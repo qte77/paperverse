@@ -1,0 +1,29 @@
+[project]
+name = "paperverse"
+version = "0.1.0"
+description = "3D multi-source paper cloud visualization"
+requires-python = ">=3.12"
+license = "Apache-2.0"
+dependencies = [
+    "umap-learn>=0.5",
+    "numpy>=1.26",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "hypothesis>=6.0",
+    "inline-snapshot>=0.8",
+    "ruff>=0.4",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --tb=short"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
