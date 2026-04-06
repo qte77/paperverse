@@ -8,7 +8,6 @@ node_modules/
 src/frontend/public/data/*.db
 .pytest_cache/
 .ruff_cache/
-ralph/docs/prd.json
 ralph/docs/progress.txt
 ralph/LEARNINGS.md
 ralph/archive/

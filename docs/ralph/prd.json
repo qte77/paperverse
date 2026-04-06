@@ -1,0 +1,209 @@
+{
+  "project": "Paperverse",
+  "description": "3D multi-source paper cloud visualization (arXiv, bioRxiv, medRxiv)",
+  "source": "docs/PRD.md",
+  "generated": "2026-04-06T12:00:00Z",
+  "stories": [
+    {
+      "id": "STORY-001",
+      "title": "Unified Paper Model",
+      "description": "Define frozen Python dataclass for papers from any source. Normalize arXiv IDs and bioRxiv DOIs into unified uid format. Include source, title, categories, published date, version, optional authors and DOI.",
+      "depends_on": [],
+      "acceptance": [
+        "Paper dataclass is frozen and uses slots",
+        "uid format: 'arxiv:{id}' or 'biorxiv:{doi}' or 'medrxiv:{doi}'",
+        "Source enum validates allowed values",
+        "Hypothesis roundtrip tests pass for all source types",
+        "Categories stored as list[str]"
+      ],
+      "files": ["src/pipeline/models.py", "tests/pipeline/test_models.py"],
+      "status": "pending",
+      "wave": 1,
+      "completed_at": null
+    },
+    {
+      "id": "STORY-002",
+      "title": "arXiv CSV Adapter",
+      "description": "Parse weekly CSV files from gha-arxiv-stats-action into Paper objects. Handle multi-category papers (semicolon-separated). Deduplicate by (ID, version).",
+      "depends_on": ["STORY-001"],
+      "acceptance": [
+        "Parses real arXiv CSV samples correctly",
+        "Handles semicolon-separated categories",
+        "Deduplicates by (rawid, version)",
+        "Property tests for valid category strings",
+        "Returns list[Paper] sorted by published date"
+      ],
+      "files": ["src/pipeline/adapters/arxiv.py", "tests/pipeline/test_adapters/test_arxiv.py"],
+      "status": "pending",
+      "wave": 2,
+      "completed_at": null
+    },
+    {
+      "id": "STORY-003",
+      "title": "bioRxiv/medRxiv CSV Adapter",
+      "description": "Parse weekly CSV files from gha-biorxiv-stats-action into Paper objects. Support both bioRxiv and medRxiv via source field. Deduplicate by (DOI, version).",
+      "depends_on": ["STORY-001"],
+      "acceptance": [
+        "Parses real bioRxiv CSV samples correctly",
+        "Supports medrxiv source selection",
+        "Deduplicates by (DOI, version)",
+        "Property tests for DOI formats",
+        "Returns list[Paper] sorted by published date"
+      ],
+      "files": ["src/pipeline/adapters/biorxiv.py", "tests/pipeline/test_adapters/test_biorxiv.py"],
+      "status": "pending",
+      "wave": 2,
+      "completed_at": null
+    },
+    {
+      "id": "STORY-004",
+      "title": "Multi-Source Ingestion",
+      "description": "Combine adapters via registry pattern. Ingest from multiple data directories. Deduplicate across sources. Return sorted list of Paper objects.",
+      "depends_on": ["STORY-002", "STORY-003"],
+      "acceptance": [
+        "Registry maps source names to adapter instances",
+        "Ingests from multiple directories in one call",
+        "Cross-source deduplication by uid",
+        "Output sorted by published date",
+        "Empty directories handled gracefully"
+      ],
+      "files": ["src/pipeline/ingest.py", "src/pipeline/adapters/base.py", "tests/pipeline/test_ingest.py"],
+      "status": "pending",
+      "wave": 3,
+      "completed_at": null
+    },
+    {
+      "id": "STORY-005",
+      "title": "UMAP Layout Engine",
+      "description": "Compute 3D positions from paper category vectors using UMAP. One-hot encode categories, reduce to 3 dimensions. Z-axis weighted by publication date. Deterministic with fixed seed.",
+      "depends_on": ["STORY-001"],
+      "acceptance": [
+        "Output has x, y, z per paper",
+        "Deterministic output with same seed",
+        "Similar categories cluster together (cosine distance test)",
+        "Z-axis correlates with publication date",
+        "Handles 100K+ papers without OOM"
+      ],
+      "files": ["src/pipeline/layout.py", "tests/pipeline/test_layout.py"],
+      "status": "pending",
+      "wave": 2,
+      "completed_at": null
+    },
+    {
+      "id": "STORY-006",
+      "title": "SQLite Export",
+      "description": "Write Paper objects with 3D positions to SQLite database. Create indexes on source and published. Create FTS5 virtual table on title and authors.",
+      "depends_on": ["STORY-005"],
+      "acceptance": [
+        "papers.db contains all papers with positions",
+        "FTS5 search on title returns correct results",
+        "Indexes exist on source and published columns",
+        "Categories stored as JSON array",
+        "Inline-snapshot test for schema structure"
+      ],
+      "files": ["src/pipeline/db.py", "tests/pipeline/test_db.py"],
+      "status": "pending",
+      "wave": 3,
+      "completed_at": null
+    },
+    {
+      "id": "STORY-007",
+      "title": "Pipeline CLI",
+      "description": "Click-based CLI with subcommands: ingest, layout, export. Support --sources, --data-dir, --output, --seed flags. End-to-end from CSV dirs to papers.db.",
+      "depends_on": ["STORY-004", "STORY-006"],
+      "acceptance": [
+        "CLI runs end-to-end: CSV dirs → papers.db",
+        "--sources flag filters by source name",
+        "--seed flag produces deterministic output",
+        "--output flag controls database path",
+        "Exit code 0 on success, non-zero on error"
+      ],
+      "files": ["src/pipeline/cli.py", "tests/pipeline/test_cli.py"],
+      "status": "pending",
+      "wave": 4,
+      "completed_at": null
+    },
+    {
+      "id": "STORY-008",
+      "title": "Three.js Scene Setup",
+      "description": "Create Three.js scene with WebGPU renderer and WebGL2 fallback. OrbitControls for rotate/zoom/pan. Responsive canvas filling viewport. Dark background.",
+      "depends_on": [],
+      "acceptance": [
+        "Scene renders empty dark background",
+        "OrbitControls respond to mouse input",
+        "Canvas resizes with window",
+        "WebGL2 fallback works when WebGPU unavailable"
+      ],
+      "files": ["src/frontend/src/scene.js", "src/frontend/src/main.js", "src/frontend/index.html"],
+      "status": "pending",
+      "wave": 1,
+      "completed_at": null
+    },
+    {
+      "id": "STORY-009",
+      "title": "Paper Points Rendering",
+      "description": "Load papers.db via sql.js. Query positions into Float32Arrays. Create BufferGeometry Points with per-point color by source/category. Handle 100K+ points at 60fps.",
+      "depends_on": ["STORY-006", "STORY-008"],
+      "acceptance": [
+        "Points render from papers.db data",
+        "Colors distinguish sources (arXiv=blue, bioRxiv=green, medRxiv=orange)",
+        "100K points render at 60fps",
+        "sql.js WASM loads and queries successfully"
+      ],
+      "files": ["src/frontend/src/papers.js", "src/frontend/src/colors.js", "src/frontend/src/db.js"],
+      "status": "pending",
+      "wave": 4,
+      "completed_at": null
+    },
+    {
+      "id": "STORY-010",
+      "title": "Interaction",
+      "description": "Raycasting on Points for hover detection. Tooltip with title on hover. Click queries full metadata from SQLite. Detail panel shows title, authors, categories, source, date.",
+      "depends_on": ["STORY-009"],
+      "acceptance": [
+        "Hover highlights nearest point",
+        "Tooltip shows paper title",
+        "Click opens detail panel with full metadata",
+        "SQL query returns correct paper for clicked point"
+      ],
+      "files": ["src/frontend/src/interaction.js"],
+      "status": "pending",
+      "wave": 5,
+      "completed_at": null
+    },
+    {
+      "id": "STORY-011",
+      "title": "Full-Text Search",
+      "description": "FTS5 query via sql.js on title/authors. Search input with debounced query. Highlight matching points. Animate camera to centroid of results.",
+      "depends_on": ["STORY-009"],
+      "acceptance": [
+        "FTS5 query returns matching papers",
+        "Matching points change color/size",
+        "Camera animates to result centroid",
+        "Empty query resets highlights",
+        "Debounced input (300ms)"
+      ],
+      "files": ["src/frontend/src/search.js"],
+      "status": "pending",
+      "wave": 5,
+      "completed_at": null
+    },
+    {
+      "id": "STORY-012",
+      "title": "GitHub Pages Deployment",
+      "description": "GitHub Actions workflow: install uv, run pipeline CLI, build Vite frontend, deploy dist/ to GitHub Pages. Trigger on push to main.",
+      "depends_on": ["STORY-007", "STORY-009"],
+      "acceptance": [
+        "Push to main triggers workflow",
+        "Pipeline generates papers.db",
+        "Vite builds frontend to dist/",
+        "Site deploys to GitHub Pages",
+        "Live site loads and renders paper cloud"
+      ],
+      "files": [".github/workflows/deploy.yaml", "src/frontend/vite.config.js", "src/frontend/package.json"],
+      "status": "pending",
+      "wave": 6,
+      "completed_at": null
+    }
+  ]
+}
