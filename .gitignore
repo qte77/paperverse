@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.venv/
+dist/
+*.egg-info/
+.scaffold
+node_modules/
+src/frontend/public/data/*.db
+.pytest_cache/
+.ruff_cache/
+ralph/docs/progress.txt
+ralph/LEARNINGS.md
+ralph/archive/
