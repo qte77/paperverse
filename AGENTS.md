@@ -1,3 +1,5 @@
+# Agent Guidelines
+
 ## Agent Guidelines
 
 See `CONTRIBUTING.md` for core principles.
