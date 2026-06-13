@@ -51,10 +51,10 @@
         "Unknown directory handled gracefully",
         "Source tag matches uid prefix"
       ],
-      "files": ["src/paperverse/adapters/csv_loader.py", "tests/paperverse/test_adapters/test_source_selection.py"],
-      "status": "pending",
+      "files": ["src/paperverse/ingest.py", "tests/paperverse/test_ingest.py"],
+      "status": "completed",
       "wave": 2,
-      "completed_at": null
+      "completed_at": "2026-06-13"
     },
     {
       "id": "STORY-004",
@@ -68,10 +68,10 @@
         "Output sorted by published date",
         "Empty directories handled gracefully"
       ],
-      "files": ["src/paperverse/ingest.py", "src/paperverse/adapters/base.py", "tests/paperverse/test_ingest.py"],
-      "status": "pending",
+      "files": ["src/paperverse/ingest.py", "tests/paperverse/test_ingest.py"],
+      "status": "completed",
       "wave": 3,
-      "completed_at": null
+      "completed_at": "2026-06-13"
     },
     {
       "id": "STORY-005",
@@ -86,9 +86,9 @@
         "Handles 100K+ papers without OOM"
       ],
       "files": ["src/paperverse/layout.py", "tests/paperverse/test_layout.py"],
-      "status": "pending",
+      "status": "completed",
       "wave": 2,
-      "completed_at": null
+      "completed_at": "2026-06-13"
     },
     {
       "id": "STORY-006",
