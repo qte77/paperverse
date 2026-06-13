@@ -4,6 +4,9 @@ __pycache__/
 dist/
 *.egg-info/
 node_modules/
-src/frontend/public/data/*.db
+ui/public/data/*.db
 .pytest_cache/
 .ruff_cache/
+.pyright_cache/
+.coverage
+htmlcov/
