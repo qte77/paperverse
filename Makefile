@@ -1,12 +1,20 @@
 # Paperverse — 3D multi-source paper cloud
-# Ralph recipes imported from submodule
 
 .SILENT:
 .ONESHELL:
 .DEFAULT_GOAL := help
+.PHONY: setup lint test validate help
 
-# Import ralph recipes (submodule)
--include ralph/Makefile
+setup:  ## Install dependencies (uv sync)
+	uv sync
+
+lint:  ## Lint with ruff
+	uv run ruff check .
+
+test:  ## Run the test suite (pytest)
+	uv run pytest
+
+validate: lint test  ## Lint + test (matches the CI gate)
 
 help:  ## Show available recipes
 	echo "Usage: make [recipe]"
