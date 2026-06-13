@@ -19,9 +19,9 @@
         "Categories stored as list[str]"
       ],
       "files": ["src/paperverse/models.py", "tests/paperverse/test_models.py"],
-      "status": "pending",
+      "status": "completed",
       "wave": 1,
-      "completed_at": null
+      "completed_at": "2026-06-13"
     },
     {
       "id": "STORY-002",
@@ -36,9 +36,9 @@
         "Returns list[Paper] sorted by published date"
       ],
       "files": ["src/paperverse/adapters/csv_loader.py", "tests/paperverse/test_adapters/test_csv_loader.py"],
-      "status": "pending",
+      "status": "completed",
       "wave": 2,
-      "completed_at": null
+      "completed_at": "2026-06-13"
     },
     {
       "id": "STORY-003",
