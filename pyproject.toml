@@ -18,6 +18,7 @@ dev = [
     "hypothesis>=6.0",
     "inline-snapshot>=0.8",
     "ruff>=0.4",
+    "pyright>=1.1.390",
 ]
 
 # Scaffold phase: not built as a wheel yet. When the CLI lands, add
@@ -51,3 +52,8 @@ convention = "google"
 
 [tool.ruff.lint.mccabe]
 max-complexity = 10
+
+[tool.pyright]
+include = ["src"]
+pythonVersion = "3.12"
+typeCheckingMode = "basic"

@@ -17,7 +17,7 @@ This is a technique reference, not a dependency list. None of these libraries ar
 ## The Bridge: Paper Cloud ≈ Spatial Point Cloud
 
 | Paperverse concept | Geospatial analogue | Why the analogue is useful |
-|---|---|---|
+| --- | --- | --- |
 | UMAP 3D layout from category vectors (fixed seed) | Coordinate Reference System (CRS) projection | Both deterministically map source data into display coordinates; the discipline of separating "data space" from "display space" applies directly |
 | `(x, y, z, r)` rows in SQLite | LiDAR point-cloud record (XYZ + attributes) | Same columnar shape; point-cloud formats encode level-of-detail and streaming for millions of points |
 | 100K–500K points at 60 fps (Three.js `BufferGeometry`) | GPU-instanced point layers | The browser-GPU large-point-rendering problem is identical |
@@ -68,7 +68,7 @@ GeoViews provides interactive geographic visualization of multidimensional datas
 The remaining GIS libraries from the original request are data-processing and analysis tools with little direct bearing on paperverse's renderer. Listed for completeness:
 
 | Tool | Role | Source |
-|---|---|---|
+| --- | --- | --- |
 | GDAL | Raster/vector format translation (the foundation under most of the stack) | [GDAL][gdal] |
 | GeoPandas | pandas extended with geometry types for vector geodata | [GeoPandas][geopandas] |
 | Fiona | Vector feature I/O via GDAL/OGR | [Fiona][fiona] |
