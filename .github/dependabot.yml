@@ -16,4 +16,11 @@ updates:
     groups:
       github-actions:
         patterns: ["*"]
+  - package-ecosystem: "npm"
+    directory: "/ui"
+    schedule:
+      interval: "weekly"
+    groups:
+      npm-deps:
+        patterns: ["*"]
 ...

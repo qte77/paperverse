@@ -1,0 +1,14 @@
+{
+  "name": "paperverse-ui",
+  "private": true,
+  "type": "module",
+  "description": "Paperverse L4 UI (Three.js + sql.js). Not shipped in the Python wheel.",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "vitest": "^3.2.0"
+  }
+}

@@ -3,9 +3,10 @@
 .SILENT:
 .ONESHELL:
 .PHONY: \
-	setup setup_uv setup_dev setup_lychee setup_md \
+	setup setup_uv setup_dev setup_lychee setup_md setup_js \
 	lint autofix check_types lint_md lint_links \
 	test test_cov retest validate \
+	typecheck_js test_js \
 	clean help
 .DEFAULT_GOAL := help
 
@@ -89,6 +90,19 @@ validate:  ## CI gate: lint + check_types + lint_md + test_cov
 	$(MAKE) -s check_types
 	$(MAKE) -s lint_md
 	$(MAKE) -s test_cov
+
+
+# MARK: UI
+
+
+setup_js:  ## Install ui/ npm devDependencies (npm ci)
+	npm --prefix ui ci
+
+typecheck_js:  ## tsc --noEmit in ui/
+	npm --prefix ui run typecheck
+
+test_js:  ## vitest run in ui/
+	npm --prefix ui test
 
 
 # MARK: CLEAN
