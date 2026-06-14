@@ -15,6 +15,7 @@ import { computeRenderSize, detectBackend } from "./renderer";
 
 /** A running scene; call `dispose` to stop the loop and release resources. */
 export interface SceneHandle {
+  add(object: THREE.Object3D): void;
   dispose(): void;
 }
 
@@ -55,6 +56,9 @@ export async function createScene(canvas: HTMLCanvasElement): Promise<SceneHandl
   });
 
   return {
+    add(object: THREE.Object3D): void {
+      scene.add(object);
+    },
     dispose(): void {
       window.removeEventListener("resize", applySize);
       renderer.setAnimationLoop(null);

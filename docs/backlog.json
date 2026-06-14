@@ -152,9 +152,9 @@
         "sql.js WASM loads and lazily queries metadata"
       ],
       "files": ["ui/src/papers.ts", "ui/src/colors.ts", "ui/src/db.ts"],
-      "status": "pending",
+      "status": "completed",
       "wave": 4,
-      "completed_at": null
+      "completed_at": "2026-06-14"
     },
     {
       "id": "STORY-010",
