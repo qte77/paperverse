@@ -79,10 +79,26 @@
         border: 1px solid var(--text);
         border-radius: 6px;
       }
+      #theme {
+        position: fixed;
+        top: 1rem;
+        left: 1rem;
+        padding: 0.4rem 0.5rem;
+        font: 0.9rem system-ui, sans-serif;
+        color: var(--text);
+        background: var(--surface);
+        border: 1px solid var(--text);
+        border-radius: 6px;
+      }
     </style>
   </head>
   <body>
     <canvas id="cloud"></canvas>
+    <select id="theme" aria-label="Theme" title="Theme">
+      <option value="system">System</option>
+      <option value="light">Light</option>
+      <option value="dark">Dark</option>
+    </select>
     <form id="search-form" role="search">
       <input id="search" type="search" placeholder="Search papers…" autocomplete="off" />
     </form>

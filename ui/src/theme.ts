@@ -17,3 +17,11 @@ export function resolveTheme(
   }
   return systemPrefersDark ? "dark" : "light";
 }
+
+/** A user theme preference: follow the OS, or force a scheme. */
+export type Preference = "system" | "light" | "dark";
+
+/** Resolve a user preference to the active theme (`system` follows the OS). */
+export function themeForPreference(pref: Preference, systemPrefersDark: boolean): Theme {
+  return resolveTheme(systemPrefersDark, pref === "system" ? null : pref);
+}
