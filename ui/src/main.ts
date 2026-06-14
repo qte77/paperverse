@@ -13,13 +13,25 @@ import {
 } from "./papers";
 import { createScene } from "./scene";
 import { attachSearch } from "./search";
-import { resolveTheme } from "./theme";
+import { type Preference, themeForPreference } from "./theme";
 
 // Data artifacts + the sql.js WASM are copied into the site by the Pages build
 // and served under the Vite base path (e.g. /paperverse/).
 const BASE = import.meta.env.BASE_URL;
 const DATA_DIR = `${BASE}data`;
 const SQL_WASM_URL = `${BASE}sql-wasm.wasm`;
+
+const THEME_KEY = "paperverse-theme";
+const themeQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+function readThemePreference(): Preference {
+  const stored = localStorage.getItem(THEME_KEY);
+  return stored === "light" || stored === "dark" ? stored : "system";
+}
+
+function applyThemePreference(pref: Preference): void {
+  document.documentElement.dataset.theme = themeForPreference(pref, themeQuery.matches);
+}
 
 function interactionElements(): InteractionElements | null {
   const tooltip = document.querySelector<HTMLElement>("#tooltip");
@@ -46,7 +58,8 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
     const positions = parsePositions(await positionsResponse.arrayBuffer());
     const db = await openPapersDb(new Uint8Array(await dbResponse.arrayBuffer()), SQL_WASM_URL);
 
-    const baseline = buildColorBuffer(db.sourcesByIdx(), resolveSourceRgb(document.documentElement));
+    // Colour state — `let` so a theme switch can re-resolve the EyeRest tokens.
+    let baseline = buildColorBuffer(db.sourcesByIdx(), resolveSourceRgb(document.documentElement));
     const working = baseline.slice();
     const points = buildPointsCloud(positions, working);
     handle.add(points);
@@ -60,12 +73,10 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
       pickThreshold = Math.max(POINT_SIZE, sphere.radius * 0.03);
     }
 
-    // Compose search + hover highlights: search recolours the base, hover paints
-    // on top, so hovering never wipes the active search highlight.
-    const styles = getComputedStyle(document.documentElement);
-    const hoverRgb = hexToRgb01(styles.getPropertyValue("--data-positive").trim());
-    const bgRgb = hexToRgb01(styles.getPropertyValue("--bg").trim());
-    const dimmed = dimColors(baseline, 0.22, bgRgb);
+    const readColour = (name: string): [number, number, number] =>
+      hexToRgb01(getComputedStyle(document.documentElement).getPropertyValue(name).trim());
+    let hoverRgb = readColour("--data-positive");
+    let dimmed = dimColors(baseline, 0.22, readColour("--bg"));
     let hoverHits: number[] = [];
     let searchHits: number[] = [];
     const repaint = (): void => {
@@ -75,6 +86,13 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
       restorePoints(working, baseline, searchHits);
       paintPoints(working, hoverHits, hoverRgb);
       points.geometry.getAttribute("color").needsUpdate = true;
+    };
+    // Re-resolve point colours after a theme switch, then repaint.
+    const recolour = (): void => {
+      baseline = buildColorBuffer(db.sourcesByIdx(), resolveSourceRgb(document.documentElement));
+      hoverRgb = readColour("--data-positive");
+      dimmed = dimColors(baseline, 0.22, readColour("--bg"));
+      repaint();
     };
 
     const els = interactionElements();
@@ -104,14 +122,31 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
         flyTo: (target) => handle.flyTo(target),
       });
     }
+
+    // Theme picker: apply + persist the choice, recolouring the cloud on switch.
+    const themeControl = document.querySelector<HTMLSelectElement>("#theme");
+    if (themeControl) {
+      themeControl.value = readThemePreference();
+      themeControl.addEventListener("change", () => {
+        const pref = themeControl.value as Preference;
+        localStorage.setItem(THEME_KEY, pref);
+        applyThemePreference(pref);
+        recolour();
+      });
+    }
+    themeQuery.addEventListener("change", () => {
+      if (readThemePreference() === "system") {
+        applyThemePreference("system");
+        recolour();
+      }
+    });
   } catch (error) {
     console.warn("paperverse: paper cloud not loaded (data is served in STORY-012)", error);
   }
 }
 
-// Apply the resolved system theme so the EyeRest CSS variables resolve.
-const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-document.documentElement.dataset.theme = resolveTheme(prefersDark);
+// Apply the saved theme preference before the scene reads the EyeRest variables.
+applyThemePreference(readThemePreference());
 
 const canvas = document.querySelector<HTMLCanvasElement>("#cloud");
 if (canvas) {

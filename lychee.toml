@@ -5,7 +5,8 @@
 # where Vite serves the project from ui/ with /src/... rooted there.
 root_dir = "ui"
 
-# npmjs.com returns 403 to automated crawlers (anti-bot); packages are
-# verified reachable via the npm registry API. Exclude the www.npmjs.com
-# website URLs to avoid false positives from rate-limiting / bot protection.
-exclude = ["https://www\\.npmjs\\.com/"]
+# Some sites return 403 to automated crawlers (anti-bot / rate-limiting) even
+# though the URL is valid in a browser. Exclude those to avoid false positives:
+#   - www.npmjs.com   — packages verified via the npm registry API instead
+#   - www.whiteboxgeo.com — prior-art reference, reachable in-browser
+exclude = ["https://www\\.npmjs\\.com/", "https://www\\.whiteboxgeo\\.com/"]
