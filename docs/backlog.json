@@ -120,9 +120,9 @@
         "Exit code 0 on success, non-zero on error"
       ],
       "files": ["src/paperverse/__main__.py", "tests/paperverse/test_cli.py"],
-      "status": "pending",
+      "status": "completed",
       "wave": 4,
-      "completed_at": null
+      "completed_at": "2026-06-14"
     },
     {
       "id": "STORY-008",

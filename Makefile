@@ -84,9 +84,9 @@ test_cov:  ## pytest with coverage (fails under 90%)
 retest:  ## rerun last failed tests only
 	uv run pytest --lf -x
 
-audit:  ## pip-audit dependency CVE scan (network)
+audit:  ## pip-audit dependency CVE scan (network; skips the local editable pkg)
 	echo "--- audit"
-	uv run pip-audit
+	uv run pip-audit --skip-editable
 
 validate:  ## CI gate: lint + check_types + lint_md + audit + test_cov
 	set -e
