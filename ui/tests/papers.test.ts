@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { Source } from "../src/colors";
-import { buildColorBuffer, parsePositions } from "../src/papers";
+import { applyHighlight, buildColorBuffer, parsePositions } from "../src/papers";
 
 describe("parsePositions", () => {
   it("views the buffer as one float32 triple per point", () => {
@@ -38,5 +38,29 @@ describe("buildColorBuffer", () => {
 
   it("returns an empty buffer for no points", () => {
     expect(buildColorBuffer([], rgb).length).toBe(0);
+  });
+});
+
+describe("applyHighlight", () => {
+  it("writes the highlight colour at the given points and restores the rest", () => {
+    const baseline = new Float32Array([1, 1, 1, 2, 2, 2, 3, 3, 3]);
+    const working = new Float32Array(9);
+    applyHighlight(working, baseline, [1], [9, 9, 9]);
+    expect(working).toEqual(new Float32Array([1, 1, 1, 9, 9, 9, 3, 3, 3]));
+  });
+
+  it("restores fully when nothing is highlighted", () => {
+    const baseline = new Float32Array([1, 2, 3, 4, 5, 6]);
+    const working = new Float32Array([0, 0, 0, 0, 0, 0]);
+    applyHighlight(working, baseline, [], [9, 9, 9]);
+    expect(working).toEqual(baseline);
+  });
+
+  it("is idempotent across repeated calls (resets from baseline each time)", () => {
+    const baseline = new Float32Array([1, 1, 1, 2, 2, 2]);
+    const working = new Float32Array(6);
+    applyHighlight(working, baseline, [0], [7, 8, 9]);
+    applyHighlight(working, baseline, [0], [7, 8, 9]);
+    expect(working).toEqual(new Float32Array([7, 8, 9, 2, 2, 2]));
   });
 });

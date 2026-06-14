@@ -168,9 +168,9 @@
         "SQL query returns correct paper for clicked point"
       ],
       "files": ["ui/src/interaction.ts"],
-      "status": "pending",
+      "status": "completed",
       "wave": 5,
-      "completed_at": null
+      "completed_at": "2026-06-14"
     },
     {
       "id": "STORY-011",

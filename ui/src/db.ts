@@ -1,17 +1,32 @@
 /** Open the prebuilt papers.db in the browser via sql.js-fts5 (FTS5-enabled).
  *
- * STORY-009 only needs the per-point source to colour the cloud; lazy metadata
- * (STORY-010) and FTS5 search (STORY-011) reuse this handle.
+ * STORY-009 colours points by source; STORY-010 reads one paper's metadata on
+ * click; STORY-011 runs the FTS5 search. The handle stays open for the page's life.
  */
 
 import initSqlJs from "sql.js-fts5";
 
 import type { Source } from "./colors";
 
+/** Full metadata for one paper (cold path: fetched lazily on click). */
+export interface PaperMeta {
+  idx: number;
+  uid: string;
+  source: Source;
+  title: string;
+  categories: string[];
+  published: string;
+  authors: string;
+  abstract: string;
+  doi: string | null;
+}
+
 /** A read-only handle over the in-browser papers database. */
 export interface PapersDb {
   /** Per-point source, ordered by `papers.idx` (aligned with the positions binary). */
   sourcesByIdx(): Source[];
+  /** Full metadata for one point, or null if the index is unknown. */
+  paperByIdx(idx: number): PaperMeta | null;
   /** Release the in-memory database. */
   close(): void;
 }
@@ -29,6 +44,30 @@ export async function openPapersDb(bytes: Uint8Array, wasmUrl: string): Promise<
       }
       stmt.free();
       return sources;
+    },
+    paperByIdx(idx: number): PaperMeta | null {
+      const stmt = db.prepare(
+        "SELECT idx, uid, source, title, categories, published, authors, abstract, doi " +
+          "FROM papers WHERE idx = ?",
+      );
+      stmt.bind([idx]);
+      if (!stmt.step()) {
+        stmt.free();
+        return null;
+      }
+      const row = stmt.getAsObject();
+      stmt.free();
+      return {
+        idx: row.idx as number,
+        uid: row.uid as string,
+        source: row.source as Source,
+        title: row.title as string,
+        categories: JSON.parse(row.categories as string) as string[],
+        published: row.published as string,
+        authors: row.authors as string,
+        abstract: row.abstract as string,
+        doi: (row.doi as string | null) ?? null,
+      };
     },
     close(): void {
       db.close();
