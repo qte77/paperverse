@@ -79,6 +79,11 @@ doi, x, y, z, r. Index source and published; FTS5 virtual table on title,
 authors, abstract. The UI renders from the positions binary and lazily
 queries `papers.db` for metadata.
 
+> Note (STORY-006): the shipped positions binary is pure little-endian Float32
+> `x,y,z`; per-point color/size is derived in the UI (color from `source`),
+> deferred to STORY-009. The store choice and full export contract are recorded
+> in [ADR-0002](decisions/0002-in-browser-store-and-data-contract.md).
+
 #### Feature 7: Pipeline CLI
 
 A pydantic `AppSettings(BaseSettings, cli_parse_args=True)` CLI (no
@@ -86,6 +91,12 @@ Click), exposed as `[project.scripts] paperverse`, with subcommands
 `ingest` (CSV dirs → Paper list), `layout` (Paper list → positions),
 `export` (Papers + positions → papers.db + positions binary). Support
 `--sources`, `--data-dir`, `--output`, `--seed`.
+
+> Note (STORY-007): the CLI shipped as a single flat `paperverse` command (run via
+> pydantic-settings `CliApp.run`), not `ingest`/`layout`/`export` subcommands — no
+> intermediate on-disk format was defined, so the end-to-end command meets every
+> acceptance criterion (YAGNI). See
+> [ADR-0002](decisions/0002-in-browser-store-and-data-contract.md).
 
 ### Area 3: Frontend Visualization
 

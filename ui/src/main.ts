@@ -1,7 +1,97 @@
+import { hexToRgb01 } from "./colors";
+import { openPapersDb } from "./db";
+import { attachInteraction, type InteractionElements } from "./interaction";
+import {
+  applyHighlight,
+  buildColorBuffer,
+  buildPointsCloud,
+  paintPoints,
+  parsePositions,
+  resolveSourceRgb,
+} from "./papers";
+import { createScene } from "./scene";
+import { attachSearch } from "./search";
 import { resolveTheme } from "./theme";
 
-// DOM glue: read the system preference and apply the resolved theme as a
-// data-theme attribute so the EyeRest CSS variables resolve. (The Three.js
-// scene is added in a later slice.)
+// Data artifacts + the sql.js WASM are copied into the site by the Pages build
+// and served under the Vite base path (e.g. /paperverse/).
+const BASE = import.meta.env.BASE_URL;
+const DATA_DIR = `${BASE}data`;
+const SQL_WASM_URL = `${BASE}sql-wasm.wasm`;
+
+function interactionElements(): InteractionElements | null {
+  const tooltip = document.querySelector<HTMLElement>("#tooltip");
+  const panel = document.querySelector<HTMLElement>("#detail");
+  const panelTitle = document.querySelector<HTMLElement>("#detail-title");
+  const panelMeta = document.querySelector<HTMLElement>("#detail-meta");
+  const panelAbstract = document.querySelector<HTMLElement>("#detail-abstract");
+  if (!tooltip || !panel || !panelTitle || !panelMeta || !panelAbstract) {
+    return null;
+  }
+  document
+    .querySelector("#detail-close")
+    ?.addEventListener("click", () => (panel.hidden = true));
+  return { tooltip, panel, panelTitle, panelMeta, panelAbstract };
+}
+
+async function mount(canvas: HTMLCanvasElement): Promise<void> {
+  const handle = await createScene(canvas);
+  try {
+    const [positionsResponse, dbResponse] = await Promise.all([
+      fetch(`${DATA_DIR}/positions.bin`),
+      fetch(`${DATA_DIR}/papers.db`),
+    ]);
+    const positions = parsePositions(await positionsResponse.arrayBuffer());
+    const db = await openPapersDb(new Uint8Array(await dbResponse.arrayBuffer()), SQL_WASM_URL);
+
+    const baseline = buildColorBuffer(db.sourcesByIdx(), resolveSourceRgb(document.documentElement));
+    const working = baseline.slice();
+    const points = buildPointsCloud(positions, working);
+    handle.add(points);
+
+    // Compose search + hover highlights: search recolours the base, hover paints
+    // on top, so hovering never wipes the active search highlight.
+    const styles = getComputedStyle(document.documentElement);
+    const hoverRgb = hexToRgb01(styles.getPropertyValue("--data-positive").trim());
+    const searchRgb = hexToRgb01(styles.getPropertyValue("--data-alt").trim());
+    let hoverHits: number[] = [];
+    let searchHits: number[] = [];
+    const repaint = (): void => {
+      applyHighlight(working, baseline, searchHits, searchRgb);
+      paintPoints(working, hoverHits, hoverRgb);
+      points.geometry.getAttribute("color").needsUpdate = true;
+    };
+
+    const els = interactionElements();
+    if (els) {
+      attachInteraction(handle, points, db, els, (indices) => {
+        hoverHits = indices;
+        repaint();
+      });
+    }
+    const searchInput = document.querySelector<HTMLInputElement>("#search");
+    if (searchInput) {
+      attachSearch({
+        input: searchInput,
+        db,
+        positions,
+        onResults: (indices) => {
+          searchHits = indices;
+          repaint();
+        },
+        flyTo: (target) => handle.flyTo(target),
+      });
+    }
+  } catch (error) {
+    console.warn("paperverse: paper cloud not loaded (data is served in STORY-012)", error);
+  }
+}
+
+// Apply the resolved system theme so the EyeRest CSS variables resolve.
 const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
 document.documentElement.dataset.theme = resolveTheme(prefersDark);
+
+const canvas = document.querySelector<HTMLCanvasElement>("#cloud");
+if (canvas) {
+  void mount(canvas);
+}

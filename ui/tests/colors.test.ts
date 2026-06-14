@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { DATA_ARC, sourceColorVar, type Source } from "../src/colors";
+import { DATA_ARC, hexToRgb01, sourceColorVar, type Source } from "../src/colors";
 
 const SOURCES: Source[] = ["arxiv", "biorxiv", "medrxiv"];
 
@@ -15,5 +15,30 @@ describe("sourceColorVar", () => {
   it("gives each source a distinct colour so sources stay distinguishable", () => {
     const vars = SOURCES.map(sourceColorVar);
     expect(new Set(vars).size).toBe(SOURCES.length);
+  });
+});
+
+describe("hexToRgb01", () => {
+  it("converts #rrggbb to 0..1 floats", () => {
+    const [r, g, b] = hexToRgb01("#787010"); // EyeRest --data-caution
+    expect(r).toBeCloseTo(120 / 255);
+    expect(g).toBeCloseTo(112 / 255);
+    expect(b).toBeCloseTo(16 / 255);
+  });
+
+  it("expands the short #rgb form", () => {
+    expect(hexToRgb01("#abc")).toEqual(hexToRgb01("#aabbcc"));
+  });
+
+  it("maps the bounds and is case-insensitive", () => {
+    expect(hexToRgb01("#FFFFFF")).toEqual([1, 1, 1]);
+    expect(hexToRgb01("#000000")).toEqual([0, 0, 0]);
+    expect(hexToRgb01("#fff")).toEqual([1, 1, 1]);
+  });
+
+  it("throws on a malformed hex string", () => {
+    expect(() => hexToRgb01("nope")).toThrow();
+    expect(() => hexToRgb01("#12")).toThrow();
+    expect(() => hexToRgb01("#1234567")).toThrow();
   });
 });

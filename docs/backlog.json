@@ -120,9 +120,9 @@
         "Exit code 0 on success, non-zero on error"
       ],
       "files": ["src/paperverse/__main__.py", "tests/paperverse/test_cli.py"],
-      "status": "pending",
+      "status": "completed",
       "wave": 4,
-      "completed_at": null
+      "completed_at": "2026-06-14"
     },
     {
       "id": "STORY-008",
@@ -136,9 +136,9 @@
         "WebGL2 fallback works when WebGPU unavailable"
       ],
       "files": ["ui/src/scene.ts", "ui/src/main.ts", "ui/index.html"],
-      "status": "pending",
+      "status": "completed",
       "wave": 1,
-      "completed_at": null
+      "completed_at": "2026-06-14"
     },
     {
       "id": "STORY-009",
@@ -152,9 +152,9 @@
         "sql.js WASM loads and lazily queries metadata"
       ],
       "files": ["ui/src/papers.ts", "ui/src/colors.ts", "ui/src/db.ts"],
-      "status": "pending",
+      "status": "completed",
       "wave": 4,
-      "completed_at": null
+      "completed_at": "2026-06-14"
     },
     {
       "id": "STORY-010",
@@ -168,9 +168,9 @@
         "SQL query returns correct paper for clicked point"
       ],
       "files": ["ui/src/interaction.ts"],
-      "status": "pending",
+      "status": "completed",
       "wave": 5,
-      "completed_at": null
+      "completed_at": "2026-06-14"
     },
     {
       "id": "STORY-011",
@@ -185,9 +185,9 @@
         "Debounced input (300ms)"
       ],
       "files": ["ui/src/search.ts"],
-      "status": "pending",
+      "status": "completed",
       "wave": 5,
-      "completed_at": null
+      "completed_at": "2026-06-14"
     },
     {
       "id": "STORY-012",
@@ -202,9 +202,9 @@
         "Live site loads and renders the paper cloud"
       ],
       "files": [".github/workflows/deploy.yaml", "ui/vite.config.ts", "ui/package.json"],
-      "status": "pending",
+      "status": "completed",
       "wave": 6,
-      "completed_at": null
+      "completed_at": "2026-06-14"
     }
   ]
 }

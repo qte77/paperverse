@@ -4,9 +4,95 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Paperverse</title>
+    <link rel="stylesheet" href="/src/theme.css" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+      }
+      /* data-theme drives the system color-scheme; the empty transparent canvas
+         shows the themed page background. EyeRest tokens layer on by pointer. */
+      html[data-theme="light"] {
+        color-scheme: light;
+      }
+      html[data-theme="dark"] {
+        color-scheme: dark;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+      }
+      #cloud {
+        display: block;
+        width: 100vw;
+        height: 100vh;
+      }
+      #tooltip {
+        position: absolute;
+        pointer-events: none;
+        max-width: 22rem;
+        padding: 0.25rem 0.5rem;
+        font: 0.85rem/1.4 system-ui, sans-serif;
+        background: var(--surface);
+        color: var(--text);
+        border-radius: 4px;
+      }
+      #detail {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: min(28rem, 90vw);
+        height: 100%;
+        overflow-y: auto;
+        box-sizing: border-box;
+        padding: 1.5rem;
+        font: 1rem/1.5 system-ui, sans-serif;
+        background: var(--surface);
+        color: var(--text);
+      }
+      #detail-close {
+        float: right;
+        border: 0;
+        background: transparent;
+        color: var(--text);
+        font-size: 1.2rem;
+        cursor: pointer;
+      }
+      #detail-meta {
+        opacity: 0.75;
+        font-size: 0.85rem;
+      }
+      #search-form {
+        position: fixed;
+        top: 1rem;
+        left: 50%;
+        transform: translateX(-50%);
+        margin: 0;
+      }
+      #search {
+        width: min(28rem, 80vw);
+        padding: 0.5rem 0.75rem;
+        font: 1rem system-ui, sans-serif;
+        color: var(--text);
+        background: var(--surface);
+        border: 1px solid var(--text);
+        border-radius: 6px;
+      }
+    </style>
   </head>
   <body>
     <canvas id="cloud"></canvas>
+    <form id="search-form" role="search">
+      <input id="search" type="search" placeholder="Search papers…" autocomplete="off" />
+    </form>
+    <div id="tooltip" hidden aria-live="polite"></div>
+    <aside id="detail" hidden>
+      <button id="detail-close" aria-label="Close">✕</button>
+      <h2 id="detail-title"></h2>
+      <p id="detail-meta"></p>
+      <p id="detail-abstract"></p>
+    </aside>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

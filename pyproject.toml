@@ -1,3 +1,7 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "paperverse"
 version = "0.1.0"
@@ -11,6 +15,9 @@ dependencies = [
     "pydantic-settings>=2.6",
 ]
 
+[project.scripts]
+paperverse = "paperverse.__main__:main"
+
 [dependency-groups]
 dev = [
     "pytest>=8.0",
@@ -22,11 +29,8 @@ dev = [
     "pip-audit>=2.7",
 ]
 
-# Scaffold phase: not built as a wheel yet. When the CLI lands, add
-# [build-system] (hatchling), [tool.hatch.build.targets.wheel] packages =
-# ["src/paperverse"], and [project.scripts] paperverse = "paperverse.__main__:main".
-[tool.uv]
-package = false
+[tool.hatch.build.targets.wheel]
+packages = ["src/paperverse"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
