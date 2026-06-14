@@ -2,8 +2,8 @@
 title: Visualization Prior Art (Point Cloud & Spatial Rendering)
 purpose: Reference prior art for paperverse's renderer — how the geospatial/GIS ecosystem projects data into display coordinates and renders very large point sets in the browser, mapped to paperverse's Three.js point cloud and roadmap.
 created: 2026-06-13
-updated: 2026-06-13
-validated_links: 2026-06-13
+updated: 2026-06-14
+validated_links: 2026-06-14
 ---
 
 **Status**: Research (informational)
@@ -63,6 +63,38 @@ GeoViews provides interactive geographic visualization of multidimensional datas
 
 **Relevance.** A Python-to-browser interactive-viz pipeline to compare against paperverse's Python-pipeline → static-JS-frontend split — a different architecture (server/notebook-oriented vs. fully static) that clarifies the trade-offs paperverse chose.
 
+## In-browser Serving & Scaling
+
+The prior art above is about *rendering*; this section is about the *data* side — how 100K–500K paper records plus full-text search are served **read-only from a static host** (GitHub Pages, no server logic, but HTTP Range requests work). These are the in-browser store options evaluated for STORY-006, verified against first-party sources (issue #26). The deciding constraint is not "which engine has full-text search" — several do — but "which one serves a **prebuilt, static, read-only** FTS index in the browser within the page-load budget."
+
+| Option | In-browser FTS | Lazy range-load (static host) | Browser payload | Verdict |
+| --- | --- | --- | --- | --- |
+| SQLite + `sql.js-fts5` (+ `sql.js-httpvfs`) | Yes — FTS5 ([FTS5][sqlite-fts5]) | Yes — `sql.js-httpvfs` Range VFS | ~1.16 MB WASM ([sql.js-fts5][sqljs-fts5]) | **Chosen** |
+| DuckDB-WASM + Parquet | Listed, but breaks read-only (see below) | No — `httpfs` absent in WASM | ~34 MB WASM ([extensions][duckdb-wasm-ext]) | Rejected |
+| Parquet + `hyparquet` / `arrow-js` | No (no built-in FTS) | Yes — columnar range reads | small JS | Positions only |
+| Arrow IPC | No | Partial | small JS | Positions only |
+| IndexedDB | No (no FTS engine) | n/a (local cache) | browser built-in | Cache layer |
+
+### SQLite via sql.js — chosen
+
+`sql.js` compiles SQLite to WebAssembly and reads the whole `.db` into memory ([sql.js][sqljs]). Two caveats matter for paperverse. First, the **default sql.js build ships FTS3, not FTS5** — the "enable FTS5 by default" request is open and was declined on bundle-size grounds ([sql.js#199][sqljs-fts5-pr]) — so the UI must pin an FTS5-enabled build (`sql.js-fts5`, ~1.16 MB WASM) or compile sql.js with `-DSQLITE_ENABLE_FTS5`. Second, to avoid downloading the entire database, `sql.js-httpvfs` adds a read-only **HTTP Range-request virtual filesystem** that fetches only the SQLite pages a query touches — explicitly designed for static hosts like GitHub Pages ([sql.js-httpvfs][sqljs-httpvfs]); on GitHub Pages it needs an explicit `fileLength` because the CDN's gzip transfer-encoding breaks the `Content-Length` of Range responses. SQLite's FTS5 supports **external-content tables** (`content=`/`content_rowid=`, so the indexed text is not duplicated), BM25 ranking with per-column weights, prefix/phrase queries, and porter/unicode61 stemming ([FTS5][sqlite-fts5]) — all queryable read-only against a prebuilt file.
+
+### DuckDB-WASM + Parquet — evaluated, rejected
+
+DuckDB-WASM is far more capable analytically and *does* list an `fts` extension as autoloadable in WASM ([DuckDB-Wasm extensions][duckdb-wasm-ext]), which removes the old "DuckDB can't do in-browser FTS" objection. It was nonetheless rejected for this use case for three first-party reasons. (1) **A prebuilt FTS index does not survive being reopened**: building the index offline, shipping the `.duckdb`, then `ATTACH`-ing it in a fresh session — exactly the browser load pattern — fails to resolve the index tables (`Catalog Error: Table 'terms' does not exist`), reported and **closed as "not planned"** ([duckdb#13523][duckdb-fts-attach]). (2) The native `httpfs` extension is **not available in DuckDB-WASM** ([extensions][duckdb-wasm-ext]), so there is no `sql.js-httpvfs`-style lazy load — the whole file must download ([data ingestion][duckdb-wasm-data]). (3) The smallest WASM variant is ~34 MB versus ~1.16 MB for `sql.js-fts5`, against a <5 s page-load NFR. DuckDB's columnar OLAP strengths are also unused here: the UI does single-row lookups by point index plus FTS over three text columns, not aggregations or joins.
+
+### Parquet (hyparquet / arrow-js) and Arrow IPC — positions-binary alternatives
+
+[hyparquet][hyparquet] (a dependency-free JS Parquet reader) and the [Apache Arrow JS][arrow-js] library read columnar data directly in the browser, and Arrow IPC offers a zero-copy columnar interchange format. None provides full-text search, so they are not candidates for the *metadata + FTS* store. They are relevant only as alternatives to the raw `Float32Array` **positions binary** (the hot render path) — useful if positions later grow extra per-point columns or need column pruning; for a fixed `[x, y, z]` triple, a tightly-packed little-endian `Float32Array` stays the simplest hot-path format.
+
+### IndexedDB — client-side cache
+
+[IndexedDB][indexeddb] is the browser's persistent key/value store. It has no query or FTS engine of its own, so it is not a store option here, but it is the standard place to **cache** the downloaded `papers.db` (or its pages) between visits so repeat loads skip the network. A possible later optimization, orthogonal to the engine choice.
+
+### Decision
+
+Paperverse keeps a SQLite `papers.db` (FTS5 over title/authors/abstract, indexes on source/published) plus a `Float32Array` positions binary, consumed in the browser by an FTS5-enabled sql.js (`sql.js-fts5`, optionally `sql.js-httpvfs` for lazy loading) — consistent with the L1→L4 data contract in [ADR-0001](decisions/0001-backend-cli-ui-separation.md). The decider is bundle size plus a *working* prebuilt-static-read-only FTS path, not FTS availability alone.
+
 ## Other Geospatial Sources (Mention)
 
 The remaining GIS libraries from the original request are data-processing and analysis tools with little direct bearing on paperverse's renderer. Listed for completeness:
@@ -87,6 +119,17 @@ The remaining GIS libraries from the original request are data-processing and an
 
 ## Sources
 
+[sqlite-fts5]: https://www.sqlite.org/fts5.html
+[sqljs]: https://github.com/sql-js/sql.js
+[sqljs-fts5-pr]: https://github.com/sql-js/sql.js/pull/199
+[sqljs-fts5]: https://www.npmjs.com/package/sql.js-fts5
+[sqljs-httpvfs]: https://github.com/phiresky/sql.js-httpvfs
+[duckdb-wasm-ext]: https://duckdb.org/docs/stable/clients/wasm/extensions.html
+[duckdb-wasm-data]: https://duckdb.org/docs/stable/clients/wasm/data_ingestion.html
+[duckdb-fts-attach]: https://github.com/duckdb/duckdb/issues/13523
+[hyparquet]: https://github.com/hyparam/hyparquet
+[arrow-js]: https://arrow.apache.org/docs/js/
+[indexeddb]: https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API
 [deckgl]: https://github.com/visgl/deck.gl
 [keplergl]: https://docs.kepler.gl/
 [keplergl-repo]: https://github.com/keplergl/kepler.gl
