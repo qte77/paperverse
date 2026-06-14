@@ -1,0 +1,11 @@
+# lychee link-checker configuration
+# See: https://lychee.cli.rs/usage/config/
+
+# Resolve root-relative paths (e.g. /src/theme.css) against the ui/ tree,
+# where Vite serves the project from ui/ with /src/... rooted there.
+root_dir = "ui"
+
+# npmjs.com returns 403 to automated crawlers (anti-bot); packages are
+# verified reachable via the npm registry API. Exclude the www.npmjs.com
+# website URLs to avoid false positives from rate-limiting / bot protection.
+exclude = ["https://www\\.npmjs\\.com/"]
