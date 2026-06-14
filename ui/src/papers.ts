@@ -11,8 +11,9 @@ import { hexToRgb01, SOURCE_VAR, type Source } from "./colors";
 
 const SOURCES: Source[] = ["arxiv", "biorxiv", "medrxiv"];
 
-/** Point size in world units; also the raycaster pick threshold (see interaction.ts). */
-export const POINT_SIZE = 0.05;
+/** Default raycaster pick threshold in world units (interaction.ts); main.ts
+ * scales it to the loaded cloud's radius. */
+export const POINT_SIZE = 0.1;
 
 /** View a positions binary as float32 `[x, y, z]` per point (point `i` == row `i`). */
 export function parsePositions(buffer: ArrayBuffer): Float32Array {
@@ -78,10 +79,12 @@ export function buildPointsCloud(positions: Float32Array, colors: Float32Array):
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
   geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+  // Constant screen-pixel size so points stay clearly visible at any cloud scale
+  // or camera distance (the UMAP coordinate range is data-dependent).
   const material = new THREE.PointsMaterial({
     vertexColors: true,
-    size: POINT_SIZE,
-    sizeAttenuation: true,
+    size: 6,
+    sizeAttenuation: false,
   });
   return new THREE.Points(geometry, material);
 }
