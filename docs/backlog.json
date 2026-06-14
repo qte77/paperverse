@@ -103,9 +103,9 @@
         "Inline-snapshot test for schema structure"
       ],
       "files": ["src/paperverse/db.py", "tests/paperverse/test_db.py"],
-      "status": "pending",
+      "status": "completed",
       "wave": 3,
-      "completed_at": null
+      "completed_at": "2026-06-14"
     },
     {
       "id": "STORY-007",
