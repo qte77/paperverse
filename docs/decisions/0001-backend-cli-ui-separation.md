@@ -124,5 +124,4 @@ wheel boundary (Layer 1) is unchanged.
   one-way model.
 + qte77 brand `qte77/qte77/brand/DESIGN.md` (EyeRest).
 + Producer schema alignment: `gha-rxiv-feed-action` issue #107.
-+ [`../PRD.md`](../PRD.md), [`../UserStory.md`](../UserStory.md),
-  [`../backlog.json`](../backlog.json).
++ [`../PRD.md`](../PRD.md), [`../UserStory.md`](../UserStory.md).

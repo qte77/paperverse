@@ -1,12 +1,11 @@
 # Roadmap
 
-Forward-looking index of open work. Shipped stories are recorded in
-[`backlog.json`](backlog.json); how the built system works is in
+Forward-looking index of open work. How the built system works is in
 [`architecture.md`](architecture.md).
 
 ## v0.1 — Pipeline + interactive UI + Pages (shipped)
 
-STORY-001–012 complete (see [`backlog.json`](backlog.json)): canonical-CSV ingest → UMAP
+STORY-001–012 complete: canonical-CSV ingest → UMAP
 layout → SQLite + FTS5 `papers.db` + Float32 `positions.bin` export → `paperverse` CLI →
 Three.js + sql.js UI (scene, point cloud, hover/click, full-text search) → GitHub Pages.
 Live at <https://qte77.github.io/paperverse/>.
