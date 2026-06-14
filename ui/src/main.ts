@@ -5,10 +5,12 @@ import {
   applyHighlight,
   buildColorBuffer,
   buildPointsCloud,
+  paintPoints,
   parsePositions,
   resolveSourceRgb,
 } from "./papers";
 import { createScene } from "./scene";
+import { attachSearch } from "./search";
 import { resolveTheme } from "./theme";
 
 // Data artifacts + the sql.js WASM are served by the Vite/Pages build (STORY-012);
@@ -46,16 +48,38 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
     const points = buildPointsCloud(positions, working);
     handle.add(points);
 
+    // Compose search + hover highlights: search recolours the base, hover paints
+    // on top, so hovering never wipes the active search highlight.
+    const styles = getComputedStyle(document.documentElement);
+    const hoverRgb = hexToRgb01(styles.getPropertyValue("--data-positive").trim());
+    const searchRgb = hexToRgb01(styles.getPropertyValue("--data-alt").trim());
+    let hoverHits: number[] = [];
+    let searchHits: number[] = [];
+    const repaint = (): void => {
+      applyHighlight(working, baseline, searchHits, searchRgb);
+      paintPoints(working, hoverHits, hoverRgb);
+      points.geometry.getAttribute("color").needsUpdate = true;
+    };
+
     const els = interactionElements();
     if (els) {
-      const hoverRgb = hexToRgb01(
-        getComputedStyle(document.documentElement).getPropertyValue("--data-positive").trim(),
-      );
-      const highlight = (indices: number[]): void => {
-        applyHighlight(working, baseline, indices, hoverRgb);
-        points.geometry.getAttribute("color").needsUpdate = true;
-      };
-      attachInteraction(handle, points, db, els, highlight);
+      attachInteraction(handle, points, db, els, (indices) => {
+        hoverHits = indices;
+        repaint();
+      });
+    }
+    const searchInput = document.querySelector<HTMLInputElement>("#search");
+    if (searchInput) {
+      attachSearch({
+        input: searchInput,
+        db,
+        positions,
+        onResults: (indices) => {
+          searchHits = indices;
+          repaint();
+        },
+        flyTo: (target) => handle.flyTo(target),
+      });
     }
   } catch (error) {
     console.warn("paperverse: paper cloud not loaded (data is served in STORY-012)", error);

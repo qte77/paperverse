@@ -185,9 +185,9 @@
         "Debounced input (300ms)"
       ],
       "files": ["ui/src/search.ts"],
-      "status": "pending",
+      "status": "completed",
       "wave": 5,
-      "completed_at": null
+      "completed_at": "2026-06-14"
     },
     {
       "id": "STORY-012",

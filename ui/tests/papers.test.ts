@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { Source } from "../src/colors";
-import { applyHighlight, buildColorBuffer, parsePositions } from "../src/papers";
+import { applyHighlight, buildColorBuffer, paintPoints, parsePositions } from "../src/papers";
 
 describe("parsePositions", () => {
   it("views the buffer as one float32 triple per point", () => {
@@ -62,5 +62,19 @@ describe("applyHighlight", () => {
     applyHighlight(working, baseline, [0], [7, 8, 9]);
     applyHighlight(working, baseline, [0], [7, 8, 9]);
     expect(working).toEqual(new Float32Array([7, 8, 9, 2, 2, 2]));
+  });
+});
+
+describe("paintPoints", () => {
+  it("writes rgb at the given points and leaves the rest untouched (no reset)", () => {
+    const buffer = new Float32Array([1, 1, 1, 2, 2, 2, 3, 3, 3]);
+    paintPoints(buffer, [2], [9, 9, 9]);
+    expect(buffer).toEqual(new Float32Array([1, 1, 1, 2, 2, 2, 9, 9, 9]));
+  });
+
+  it("no-ops for empty indices", () => {
+    const buffer = new Float32Array([1, 2, 3]);
+    paintPoints(buffer, [], [9, 9, 9]);
+    expect(buffer).toEqual(new Float32Array([1, 2, 3]));
   });
 });

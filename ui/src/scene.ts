@@ -22,6 +22,8 @@ export interface SceneHandle {
   /** Orbit controls (for camera fly-to). */
   readonly controls: OrbitControls;
   add(object: THREE.Object3D): void;
+  /** Smoothly move the orbit pivot toward a world-space target. */
+  flyTo(target: readonly [number, number, number]): void;
   dispose(): void;
 }
 
@@ -53,10 +55,17 @@ export async function createScene(canvas: HTMLCanvasElement): Promise<SceneHandl
     camera.updateProjectionMatrix();
   };
 
+  let flyTarget: THREE.Vector3 | null = null;
   await renderer.init();
   applySize();
   window.addEventListener("resize", applySize);
   renderer.setAnimationLoop(() => {
+    if (flyTarget) {
+      controls.target.lerp(flyTarget, 0.08);
+      if (controls.target.distanceTo(flyTarget) < 1e-3) {
+        flyTarget = null;
+      }
+    }
     controls.update();
     renderer.render(scene, camera);
   });
@@ -67,6 +76,9 @@ export async function createScene(canvas: HTMLCanvasElement): Promise<SceneHandl
     controls,
     add(object: THREE.Object3D): void {
       scene.add(object);
+    },
+    flyTo(target: readonly [number, number, number]): void {
+      flyTarget = new THREE.Vector3(target[0], target[1], target[2]);
     },
     dispose(): void {
       window.removeEventListener("resize", applySize);

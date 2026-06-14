@@ -63,10 +63,29 @@
         opacity: 0.75;
         font-size: 0.85rem;
       }
+      #search-form {
+        position: fixed;
+        top: 1rem;
+        left: 50%;
+        transform: translateX(-50%);
+        margin: 0;
+      }
+      #search {
+        width: min(28rem, 80vw);
+        padding: 0.5rem 0.75rem;
+        font: 1rem system-ui, sans-serif;
+        color: var(--text);
+        background: var(--surface);
+        border: 1px solid var(--text);
+        border-radius: 6px;
+      }
     </style>
   </head>
   <body>
     <canvas id="cloud"></canvas>
+    <form id="search-form" role="search">
+      <input id="search" type="search" placeholder="Search papers…" autocomplete="off" />
+    </form>
     <div id="tooltip" hidden aria-live="polite"></div>
     <aside id="detail" hidden>
       <button id="detail-close" aria-label="Close">✕</button>
