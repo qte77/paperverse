@@ -24,6 +24,8 @@ export interface SceneHandle {
   add(object: THREE.Object3D): void;
   /** Smoothly move the orbit pivot toward a world-space target. */
   flyTo(target: readonly [number, number, number]): void;
+  /** Position the camera + orbit target so a bounding sphere fills the view. */
+  frameSphere(center: readonly [number, number, number], radius: number): void;
   dispose(): void;
 }
 
@@ -79,6 +81,17 @@ export async function createScene(canvas: HTMLCanvasElement): Promise<SceneHandl
     },
     flyTo(target: readonly [number, number, number]): void {
       flyTarget = new THREE.Vector3(target[0], target[1], target[2]);
+    },
+    frameSphere(center: readonly [number, number, number], radius: number): void {
+      const c = new THREE.Vector3(center[0], center[1], center[2]);
+      controls.target.copy(c);
+      const safeRadius = Math.max(radius, 0.01);
+      const dist = (safeRadius * 1.4) / Math.sin((camera.fov * Math.PI) / 360);
+      camera.position.set(c.x, c.y, c.z + dist);
+      camera.near = Math.max(0.01, dist - safeRadius * 2);
+      camera.far = dist + safeRadius * 4;
+      camera.updateProjectionMatrix();
+      controls.update();
     },
     dispose(): void {
       window.removeEventListener("resize", applySize);

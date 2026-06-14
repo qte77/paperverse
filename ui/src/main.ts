@@ -7,6 +7,7 @@ import {
   buildPointsCloud,
   paintPoints,
   parsePositions,
+  POINT_SIZE,
   resolveSourceRgb,
 } from "./papers";
 import { createScene } from "./scene";
@@ -48,6 +49,15 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
     const working = baseline.slice();
     const points = buildPointsCloud(positions, working);
     handle.add(points);
+    // Frame the camera on the actual cloud bounds — UMAP coordinates are not
+    // centered on the origin, so a fixed camera would look at empty space.
+    points.geometry.computeBoundingSphere();
+    const sphere = points.geometry.boundingSphere;
+    let pickThreshold = POINT_SIZE;
+    if (sphere) {
+      handle.frameSphere([sphere.center.x, sphere.center.y, sphere.center.z], sphere.radius);
+      pickThreshold = Math.max(POINT_SIZE, sphere.radius * 0.03);
+    }
 
     // Compose search + hover highlights: search recolours the base, hover paints
     // on top, so hovering never wipes the active search highlight.
@@ -64,10 +74,17 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
 
     const els = interactionElements();
     if (els) {
-      attachInteraction(handle, points, db, els, (indices) => {
-        hoverHits = indices;
-        repaint();
-      });
+      attachInteraction(
+        handle,
+        points,
+        db,
+        els,
+        (indices) => {
+          hoverHits = indices;
+          repaint();
+        },
+        pickThreshold,
+      );
     }
     const searchInput = document.querySelector<HTMLInputElement>("#search");
     if (searchInput) {

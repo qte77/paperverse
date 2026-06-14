@@ -36,9 +36,10 @@ export function attachInteraction(
   db: PapersDb,
   els: InteractionElements,
   highlight: (indices: number[]) => void,
+  threshold: number = POINT_SIZE,
 ): void {
   const raycaster = new THREE.Raycaster();
-  raycaster.params.Points = { threshold: POINT_SIZE };
+  raycaster.params.Points = { threshold };
   const ndc = new THREE.Vector2();
 
   const pick = (event: MouseEvent): number | null => {
