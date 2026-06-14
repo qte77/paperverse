@@ -136,9 +136,9 @@
         "WebGL2 fallback works when WebGPU unavailable"
       ],
       "files": ["ui/src/scene.ts", "ui/src/main.ts", "ui/index.html"],
-      "status": "pending",
+      "status": "completed",
       "wave": 1,
-      "completed_at": null
+      "completed_at": "2026-06-14"
     },
     {
       "id": "STORY-009",
