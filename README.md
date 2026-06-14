@@ -9,7 +9,8 @@ entirely in the browser.
 ## Architecture
 
 Four layers with one-way imports (`L4 → L1`); see
-[ADR-0001](docs/decisions/0001-backend-cli-ui-separation.md).
+[ADR-0001](docs/decisions/0001-backend-cli-ui-separation.md) and
+[docs/architecture.md](docs/architecture.md) for the full picture.
 
 - **L1 — backend** (`src/paperverse/`): the `Paper` model, CSV ingest, UMAP
   layout, and the SQLite + positions export. Ships in the wheel.
@@ -63,15 +64,16 @@ make test_js    # ui/ vitest
 ```
 
 Run `make help` for all recipes. See [CONTRIBUTING.md](CONTRIBUTING.md) for the
-principles, testing, and branch/PR workflow, and the [backlog](docs/backlog.json)
-for what's planned next.
+principles, testing, and branch/PR workflow, and the [roadmap](docs/roadmap.md) for
+what's next.
 
 ## Status
 
-The pipeline is complete end to end (ingest → layout → export → CLI). The UI is
-scaffolded (system theme + zero-blue source colors); the Three.js scene,
-rendering, full-text search, and GitHub Pages deploy are in progress — see the
-[backlog](docs/backlog.json).
+v0.1 is shipped and **live at <https://qte77.github.io/paperverse/>** — the full
+pipeline (ingest → layout → export → CLI) and the interactive UI (3D point cloud,
+hover/click, full-text search) deployed to GitHub Pages. Done stories:
+[backlog.json](docs/backlog.json); open work and what's next:
+[roadmap.md](docs/roadmap.md).
 
 ## License
 
