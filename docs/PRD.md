@@ -92,6 +92,12 @@ Click), exposed as `[project.scripts] paperverse`, with subcommands
 `export` (Papers + positions → papers.db + positions binary). Support
 `--sources`, `--data-dir`, `--output`, `--seed`.
 
+> Note (STORY-007): the CLI shipped as a single flat `paperverse` command (run via
+> pydantic-settings `CliApp.run`), not `ingest`/`layout`/`export` subcommands — no
+> intermediate on-disk format was defined, so the end-to-end command meets every
+> acceptance criterion (YAGNI). See
+> [ADR-0002](decisions/0002-in-browser-store-and-data-contract.md).
+
 ### Area 3: Frontend Visualization
 
 #### Feature 8: Three.js Scene Setup
