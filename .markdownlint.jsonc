@@ -1,0 +1,18 @@
+{
+  // Mirrors the shared qte77 markdownlint config (qte77/.github), which the
+  // `lint-md-links` reusable workflow downloads as `.markdownlint.jsonc` when a
+  // repo lacks one. Committed here so local `make lint_md` matches CI exactly
+  // instead of relying on that fallback download.
+  //
+  // Filename MUST be `.markdownlint.jsonc` (or `.markdownlint.json`): the
+  // reusable workflow's `markdownlint-cli2-action` only checks for those names,
+  // NOT `.markdownlint-cli2.jsonc`. Rules live at the top level (markdownlint
+  // config shape), not under a `config` key (that is the cli2-options shape).
+  // Dependency dirs are ignored via globs in `make lint_md` (the rules-only
+  // shape has no `ignores` field); CI lints a clean checkout with no deps.
+  "MD013": false, // line-length: long lines allowed
+  "MD033": false, // inline HTML: allowed (img/details/summary/picture)
+  "MD024": { "siblings_only": true }, // duplicate headings OK if not siblings
+  "MD041": false, // first line need not be a top-level heading
+  "MD060": false // table pipe alignment not required (long URL cells)
+}

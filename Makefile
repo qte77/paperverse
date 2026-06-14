@@ -65,9 +65,9 @@ check_types:  ## pyright type check (src)
 	echo "--- check_types"
 	uv run pyright src $(PYRIGHT_QUIET)
 
-lint_md:  ## markdownlint-cli2 on all markdown
+lint_md:  ## markdownlint-cli2 on all markdown (config: .markdownlint.jsonc)
 	echo "--- lint_md"
-	markdownlint-cli2 "**/*.md"
+	markdownlint-cli2 "**/*.md" "!**/.venv/**" "!**/node_modules/**"
 
 lint_links:  ## lychee broken-link checker (network; respects .gitignore)
 	echo "--- lint_links"
