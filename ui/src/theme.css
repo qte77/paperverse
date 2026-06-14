@@ -1,0 +1,25 @@
+/* EyeRest design tokens (default variant), vendored from the canonical brand
+   source qte77/qte77/brand/DESIGN.md. App code references these CSS variables by
+   pointer — never a raw hex, never a blue accent. The zero-blue `--data-*` arc
+   encodes paper source; `[data-theme]` (set in main.ts) flips light/dark. */
+
+:root,
+[data-theme="light"] {
+  --bg: #ece8d8;
+  --surface: #e2dec8;
+  --text: #2c2818;
+  --data-positive: #4a6818;
+  --data-caution: #787010;
+  --data-negative: #983828;
+  --data-alt: #587818;
+}
+
+[data-theme="dark"] {
+  --bg: #1c1a14;
+  --surface: #242018;
+  --text: #d8d0b8;
+  --data-positive: #8aa860;
+  --data-caution: #c8b868;
+  --data-negative: #c08060;
+  --data-alt: #a8b870;
+}
