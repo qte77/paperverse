@@ -1,8 +1,8 @@
 /** Build the paper point cloud from the export artifacts.
  *
- * The pure helpers (parsePositions, buildColorBuffer) are unit-tested; the
- * Three.js / DOM glue (resolveSourceRgb, buildPointsCloud) is type-checked and
- * build-smoked, not unit-tested — jsdom has no WebGL and no CSS cascade.
+ * The pure helpers (parsePositions, buildColorBuffer, applyHighlight) are
+ * unit-tested; the Three.js / DOM glue (resolveSourceRgb, buildPointsCloud) is
+ * type-checked and build-smoked, not unit-tested — jsdom has no WebGL/CSS cascade.
  */
 
 import * as THREE from "three";
@@ -10,6 +10,9 @@ import * as THREE from "three";
 import { hexToRgb01, SOURCE_VAR, type Source } from "./colors";
 
 const SOURCES: Source[] = ["arxiv", "biorxiv", "medrxiv"];
+
+/** Point size in world units; also the raycaster pick threshold (see interaction.ts). */
+export const POINT_SIZE = 0.05;
 
 /** View a positions binary as float32 `[x, y, z]` per point (point `i` == row `i`). */
 export function parsePositions(buffer: ArrayBuffer): Float32Array {
@@ -36,6 +39,21 @@ export function buildColorBuffer(
   return out;
 }
 
+/** Reset `working` to `baseline`, then write `rgb` at each highlighted point. */
+export function applyHighlight(
+  working: Float32Array,
+  baseline: Float32Array,
+  indices: number[],
+  rgb: readonly [number, number, number],
+): void {
+  working.set(baseline);
+  for (const idx of indices) {
+    working[idx * 3] = rgb[0];
+    working[idx * 3 + 1] = rgb[1];
+    working[idx * 3 + 2] = rgb[2];
+  }
+}
+
 /** Resolve each source's EyeRest data-arc CSS variable to an RGB triple. */
 export function resolveSourceRgb(el: Element): Record<Source, [number, number, number]> {
   const styles = getComputedStyle(el);
@@ -53,7 +71,7 @@ export function buildPointsCloud(positions: Float32Array, colors: Float32Array):
   geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
   const material = new THREE.PointsMaterial({
     vertexColors: true,
-    size: 0.05,
+    size: POINT_SIZE,
     sizeAttenuation: true,
   });
   return new THREE.Points(geometry, material);

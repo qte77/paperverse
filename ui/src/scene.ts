@@ -15,6 +15,12 @@ import { computeRenderSize, detectBackend } from "./renderer";
 
 /** A running scene; call `dispose` to stop the loop and release resources. */
 export interface SceneHandle {
+  /** The perspective camera (for raycasting). */
+  readonly camera: THREE.PerspectiveCamera;
+  /** The renderer's canvas (for pointer events). */
+  readonly domElement: HTMLCanvasElement;
+  /** Orbit controls (for camera fly-to). */
+  readonly controls: OrbitControls;
   add(object: THREE.Object3D): void;
   dispose(): void;
 }
@@ -56,6 +62,9 @@ export async function createScene(canvas: HTMLCanvasElement): Promise<SceneHandl
   });
 
   return {
+    camera,
+    domElement: renderer.domElement,
+    controls,
     add(object: THREE.Object3D): void {
       scene.add(object);
     },

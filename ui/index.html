@@ -28,10 +28,52 @@
         width: 100vw;
         height: 100vh;
       }
+      #tooltip {
+        position: absolute;
+        pointer-events: none;
+        max-width: 22rem;
+        padding: 0.25rem 0.5rem;
+        font: 0.85rem/1.4 system-ui, sans-serif;
+        background: var(--surface);
+        color: var(--text);
+        border-radius: 4px;
+      }
+      #detail {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: min(28rem, 90vw);
+        height: 100%;
+        overflow-y: auto;
+        box-sizing: border-box;
+        padding: 1.5rem;
+        font: 1rem/1.5 system-ui, sans-serif;
+        background: var(--surface);
+        color: var(--text);
+      }
+      #detail-close {
+        float: right;
+        border: 0;
+        background: transparent;
+        color: var(--text);
+        font-size: 1.2rem;
+        cursor: pointer;
+      }
+      #detail-meta {
+        opacity: 0.75;
+        font-size: 0.85rem;
+      }
     </style>
   </head>
   <body>
     <canvas id="cloud"></canvas>
+    <div id="tooltip" hidden aria-live="polite"></div>
+    <aside id="detail" hidden>
+      <button id="detail-close" aria-label="Close">✕</button>
+      <h2 id="detail-title"></h2>
+      <p id="detail-meta"></p>
+      <p id="detail-abstract"></p>
+    </aside>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
