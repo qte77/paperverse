@@ -1,0 +1,19 @@
+Date,ISOWeek,DOI,Version,Category,Title,Authors,Abstract
+2024-01-15,3,10.1101/2024.01.15.24301001,1,epidemiology,Wastewater signals predict respiratory surges,Kaur P; Mendez R,Finds viral load in sewage leads clinical case counts by days
+2024-01-29,5,10.1101/2024.01.29.24301112,1,epidemiology;public-health,Mobility patterns and seasonal transmission,Ortiz L; Feng W,Links aggregated movement data to outbreak timing
+2024-02-12,7,10.1101/2024.02.12.24301223,1,oncology,Circulating tumour DNA for early recurrence,Schmidt A; Rao N,Detects relapse months before imaging in a colorectal cohort
+2024-02-26,9,10.1101/2024.02.26.24301334,1,oncology;public-health,Screening uptake disparities across regions,Bello T; Karlsson J,Quantifies gaps in screening access and downstream outcomes
+2024-03-11,11,10.1101/2024.03.11.24301445,1,cardiology,Wearable ECG for atrial fibrillation detection,Nguyen H; Patel S,Validates a consumer device against clinical monitoring
+2024-03-25,13,10.1101/2024.03.25.24301556,1,cardiology;epidemiology,Air pollution and acute cardiac events,Moreno C; Ide K,Associates short term exposure with hospital admissions
+2024-04-08,15,10.1101/2024.04.08.24301667,1,infectious-diseases,Rapid diagnostics for febrile illness triage,Acheampong B; Lim D,Compares point of care assays in a primary care setting
+2024-04-22,17,10.1101/2024.04.22.24301778,1,infectious-diseases;epidemiology,Vaccine effectiveness against a drifted variant,Russo F; Tan L,Estimates protection using a test negative design
+2024-05-06,19,10.1101/2024.05.06.24301889,1,psychiatry,Digital therapy for adolescent anxiety,Holm S; Varga D,Reports a randomised trial of a guided self help app
+2024-05-20,21,10.1101/2024.05.20.24301990,1,psychiatry;public-health,Loneliness trends in older adults,Dubois E; Sharma R,Tracks self reported isolation across repeated surveys
+2024-06-03,23,10.1101/2024.06.03.24302101,1,public-health,Salt reduction policy and population blood pressure,Owusu K; Lindberg T,Models the impact of reformulation on cardiovascular risk
+2024-06-17,25,10.1101/2024.06.17.24302212,1,oncology,Radiomics predicts immunotherapy response,Costa B; Yamamoto H,Builds an imaging signature for checkpoint inhibitor outcomes
+2024-07-15,29,10.1101/2024.07.15.24302323,1,cardiology,Polygenic risk improves heart failure prediction,Fischer M; Adeyi O,Adds genomic scores to clinical risk calculators
+2024-08-05,32,10.1101/2024.08.05.24302434,1,infectious-diseases,Antimicrobial resistance trends in urinary isolates,Pereira G; Sundqvist L,Reports rising resistance over a multi year surveillance period
+2024-09-09,37,10.1101/2024.09.09.24302545,1,epidemiology,Excess mortality during heat waves,Marin J; Cho Y,Estimates temperature attributable deaths across cities
+2024-10-07,41,10.1101/2024.10.07.24302656,1,psychiatry,Sleep and depression in shift workers,Halvorsen B; Rana P,Examines bidirectional links in a longitudinal cohort
+2024-11-11,46,10.1101/2024.11.11.24302767,1,public-health;epidemiology,Telehealth uptake and care continuity,Santos M; Weber K,Assesses whether remote visits maintain chronic disease control
+2024-12-09,50,10.1101/2024.12.09.24302878,1,oncology,Liquid biopsy panels for treatment selection,Iversen R; Mbeki S,Compares panels for actionable mutation detection

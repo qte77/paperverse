@@ -4,7 +4,8 @@ __pycache__/
 dist/
 *.egg-info/
 node_modules/
-ui/public/data/*.db
+ui/public/data/
+ui/public/sql-wasm.wasm
 .pytest_cache/
 .ruff_cache/
 .pyright_cache/
