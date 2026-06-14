@@ -39,7 +39,20 @@ export function buildColorBuffer(
   return out;
 }
 
-/** Reset `working` to `baseline`, then write `rgb` at each highlighted point. */
+/** Write `rgb` at each point index, leaving the rest of `buffer` untouched. */
+export function paintPoints(
+  buffer: Float32Array,
+  indices: number[],
+  rgb: readonly [number, number, number],
+): void {
+  for (const idx of indices) {
+    buffer[idx * 3] = rgb[0];
+    buffer[idx * 3 + 1] = rgb[1];
+    buffer[idx * 3 + 2] = rgb[2];
+  }
+}
+
+/** Reset `working` to `baseline`, then paint `rgb` at the highlighted points. */
 export function applyHighlight(
   working: Float32Array,
   baseline: Float32Array,
@@ -47,11 +60,7 @@ export function applyHighlight(
   rgb: readonly [number, number, number],
 ): void {
   working.set(baseline);
-  for (const idx of indices) {
-    working[idx * 3] = rgb[0];
-    working[idx * 3 + 1] = rgb[1];
-    working[idx * 3 + 2] = rgb[2];
-  }
+  paintPoints(working, indices, rgb);
 }
 
 /** Resolve each source's EyeRest data-arc CSS variable to an RGB triple. */

@@ -27,6 +27,8 @@ export interface PapersDb {
   sourcesByIdx(): Source[];
   /** Full metadata for one point, or null if the index is unknown. */
   paperByIdx(idx: number): PaperMeta | null;
+  /** Point indices matching an FTS5 query, ranked; [] for no match or a bad query. */
+  search(query: string): number[];
   /** Release the in-memory database. */
   close(): void;
 }
@@ -68,6 +70,23 @@ export async function openPapersDb(bytes: Uint8Array, wasmUrl: string): Promise<
         abstract: row.abstract as string,
         doi: (row.doi as string | null) ?? null,
       };
+    },
+    search(query: string): number[] {
+      const stmt = db.prepare(
+        "SELECT rowid AS idx FROM papers_fts WHERE papers_fts MATCH ? ORDER BY rank",
+      );
+      const indices: number[] = [];
+      try {
+        stmt.bind([query]);
+        while (stmt.step()) {
+          indices.push(stmt.get()[0] as number);
+        }
+      } catch {
+        indices.length = 0; // malformed FTS5 query string → no results
+      } finally {
+        stmt.free();
+      }
+      return indices;
     },
     close(): void {
       db.close();
