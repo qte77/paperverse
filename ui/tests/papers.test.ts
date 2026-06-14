@@ -1,7 +1,14 @@
 import { describe, expect, it } from "vitest";
 
 import type { Source } from "../src/colors";
-import { applyHighlight, buildColorBuffer, paintPoints, parsePositions } from "../src/papers";
+import {
+  applyHighlight,
+  buildColorBuffer,
+  dimColors,
+  paintPoints,
+  parsePositions,
+  restorePoints,
+} from "../src/papers";
 
 describe("parsePositions", () => {
   it("views the buffer as one float32 triple per point", () => {
@@ -76,5 +83,30 @@ describe("paintPoints", () => {
     const buffer = new Float32Array([1, 2, 3]);
     paintPoints(buffer, [], [9, 9, 9]);
     expect(buffer).toEqual(new Float32Array([1, 2, 3]));
+  });
+});
+
+describe("dimColors", () => {
+  it("blends every colour toward the background by (1 - factor)", () => {
+    expect(dimColors(new Float32Array([1, 0, 0.5]), 0.5, [0, 0, 0])).toEqual(
+      new Float32Array([0.5, 0, 0.25]),
+    );
+    expect(dimColors(new Float32Array([0, 0, 0]), 0.5, [1, 1, 1])).toEqual(
+      new Float32Array([0.5, 0.5, 0.5]),
+    );
+  });
+
+  it("leaves colours unchanged at factor 1", () => {
+    const c = new Float32Array([0.25, 0.5, 0.75]);
+    expect(dimColors(c, 1, [1, 1, 1])).toEqual(c);
+  });
+});
+
+describe("restorePoints", () => {
+  it("copies baseline colours at the given points, leaving the rest", () => {
+    const baseline = new Float32Array([1, 1, 1, 2, 2, 2, 3, 3, 3]);
+    const working = new Float32Array([0, 0, 0, 0, 0, 0, 0, 0, 0]);
+    restorePoints(working, baseline, [1]);
+    expect(working).toEqual(new Float32Array([0, 0, 0, 2, 2, 2, 0, 0, 0]));
   });
 });

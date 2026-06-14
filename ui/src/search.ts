@@ -40,6 +40,16 @@ export function resultCentroid(
   return [x / n, y / n, z / n];
 }
 
+/** Turn a user query into an FTS5 prefix query: each term gets a trailing `*`. */
+export function toPrefixQuery(raw: string): string {
+  return raw
+    .trim()
+    .split(/\s+/)
+    .filter((term) => term.length > 0)
+    .map((term) => `${term}*`)
+    .join(" ");
+}
+
 /** Wire the debounced search box: highlight matches and fly the camera to them. */
 export function attachSearch(deps: {
   input: HTMLInputElement;
@@ -49,7 +59,7 @@ export function attachSearch(deps: {
   flyTo: (target: readonly [number, number, number]) => void;
 }): void {
   const run = (raw: string): void => {
-    const query = raw.trim();
+    const query = toPrefixQuery(raw);
     const indices = query === "" ? [] : deps.db.search(query);
     deps.onResults(indices);
     if (indices.length > 0) {

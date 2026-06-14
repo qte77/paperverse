@@ -64,6 +64,34 @@ export function applyHighlight(
   paintPoints(working, indices, rgb);
 }
 
+/** Blend each colour toward `bg` by `1 - factor` (1 = unchanged, 0 = full bg). */
+export function dimColors(
+  colors: Float32Array,
+  factor: number,
+  bg: readonly [number, number, number],
+): Float32Array {
+  const out = new Float32Array(colors.length);
+  for (let i = 0; i < colors.length; i += 3) {
+    out[i] = colors[i] * factor + bg[0] * (1 - factor);
+    out[i + 1] = colors[i + 1] * factor + bg[1] * (1 - factor);
+    out[i + 2] = colors[i + 2] * factor + bg[2] * (1 - factor);
+  }
+  return out;
+}
+
+/** Copy `baseline` colours back into `working` at the given point indices. */
+export function restorePoints(
+  working: Float32Array,
+  baseline: Float32Array,
+  indices: number[],
+): void {
+  for (const idx of indices) {
+    working[idx * 3] = baseline[idx * 3];
+    working[idx * 3 + 1] = baseline[idx * 3 + 1];
+    working[idx * 3 + 2] = baseline[idx * 3 + 2];
+  }
+}
+
 /** Resolve each source's EyeRest data-arc CSS variable to an RGB triple. */
 export function resolveSourceRgb(el: Element): Record<Source, [number, number, number]> {
   const styles = getComputedStyle(el);
