@@ -13,10 +13,11 @@ import { createScene } from "./scene";
 import { attachSearch } from "./search";
 import { resolveTheme } from "./theme";
 
-// Data artifacts + the sql.js WASM are served by the Vite/Pages build (STORY-012);
-// these are the paths that build will provide.
-const DATA_DIR = "data";
-const SQL_WASM_URL = "sql-wasm.wasm";
+// Data artifacts + the sql.js WASM are copied into the site by the Pages build
+// and served under the Vite base path (e.g. /paperverse/).
+const BASE = import.meta.env.BASE_URL;
+const DATA_DIR = `${BASE}data`;
+const SQL_WASM_URL = `${BASE}sql-wasm.wasm`;
 
 function interactionElements(): InteractionElements | null {
   const tooltip = document.querySelector<HTMLElement>("#tooltip");

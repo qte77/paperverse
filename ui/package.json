@@ -4,6 +4,9 @@
   "type": "module",
   "description": "Paperverse L4 UI (Three.js + sql.js). Not shipped in the Python wheel.",
   "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
@@ -11,6 +14,7 @@
     "@types/sql.js": "^1.4.11",
     "@types/three": "^0.184.1",
     "typescript": "^6.0.3",
+    "vite": "^8.0.16",
     "vitest": "^4.1.8"
   },
   "dependencies": {
