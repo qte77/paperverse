@@ -1,1 +1,78 @@
 # paperverse
+
+A 3D academic-paper cloud — a static GitHub Pages visualization of arXiv, bioRxiv,
+and medRxiv papers. A Python pipeline ingests weekly canonical CSVs, lays the
+papers out in 3D with UMAP, and exports a SQLite + FTS5 database and a Float32
+positions binary; a Three.js + sql.js frontend renders the cloud and searches it
+entirely in the browser.
+
+## Architecture
+
+Four layers with one-way imports (`L4 → L1`); see
+[ADR-0001](docs/decisions/0001-backend-cli-ui-separation.md).
+
+- **L1 — backend** (`src/paperverse/`): the `Paper` model, CSV ingest, UMAP
+  layout, and the SQLite + positions export. Ships in the wheel.
+- **L2 — CLI** (`paperverse` command): the end-to-end pipeline.
+- **L4 — UI** (`ui/`): a static Three.js + sql.js site, built with Vite. Not in
+  the wheel.
+
+Why SQLite + FTS5 in the browser (over DuckDB-WASM / Parquet) and the export data
+contract: [ADR-0002](docs/decisions/0002-in-browser-store-and-data-contract.md).
+
+## Install
+
+Requires Python 3.12+ and [uv](https://docs.astral.sh/uv/).
+
+```bash
+uv sync
+```
+
+## Usage
+
+Lay out and export a corpus to `papers.db` + `positions.bin`:
+
+```bash
+uv run paperverse --data-dir data --output dist/data
+```
+
+`--data-dir` holds one subdirectory per source, each with canonical CSVs
+(`Date,ISOWeek,DOI,Version,Category,Title,Authors,Abstract`):
+
+```text
+data/
+  arxiv/.../*.csv
+  biorxiv/.../*.csv
+  medrxiv/.../*.csv
+```
+
+| Flag | Default | Description |
+| --- | --- | --- |
+| `--data-dir` | `data` | Root holding one CSV subdirectory per source |
+| `--output` | `dist/data` | Directory to receive `papers.db` + `positions.bin` |
+| `--sources` | all | Restrict to sources; repeatable (`--sources arxiv --sources biorxiv`) |
+| `--seed` | `42` | UMAP seed for reproducible layouts |
+
+## Development
+
+```bash
+make setup      # uv sync + lychee + markdownlint-cli2
+make validate   # ruff + pyright (strict) + markdownlint + pip-audit + pytest (cov >= 90%)
+make test       # fast pytest (red-green-refactor loop)
+make test_js    # ui/ vitest
+```
+
+Run `make help` for all recipes. Contributions follow
+[CONTRIBUTING.md](CONTRIBUTING.md) and the [backlog](docs/backlog.json); pipeline
+code is test-first (behavior tests, not implementation tests).
+
+## Status
+
+The pipeline is complete end to end (ingest → layout → export → CLI). The UI is
+scaffolded (system theme + zero-blue source colors); the Three.js scene,
+rendering, full-text search, and GitHub Pages deploy are in progress — see the
+[backlog](docs/backlog.json).
+
+## License
+
+Apache-2.0.
