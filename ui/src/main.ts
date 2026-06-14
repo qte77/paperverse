@@ -2,13 +2,14 @@ import { hexToRgb01 } from "./colors";
 import { openPapersDb } from "./db";
 import { attachInteraction, type InteractionElements } from "./interaction";
 import {
-  applyHighlight,
   buildColorBuffer,
   buildPointsCloud,
+  dimColors,
   paintPoints,
   parsePositions,
   POINT_SIZE,
   resolveSourceRgb,
+  restorePoints,
 } from "./papers";
 import { createScene } from "./scene";
 import { attachSearch } from "./search";
@@ -63,11 +64,15 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
     // on top, so hovering never wipes the active search highlight.
     const styles = getComputedStyle(document.documentElement);
     const hoverRgb = hexToRgb01(styles.getPropertyValue("--data-positive").trim());
-    const searchRgb = hexToRgb01(styles.getPropertyValue("--data-alt").trim());
+    const bgRgb = hexToRgb01(styles.getPropertyValue("--bg").trim());
+    const dimmed = dimColors(baseline, 0.22, bgRgb);
     let hoverHits: number[] = [];
     let searchHits: number[] = [];
     const repaint = (): void => {
-      applyHighlight(working, baseline, searchHits, searchRgb);
+      // Search focus: when there are matches, fade everything toward the page
+      // background, then restore matches to full colour so they stand out.
+      working.set(searchHits.length > 0 ? dimmed : baseline);
+      restorePoints(working, baseline, searchHits);
       paintPoints(working, hoverHits, hoverRgb);
       points.geometry.getAttribute("color").needsUpdate = true;
     };

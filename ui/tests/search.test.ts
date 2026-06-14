@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { debounce, resultCentroid } from "../src/search";
+import { debounce, resultCentroid, toPrefixQuery } from "../src/search";
 
 describe("debounce", () => {
   it("fires once after the quiet period, with the latest args", () => {
@@ -45,5 +45,19 @@ describe("resultCentroid", () => {
 
   it("throws on an empty selection", () => {
     expect(() => resultCentroid(positions, [])).toThrow();
+  });
+});
+
+describe("toPrefixQuery", () => {
+  it("appends an FTS5 prefix wildcard to each term", () => {
+    expect(toPrefixQuery("deep learn")).toBe("deep* learn*");
+  });
+
+  it("trims and collapses whitespace, dropping empty terms", () => {
+    expect(toPrefixQuery("  neural   nets  ")).toBe("neural* nets*");
+  });
+
+  it("returns an empty string for a blank query", () => {
+    expect(toPrefixQuery("   ")).toBe("");
   });
 });
