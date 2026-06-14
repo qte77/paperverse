@@ -8,11 +8,13 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
+    "@types/sql.js": "^1.4.11",
     "@types/three": "^0.184.1",
     "typescript": "^6.0.3",
     "vitest": "^4.1.8"
   },
   "dependencies": {
+    "sql.js-fts5": "^1.4.0",
     "three": "^0.184.0"
   }
 }
