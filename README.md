@@ -62,9 +62,9 @@ make test       # fast pytest (red-green-refactor loop)
 make test_js    # ui/ vitest
 ```
 
-Run `make help` for all recipes. Contributions follow
-[CONTRIBUTING.md](CONTRIBUTING.md) and the [backlog](docs/backlog.json); pipeline
-code is test-first (behavior tests, not implementation tests).
+Run `make help` for all recipes. See [CONTRIBUTING.md](CONTRIBUTING.md) for the
+principles, testing, and branch/PR workflow, and the [backlog](docs/backlog.json)
+for what's planned next.
 
 ## Status
 
