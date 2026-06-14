@@ -4,7 +4,7 @@
 .ONESHELL:
 .PHONY: \
 	setup setup_uv setup_dev setup_lychee setup_md setup_js \
-	lint autofix check_types lint_md lint_links \
+	lint autofix check_types lint_md lint_links audit \
 	test test_cov retest validate \
 	typecheck_js test_js \
 	clean help
@@ -77,18 +77,23 @@ test:  ## pytest
 	echo "--- test"
 	uv run pytest $(PYTEST_QUIET)
 
-test_cov:  ## pytest with coverage (--cov-fail-under=0; raise as the suite grows)
+test_cov:  ## pytest with coverage (fails under 90%)
 	echo "--- test_cov"
-	uv run pytest --cov=src/paperverse --cov-fail-under=0 $(PYTEST_QUIET)
+	uv run pytest --cov=src/paperverse --cov-fail-under=90 $(PYTEST_QUIET)
 
 retest:  ## rerun last failed tests only
 	uv run pytest --lf -x
 
-validate:  ## CI gate: lint + check_types + lint_md + test_cov
+audit:  ## pip-audit dependency CVE scan (network)
+	echo "--- audit"
+	uv run pip-audit
+
+validate:  ## CI gate: lint + check_types + lint_md + audit + test_cov
 	set -e
 	$(MAKE) -s lint
 	$(MAKE) -s check_types
 	$(MAKE) -s lint_md
+	$(MAKE) -s audit
 	$(MAKE) -s test_cov
 
 

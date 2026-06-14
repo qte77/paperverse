@@ -19,6 +19,7 @@ dev = [
     "inline-snapshot>=0.8",
     "ruff>=0.4",
     "pyright>=1.1.390",
+    "pip-audit>=2.7",
 ]
 
 # Scaffold phase: not built as a wheel yet. When the CLI lands, add
@@ -56,4 +57,12 @@ max-complexity = 10
 [tool.pyright]
 include = ["src"]
 pythonVersion = "3.12"
-typeCheckingMode = "basic"
+typeCheckingMode = "strict"
+# umap-learn ships no type stubs; relax only the two reports that fire solely at
+# that untyped boundary (in layout.py). Every other strict check stays on.
+reportMissingTypeStubs = false
+reportUnknownMemberType = false
+
+[tool.inline-snapshot]
+# Format created/updated snapshots with ruff (avoids the optional black dep).
+format-command = "ruff format --stdin-filename {filename} -"
