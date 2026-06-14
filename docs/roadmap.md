@@ -11,10 +11,14 @@ layout → SQLite + FTS5 `papers.db` + Float32 `positions.bin` export → `paper
 Three.js + sql.js UI (scene, point cloud, hover/click, full-text search) → GitHub Pages.
 Live at <https://qte77.github.io/paperverse/>.
 
+## v0.1.1 — Theme picker (shipped)
+
+System / Light / Dark picker with `localStorage` persistence and recolour-on-switch —
+[#46](https://github.com/qte77/paperverse/issues/46) · [plan](plans/theme-picker.md).
+
 ## Next
 
-- Theme picker (System / Light / Dark) —
-  [#46](https://github.com/qte77/paperverse/issues/46) · [plan](plans/theme-picker.md)
+Nothing queued — the deferred items under **Later** are the candidates.
 
 ## Later — visual & performance
 
