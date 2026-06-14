@@ -1,0 +1,22 @@
+Date,ISOWeek,DOI,Version,Category,Title,Authors,Abstract
+2024-01-08,2,2401.01010,1,cs.LG;cs.AI,Scaling laws for sparse mixture of experts,Chen L; Patel R,Examines how sparsity affects scaling behaviour in large language models
+2024-01-22,4,2401.02220,1,cs.CL;cs.LG,Retrieval augmented decoding for long contexts,Nakamura K; Silva M,Interleaves retrieval with autoregressive decoding to improve factuality
+2024-02-05,6,2402.03330,1,cs.CV,Self supervised depth from monocular video,Okafor N; Brandt T,Learns dense depth without labels using photometric consistency
+2024-02-19,8,2402.04440,1,cs.CV;cs.LG,Token pruning for efficient vision transformers,Haddad S; Wei J,Drops uninformative patches to cut inference cost on edge devices
+2024-03-04,10,2403.05550,1,cs.CL,Instruction tuning with filtered synthetic dialogue,Romero P; Ito H,Shows small models gain from carefully filtered synthetic conversations
+2024-03-18,12,2403.06660,1,stat.ML;cs.LG,Calibrated uncertainty via deep ensembles revisited,Larsson E; Gupta A,Quantifies when ensembles improve calibration under distribution shift
+2024-04-01,14,2404.07770,1,cs.RO;cs.LG,Sim to real transfer for dexterous manipulation,Volkov D; Mensah K,Bridges the reality gap with domain randomised contact dynamics
+2024-04-15,16,2404.08880,1,cs.RO,Whole body control for legged locomotion,Tanaka Y; Costa F,Achieves robust stair climbing with a terrain aware learned policy
+2024-04-29,18,2404.09990,1,cs.LG;stat.ML,Gradient free optimisation of black box samplers,Dubois A; Khan I,Tunes sampler hyperparameters using bandit style exploration
+2024-05-13,20,2405.10100,1,cs.CL;cs.AI,Tool use planning with verifier feedback,Mwangi J; Olsen P,Plans multi step tool calls and repairs them from verifier signals
+2024-05-27,22,2405.11200,1,cs.CV,Diffusion priors for inverse imaging problems,Ferreira L; Sato R,Uses pretrained diffusion models to regularise deblurring and inpainting
+2024-06-10,24,2406.12300,1,eess.SP;cs.LG,Learned compression for streaming sensor data,Becker M; Rao S,Compresses telemetry with a lightweight learned entropy coder
+2024-06-24,26,2406.13400,1,cs.LG,Continual learning without a replay buffer,Andersen K; Mehta V,Mitigates forgetting via gradient projection onto stable subspaces
+2024-07-08,28,2407.14500,1,cs.CL;stat.ML,Probing factual consistency in summarisation,Garcia D; Yamada T,Introduces a contrastive metric that flags unsupported claims
+2024-07-22,30,2407.15600,1,cs.CV;cs.RO,Neural fields for real time scene reconstruction,Ivanova S; Park C,Reconstructs explorable scenes from posed RGB at interactive rates
+2024-08-12,33,2408.16700,1,cs.AI;cs.LG,Reward modelling from sparse human preferences,Bauer H; Lim Q,Learns dense rewards from a handful of pairwise comparisons
+2024-09-02,36,2409.17800,1,stat.ML,Nonparametric tests for covariate shift,Schulz F; Adeyemi B,Detects shift with kernel two sample statistics and finite sample bounds
+2024-09-23,39,2409.18900,1,cs.CL,Multilingual alignment with shared subword anchors,Nguyen T; Bianchi G,Aligns embeddings across scripts using anchor tokens
+2024-10-14,42,2410.19000,1,cs.RO;cs.LG,Safe exploration for contact rich assembly,Petrov A; Chan W,Bounds risk during exploration with a learned constraint critic
+2024-11-04,45,2411.20100,1,cs.CV,Open vocabulary segmentation from captions,Moreau J; Singh R,Segments unseen classes by grounding free form caption phrases
+2024-12-02,49,2412.21200,1,cs.LG;cs.AI,Distillation of long horizon planning agents,Weber S; Cho E,Compresses search heavy planners into fast reactive policies

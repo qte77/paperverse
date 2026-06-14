@@ -1,0 +1,19 @@
+Date,ISOWeek,DOI,Version,Category,Title,Authors,Abstract
+2024-01-12,2,10.1101/2024.01.12.575001,1,neuroscience,Hippocampal replay during goal directed navigation,Reyes M; Ahmed S,Records sequential reactivation that predicts upcoming route choices
+2024-01-26,4,10.1101/2024.01.26.575112,1,neuroscience;biophysics,Dendritic computation in cortical pyramidal cells,Lindqvist E; Tan H,Shows nonlinear dendritic events shape stimulus selectivity
+2024-02-09,6,10.1101/2024.02.09.575223,1,genomics,Single cell atlas of regenerating liver tissue,Costa P; Yuan L,Maps transcriptional states across the regeneration time course
+2024-02-23,8,10.1101/2024.02.23.575334,1,genomics;bioinformatics,Structural variants from long read assembly,Olsen R; Banerjee K,Resolves complex rearrangements missed by short read pipelines
+2024-03-08,10,10.1101/2024.03.08.575445,1,bioinformatics,Fast alignment free transcript quantification,Mori T; Abara C,Estimates expression from k mer sketches with calibrated uncertainty
+2024-03-22,12,10.1101/2024.03.22.575556,1,cell-biology,Mitochondrial dynamics under nutrient stress,Haas G; Pillai N,Links fission frequency to metabolic flux in cultured cells
+2024-04-05,14,10.1101/2024.04.05.575667,1,cell-biology;biophysics,Membrane tension gradients during cell spreading,Sato K; Duarte M,Measures propagating tension waves with a genetically encoded sensor
+2024-04-19,16,10.1101/2024.04.19.575778,1,microbiology,Phage resistance evolves via surface remodelling,Ferreira J; Wong T,Tracks receptor loss mutations across serial passage experiments
+2024-05-03,18,10.1101/2024.05.03.575889,1,microbiology;genomics,Gut community assembly after antibiotic perturbation,Adeniran O; Klein D,Follows recovery trajectories and identifies keystone recolonisers
+2024-05-17,20,10.1101/2024.05.17.575990,1,evolution,Convergent wing patterning across butterfly clades,Marchetti L; Bose A,Identifies shared regulatory changes underlying mimicry
+2024-06-07,23,10.1101/2024.06.07.576101,1,evolution;genomics,Ancient introgression shapes alpine plant adaptation,Novak P; Tessier B,Detects adaptive haplotypes shared between diverged lineages
+2024-06-21,25,10.1101/2024.06.21.576212,1,neuroscience,Sleep dependent consolidation of motor sequences,Iqbal R; Stern M,Finds spindle coupled reactivation predicts overnight gains
+2024-07-12,28,10.1101/2024.07.12.576323,1,biophysics,Force spectroscopy of nucleosome unwrapping,Caron F; Mehta P,Quantifies unwrapping intermediates with optical tweezers
+2024-08-02,31,10.1101/2024.08.02.576434,1,bioinformatics;genomics,Graph pangenomes improve variant genotyping,Salazar R; Owusu E,Reduces reference bias for diverse human cohorts
+2024-08-23,34,10.1101/2024.08.23.576545,1,cell-biology,Liquid droplets organise stress granule assembly,Voss A; Nair S,Reconstitutes condensate formation from purified components
+2024-09-13,37,10.1101/2024.09.13.576656,1,neuroscience,Astrocyte calcium modulates cortical gain,Bauer L; Cho M,Shows astrocyte signalling adjusts the gain of sensory responses
+2024-10-04,40,10.1101/2024.10.04.576767,1,microbiology,Biofilm architecture controls antibiotic tolerance,Renaud C; Park J,Relates spatial structure to persister cell distribution
+2024-11-08,45,10.1101/2024.11.08.576878,1,evolution,Experimental evolution of thermal tolerance,Diallo M; Eriksen P,Maps the genetic basis of heat adaptation in fruit flies
