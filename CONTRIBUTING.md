@@ -44,6 +44,17 @@ make test_js    # ui/ vitest (make typecheck_js for tsc)
 - pytest for logic, Hypothesis for properties, inline-snapshot for structure. No
   BDD, no Gherkin, no feature files.
 
+## Running the UI locally
+
+```bash
+make serve_ui            # build ui/ + serve the production bundle on :8143 (node-free: uv + http.server)
+make serve_ui PORT=9000  # override the port
+npm --prefix ui run dev  # hot-reload dev server (source, not the production bundle)
+```
+
+`serve_ui` regenerates the data, builds `ui/` with a root base path, and serves
+`ui/dist` the way GitHub Pages does — assets resolve at the server root.
+
 ## Commits
 
 Conventional commits: `feat:`, `fix:`, `refactor:`, `test:`, `docs:`, `chore:`.
