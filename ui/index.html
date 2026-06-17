@@ -65,11 +65,16 @@
         opacity: 0.75;
         font-size: 0.85rem;
       }
-      #search-form {
+      #toolbar {
         position: fixed;
         top: 1rem;
         left: 50%;
         transform: translateX(-50%);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      #search-form {
         margin: 0;
       }
       #search {
@@ -82,9 +87,6 @@
         border-radius: 6px;
       }
       #theme {
-        position: fixed;
-        top: 1rem;
-        left: 1rem;
         padding: 0.4rem 0.5rem;
         font: 0.9rem var(--font-sans);
         color: var(--text);
@@ -107,14 +109,16 @@
   </head>
   <body>
     <canvas id="cloud"></canvas>
-    <select id="theme" aria-label="Theme" title="Theme">
-      <option value="system">System</option>
-      <option value="light">Light</option>
-      <option value="dark">Dark</option>
-    </select>
-    <form id="search-form" role="search">
-      <input id="search" type="search" placeholder="Search papers…" autocomplete="off" />
-    </form>
+    <div id="toolbar">
+      <form id="search-form" role="search">
+        <input id="search" type="search" placeholder="Search papers…" autocomplete="off" />
+      </form>
+      <select id="theme" aria-label="Theme" title="Theme">
+        <option value="system">System</option>
+        <option value="light">Light</option>
+        <option value="dark">Dark</option>
+      </select>
+    </div>
     <div id="status" role="status" aria-live="polite">Loading…</div>
     <div id="tooltip" hidden aria-live="polite"></div>
     <aside id="detail" hidden>
