@@ -49,13 +49,30 @@ function interactionElements(): InteractionElements | null {
 }
 
 async function mount(canvas: HTMLCanvasElement): Promise<void> {
+  // Status overlay: feedback while the ~1 MB+ WASM + data fetch is in flight,
+  // and a visible message on empty/error instead of a silent blank canvas.
+  const statusEl = document.querySelector<HTMLElement>("#status");
+  const setStatus = (text: string | null): void => {
+    if (!statusEl) return;
+    if (text === null) {
+      statusEl.hidden = true;
+    } else {
+      statusEl.textContent = text;
+      statusEl.hidden = false;
+    }
+  };
   const handle = await createScene(canvas);
   try {
+    setStatus("Loading…");
     const [positionsResponse, dbResponse] = await Promise.all([
       fetch(`${DATA_DIR}/positions.bin`),
       fetch(`${DATA_DIR}/papers.db`),
     ]);
     const positions = parsePositions(await positionsResponse.arrayBuffer());
+    if (positions.length === 0) {
+      setStatus("No papers to display.");
+      return;
+    }
     const db = await openPapersDb(new Uint8Array(await dbResponse.arrayBuffer()), SQL_WASM_URL);
 
     // Colour state — `let` so a theme switch can re-resolve the EyeRest tokens.
@@ -63,6 +80,7 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
     const working = baseline.slice();
     const points = buildPointsCloud(positions, working);
     handle.add(points);
+    setStatus(null);
     // Frame the camera on the actual cloud bounds — UMAP coordinates are not
     // centered on the origin, so a fixed camera would look at empty space.
     points.geometry.computeBoundingSphere();
@@ -141,7 +159,8 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
       }
     });
   } catch (error) {
-    console.warn("paperverse: paper cloud not loaded (data is served in STORY-012)", error);
+    setStatus("Couldn't load the paper cloud. Please reload the page.");
+    console.warn("paperverse: failed to load the paper cloud", error);
   }
 }
 
