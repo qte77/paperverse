@@ -3,8 +3,28 @@
    pointer — never a raw hex, never a blue accent. The zero-blue `--data-*` arc
    encodes paper source; `[data-theme]` (set in main.ts) flips light/dark. */
 
+/* Self-hosted Inter (brand sans), vendored from qte77/qte77/brand/fonts. Vite
+   hashes these into the build; `font-display: swap` paints system-ui first so
+   text is never blocked. The `--font-sans` stack falls back to the user's system
+   fonts when Inter is unavailable or a glyph is outside the subset. */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("./assets/fonts/Inter-Regular.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("./assets/fonts/Inter-Bold.ttf") format("truetype");
+}
+
 :root,
 [data-theme="light"] {
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
   --bg: #ece8d8;
   --surface: #e2dec8;
   --text: #2c2818;
