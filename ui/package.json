@@ -15,7 +15,7 @@
     "@types/three": "^0.184.1",
     "typescript": "^6.0.3",
     "vite": "^8.0.16",
-    "vitest": "^4.1.8"
+    "vitest": "^4.1.9"
   },
   "dependencies": {
     "sql.js-fts5": "^1.4.0",
