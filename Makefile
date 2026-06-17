@@ -6,7 +6,7 @@
 	setup setup_uv setup_dev setup_lychee setup_md setup_js \
 	lint autofix check_types lint_md lint_links audit \
 	test test_cov retest validate \
-	typecheck_js test_js build_ui serve_ui \
+	typecheck_js test_js build_ui preview \
 	clean help
 .DEFAULT_GOAL := help
 
@@ -101,7 +101,7 @@ validate:  ## CI gate: lint + check_types + lint_md + audit + test_cov
 
 
 # Local serve port (overridable) and the Vite base path. Pages builds at
-# /paperverse/; serve_ui overrides to / so http.server resolves assets at root.
+# /paperverse/; preview overrides to / so http.server resolves assets at root.
 PORT ?= 8143
 UI_BASE ?= /paperverse/
 
@@ -119,9 +119,9 @@ build_ui: setup_js  ## Generate data + build ui/ to ui/dist (UI_BASE, default /p
 	cp ui/node_modules/sql.js-fts5/dist/sql-wasm.wasm ui/public/sql-wasm.wasm
 	npm --prefix ui run build -- --base=$(UI_BASE)
 
-serve_ui: UI_BASE := /
-serve_ui: build_ui  ## Node-free local serve: build ui/ + serve ui/dist on http://localhost:$(PORT)
-	echo "Serving ui/dist on http://localhost:$(PORT)/ (Ctrl-C to stop)"
+preview: UI_BASE := /
+preview: build_ui  ## Node-free preview: build ui/ + serve ui/dist on http://localhost:$(PORT) (PORT default 8143)
+	echo "Previewing ui/dist on http://localhost:$(PORT)/ (Ctrl-C to stop)"
 	uv run python -m http.server $(PORT) --directory ui/dist
 
 
