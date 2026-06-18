@@ -124,25 +124,79 @@ export function resolveSourceRgb(el: Element): Record<Source, [number, number, n
   return Object.fromEntries(entries) as Record<Source, [number, number, number]>;
 }
 
+// Round soft-edged sprite shader. Discards fragments outside the unit circle
+// and applies a smooth alpha falloff so points render as anti-aliased discs.
+// Perspective size attenuation is handled manually (divide by -mv.z) because
+// ShaderMaterial does not inherit PointsMaterial's sizeAttenuation.
+// Linear fog (THREE.Fog) is wired via the fogNear/fogFar/fogColor uniforms so
+// distant points fade toward the page background, matching the scene fog.
+const _VERT = /* glsl */ `
+  uniform float pointSize;
+  attribute vec3 color;
+  varying vec3 vColor;
+  varying float vFogDepth;
+  void main() {
+    vColor = color;
+    vec4 mv = modelViewMatrix * vec4(position, 1.0);
+    gl_PointSize = pointSize * (300.0 / -mv.z);
+    gl_Position = projectionMatrix * mv;
+    vFogDepth = -mv.z;
+  }
+`;
+const _FRAG = /* glsl */ `
+  uniform vec3 fogColor;
+  uniform float fogNear;
+  uniform float fogFar;
+  varying vec3 vColor;
+  varying float vFogDepth;
+  void main() {
+    vec2 uv = gl_PointCoord * 2.0 - 1.0;
+    float d = dot(uv, uv);
+    if (d > 1.0) discard;
+    float alpha = 1.0 - smoothstep(0.36, 1.0, d);
+    float fogFactor = smoothstep(fogNear, fogFar, vFogDepth);
+    vec3 col = mix(vColor, fogColor, fogFactor);
+    gl_FragColor = vec4(col, alpha * (1.0 - fogFactor));
+  }
+`;
+
 /** Build the Points cloud (hot render path) from positions + colour buffers. */
 export function buildPointsCloud(positions: Float32Array, colors: Float32Array): THREE.Points {
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
   geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
-  // Perspective size: nearer points render larger, farther ones smaller — a depth
-  // cue. The world-space `size` is data-dependent, so main.ts scales it to the
-  // loaded cloud via setPointSize once the bounding sphere is known.
-  const material = new THREE.PointsMaterial({
-    vertexColors: true,
-    size: 0.1,
-    sizeAttenuation: true,
+  const material = new THREE.ShaderMaterial({
+    vertexShader: _VERT,
+    fragmentShader: _FRAG,
+    uniforms: {
+      pointSize: { value: 0.1 },
+      fogColor: { value: new THREE.Color(0x000000) },
+      fogNear: { value: 0.1 },
+      fogFar: { value: 1000 },
+    },
+    transparent: true,
+    depthWrite: false,
   });
   return new THREE.Points(geometry, material);
 }
 
-/** Set the rendered point size (world units; pairs with sizeAttenuation). */
+/** Set the rendered point size (world units). */
 export function setPointSize(points: THREE.Points, size: number): void {
-  (points.material as THREE.PointsMaterial).size = size;
+  const mat = points.material as THREE.ShaderMaterial;
+  mat.uniforms["pointSize"].value = size;
+}
+
+/** Sync the cloud shader's fog uniforms so distant points fade toward the page bg. */
+export function setCloudFog(
+  points: THREE.Points,
+  rgb: readonly [number, number, number],
+  near: number,
+  far: number,
+): void {
+  const u = (points.material as THREE.ShaderMaterial).uniforms;
+  u["fogColor"].value.setRGB(rgb[0], rgb[1], rgb[2]);
+  u["fogNear"].value = near;
+  u["fogFar"].value = far;
 }
 
 /** A reusable line object linking a selected point to its neighbours. Holds a
