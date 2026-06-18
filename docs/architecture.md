@@ -55,13 +55,17 @@ src/paperverse/
   db.py                  build_db / build_positions / export
   __main__.py            AppSettings(BaseSettings) CLI via CliApp.run
 ui/src/
-  scene.ts        createScene -> SceneHandle (WebGPU + WebGL2, OrbitControls, frameSphere, flyTo)
-  papers.ts       parsePositions / buildColorBuffer / buildPointsCloud + highlight helpers
+  scene.ts        createScene -> SceneHandle (WebGPU + WebGL2, OrbitControls, frameSphere,
+                  flyTo, setFogColor) + idle auto-rotate + distance fog
+  papers.ts       parsePositions / buildColorBuffer / buildPointsCloud (perspective size) +
+                  highlight helpers / nearestNeighbors / neighbour-line helpers
   colors.ts       Source -> EyeRest data-arc token; hexToRgb01
   db.ts           openPapersDb (sql.js-fts5) -> sourcesByIdx / paperByIdx / search
-  interaction.ts  raycast hover/click -> tooltip + detail panel
+  interaction.ts  raycast hover/click -> tooltip (title + source·date) + detail panel +
+                  onSelect (neighbour links)
   search.ts       debounced FTS5 prefix search -> highlight + camera fly-to
-  main.ts         mount: fetch -> build cloud -> frame -> wire interaction + search
+  main.ts         mount: fetch -> build cloud -> frame -> wire interaction + search;
+                  status overlay, source legend, reset-view button
   theme.ts/.css   system theme + vendored EyeRest tokens (light/dark)
 ```
 
@@ -71,7 +75,7 @@ ui/src/
 | --- | --- | --- |
 | `Paper` | `models.py` | frozen pydantic paper; computed `uid` |
 | `PapersDb` | `ui/src/db.ts` | in-browser handle: `sourcesByIdx` / `paperByIdx` / `search` |
-| `SceneHandle` | `ui/src/scene.ts` | camera/controls + `add` / `frameSphere` / `flyTo` / `dispose` |
+| `SceneHandle` | `ui/src/scene.ts` | camera/controls + `add` / `frameSphere` / `flyTo` / `setFogColor` / `dispose` |
 
 ## External boundaries
 

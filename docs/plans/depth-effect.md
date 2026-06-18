@@ -1,6 +1,10 @@
 # Plan: Slight 3D depth effect
 
-> Tracking: [#44](https://github.com/qte77/paperverse/issues/44) · Status: deferred
+> Tracking: [#44](https://github.com/qte77/paperverse/issues/44) · Status: partial
+>
+> Shipped: gentle idle auto-rotation, distance fog toward `--bg`, perspective size
+> attenuation, neighbour-link lines. Open: round soft sprites, an explicit z-axis
+> (date) label.
 
 ## Context
 

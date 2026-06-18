@@ -1,6 +1,6 @@
 # Plan: Custom favicon
 
-> Tracking: [#41](https://github.com/qte77/paperverse/issues/41) · Status: deferred
+> Tracking: [#41](https://github.com/qte77/paperverse/issues/41) · Status: shipped
 
 ## Context
 

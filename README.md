@@ -71,9 +71,9 @@ what's next.
 
 v0.1 is shipped and **live at <https://qte77.github.io/paperverse/>** — the full
 pipeline (ingest → layout → export → CLI) and the interactive UI (3D point cloud,
-hover/click, full-text search) deployed to GitHub Pages. What shipped and
-what's next: [roadmap.md](docs/roadmap.md); how it's built:
-[architecture.md](docs/architecture.md).
+hover/click, full-text search, theme picker, depth cues, neighbour links, source
+legend) deployed to GitHub Pages. What shipped and what's next:
+[roadmap.md](docs/roadmap.md); how it's built: [architecture.md](docs/architecture.md).
 
 ## License
 
