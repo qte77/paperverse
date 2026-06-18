@@ -26,6 +26,8 @@ export interface SceneHandle {
   flyTo(target: readonly [number, number, number]): void;
   /** Position the camera + orbit target so a bounding sphere fills the view. */
   frameSphere(center: readonly [number, number, number], radius: number): void;
+  /** Set the fog colour (RGB 0–1) so distant points fade toward the page bg. */
+  setFogColor(rgb: readonly [number, number, number]): void;
   dispose(): void;
 }
 
@@ -39,11 +41,19 @@ export async function createScene(canvas: HTMLCanvasElement): Promise<SceneHandl
   });
 
   const scene = new THREE.Scene();
+  // Linear fog fades distant points toward the page background for a slight
+  // volumetric read. Colour is themed via setFogColor; near/far are fitted to the
+  // cloud in frameSphere. Initial wide range = effectively no fog until framed.
+  scene.fog = new THREE.Fog(0x000000, 0.1, 1000);
   const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 1000);
   camera.position.set(0, 0, 5);
 
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
+  // Gentle idle drift so the cloud reads as 3D; OrbitControls pauses it while the
+  // user is actively dragging.
+  controls.autoRotate = true;
+  controls.autoRotateSpeed = 0.4;
 
   const applySize = (): void => {
     const { width, height, pixelRatio, aspect } = computeRenderSize(
@@ -91,7 +101,15 @@ export async function createScene(canvas: HTMLCanvasElement): Promise<SceneHandl
       camera.near = Math.max(0.01, dist - safeRadius * 2);
       camera.far = dist + safeRadius * 4;
       camera.updateProjectionMatrix();
+      // Fit fog across the cloud's depth: front stays crisp, back fades to bg.
+      if (scene.fog instanceof THREE.Fog) {
+        scene.fog.near = dist - safeRadius;
+        scene.fog.far = dist + safeRadius * 2.5;
+      }
       controls.update();
+    },
+    setFogColor(rgb: readonly [number, number, number]): void {
+      scene.fog?.color.setRGB(rgb[0], rgb[1], rgb[2]);
     },
     dispose(): void {
       window.removeEventListener("resize", applySize);

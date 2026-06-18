@@ -95,6 +95,7 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
       hexToRgb01(getComputedStyle(document.documentElement).getPropertyValue(name).trim());
     let hoverRgb = readColour("--data-positive");
     let dimmed = dimColors(baseline, 0.22, readColour("--bg"));
+    handle.setFogColor(readColour("--bg"));
     let hoverHits: number[] = [];
     let searchHits: number[] = [];
     const repaint = (): void => {
@@ -110,6 +111,7 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
       baseline = buildColorBuffer(db.sourcesByIdx(), resolveSourceRgb(document.documentElement));
       hoverRgb = readColour("--data-positive");
       dimmed = dimColors(baseline, 0.22, readColour("--bg"));
+      handle.setFogColor(readColour("--bg"));
       repaint();
     };
 
