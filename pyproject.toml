@@ -20,6 +20,7 @@ paperverse = "paperverse.__main__:main"
 
 [dependency-groups]
 dev = [
+    "scriv[toml]>=1.8",
     "pytest>=8.0",
     "pytest-cov>=5.0",
     "hypothesis>=6.0",
@@ -70,3 +71,11 @@ reportUnknownMemberType = false
 [tool.inline-snapshot]
 # Format created/updated snapshots with ruff (avoids the optional black dep).
 format-command = "ruff format --stdin-filename {filename} -"
+
+[tool.scriv]
+format = "md"
+fragment_directory = "changelog.d"
+categories = ["Added", "Changed", "Deprecated", "Removed", "Fixed", "Security"]
+md_header_level = "2"
+entry_title_template = "[{{ version }}] - {{ date.strftime('%Y-%m-%d') }}"
+md_html_anchors = false
