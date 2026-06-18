@@ -1,6 +1,6 @@
 # Plan: Theme picker (System / Light / Dark)
 
-> Tracking: [#46](https://github.com/qte77/paperverse/issues/46) · Status: next
+> Tracking: [#46](https://github.com/qte77/paperverse/issues/46) · Status: shipped
 
 ## Context
 

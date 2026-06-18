@@ -1,6 +1,9 @@
 # Plan: Visual appearance polish
 
-> Tracking: [#42](https://github.com/qte77/paperverse/issues/42) · Status: deferred
+> Tracking: [#42](https://github.com/qte77/paperverse/issues/42) · Status: partial
+>
+> Shipped: loading/empty/error overlay, richer hover tooltip, source + axis legend,
+> neighbour-link lines. Open: adaptive/per-point sizing, colour-contrast audit.
 
 ## Context
 
