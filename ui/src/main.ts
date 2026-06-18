@@ -12,6 +12,7 @@ import {
   POINT_SIZE,
   resolveSourceRgb,
   restorePoints,
+  setCloudFog,
   setLineColor,
   setPointSize,
   updateNeighborLines,
@@ -96,12 +97,20 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
     points.geometry.computeBoundingSphere();
     const sphere = points.geometry.boundingSphere;
     let pickThreshold = POINT_SIZE;
+    // fogNear/fogFar are computed to match scene.ts frameSphere fog formula so
+    // the shader's manual fog uniform stays in sync with the scene fog.
+    let fogNear = 0.1;
+    let fogFar = 1000;
     if (sphere) {
       const center: [number, number, number] = [sphere.center.x, sphere.center.y, sphere.center.z];
       const radius = sphere.radius;
       handle.frameSphere(center, radius);
       pickThreshold = Math.max(POINT_SIZE, radius * 0.03);
       setPointSize(points, radius * 0.04);
+      const safeRadius = Math.max(radius, 0.01);
+      const dist = (safeRadius * 1.4) / Math.sin((60 * Math.PI) / 360);
+      fogNear = dist - safeRadius;
+      fogFar = dist + safeRadius * 2.5;
       document
         .querySelector("#reset")
         ?.addEventListener("click", () => handle.frameSphere(center, radius));
@@ -115,7 +124,9 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
     const applyThemeColors = (): void => {
       hoverRgb = readColour("--data-positive");
       dimmed = dimColors(baseline, 0.22, readColour("--bg"));
-      handle.setFogColor(readColour("--bg"));
+      const bgRgb = readColour("--bg");
+      handle.setFogColor(bgRgb);
+      setCloudFog(points, bgRgb, fogNear, fogFar);
       setLineColor(neighborLines, readColour("--text"));
     };
     applyThemeColors();
