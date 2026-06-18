@@ -7,6 +7,7 @@
 - Reset-view button and perspective point sizing (near points larger, far points smaller).
 - Neighbour-link lines: clicking a paper draws faint lines to its nearest neighbours in the UMAP layout. (#42, #44)
 - Source + axis legend (colour key, and what the x·y / z axes encode).
+- Round soft-edged point sprites instead of flat squares. (#61)
 - `scriv` changelog tooling. (#58)
 
 ### Changed
@@ -14,3 +15,4 @@
 - Theme picker moved beside the search input.
 - Richer hover tooltip: title plus a `source · date` meta line.
 - Renamed `make serve_ui` to `make preview`.
+- Hover picking coalesced to one raycast per frame via `requestAnimationFrame`. (#60)
