@@ -92,6 +92,28 @@ export function restorePoints(
   }
 }
 
+/** Indices of the `k` points nearest to `index` (Euclidean, 3D), closest first,
+ * excluding `index` itself. Proximity in the UMAP layout ≈ similarity, so these
+ * are a paper's most-related neighbours. Ties break by ascending index; `k` is
+ * clamped to the number of other points. */
+export function nearestNeighbors(positions: Float32Array, index: number, k: number): number[] {
+  if (k <= 0) return [];
+  const count = positions.length / 3;
+  const ox = positions[index * 3];
+  const oy = positions[index * 3 + 1];
+  const oz = positions[index * 3 + 2];
+  const ranked: { idx: number; d2: number }[] = [];
+  for (let i = 0; i < count; i++) {
+    if (i === index) continue;
+    const dx = positions[i * 3] - ox;
+    const dy = positions[i * 3 + 1] - oy;
+    const dz = positions[i * 3 + 2] - oz;
+    ranked.push({ idx: i, d2: dx * dx + dy * dy + dz * dz });
+  }
+  ranked.sort((a, b) => a.d2 - b.d2 || a.idx - b.idx);
+  return ranked.slice(0, k).map((e) => e.idx);
+}
+
 /** Resolve each source's EyeRest data-arc CSS variable to an RGB triple. */
 export function resolveSourceRgb(el: Element): Record<Source, [number, number, number]> {
   const styles = getComputedStyle(el);
@@ -107,12 +129,69 @@ export function buildPointsCloud(positions: Float32Array, colors: Float32Array):
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
   geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
-  // Constant screen-pixel size so points stay clearly visible at any cloud scale
-  // or camera distance (the UMAP coordinate range is data-dependent).
+  // Perspective size: nearer points render larger, farther ones smaller — a depth
+  // cue. The world-space `size` is data-dependent, so main.ts scales it to the
+  // loaded cloud via setPointSize once the bounding sphere is known.
   const material = new THREE.PointsMaterial({
     vertexColors: true,
-    size: 6,
-    sizeAttenuation: false,
+    size: 0.1,
+    sizeAttenuation: true,
   });
   return new THREE.Points(geometry, material);
+}
+
+/** Set the rendered point size (world units; pairs with sizeAttenuation). */
+export function setPointSize(points: THREE.Points, size: number): void {
+  (points.material as THREE.PointsMaterial).size = size;
+}
+
+/** A reusable line object linking a selected point to its neighbours. Holds a
+ * pre-allocated buffer for up to `maxNeighbors` segments; hidden until updated. */
+export function createNeighborLines(maxNeighbors: number): THREE.LineSegments {
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute(
+    "position",
+    new THREE.BufferAttribute(new Float32Array(maxNeighbors * 2 * 3), 3),
+  );
+  geometry.setDrawRange(0, 0);
+  const material = new THREE.LineBasicMaterial({ transparent: true, opacity: 0.35 });
+  const lines = new THREE.LineSegments(geometry, material);
+  lines.frustumCulled = false;
+  lines.visible = false;
+  return lines;
+}
+
+/** Point `lines` at the segments from `fromIdx` to each neighbour, then show
+ * them (or hide when there are none). */
+export function updateNeighborLines(
+  lines: THREE.LineSegments,
+  positions: Float32Array,
+  fromIdx: number,
+  neighborIdxs: number[],
+): void {
+  const attr = lines.geometry.getAttribute("position") as THREE.BufferAttribute;
+  const buf = attr.array as Float32Array;
+  const ox = positions[fromIdx * 3];
+  const oy = positions[fromIdx * 3 + 1];
+  const oz = positions[fromIdx * 3 + 2];
+  let v = 0;
+  for (const n of neighborIdxs) {
+    buf[v++] = ox;
+    buf[v++] = oy;
+    buf[v++] = oz;
+    buf[v++] = positions[n * 3];
+    buf[v++] = positions[n * 3 + 1];
+    buf[v++] = positions[n * 3 + 2];
+  }
+  lines.geometry.setDrawRange(0, neighborIdxs.length * 2);
+  attr.needsUpdate = true;
+  lines.visible = neighborIdxs.length > 0;
+}
+
+/** Set the neighbour-line colour (RGB 0–1) so it can track the theme. */
+export function setLineColor(
+  lines: THREE.LineSegments,
+  rgb: readonly [number, number, number],
+): void {
+  (lines.material as THREE.LineBasicMaterial).color.setRGB(rgb[0], rgb[1], rgb[2]);
 }

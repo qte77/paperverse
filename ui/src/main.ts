@@ -4,12 +4,17 @@ import { attachInteraction, type InteractionElements } from "./interaction";
 import {
   buildColorBuffer,
   buildPointsCloud,
+  createNeighborLines,
   dimColors,
+  nearestNeighbors,
   paintPoints,
   parsePositions,
   POINT_SIZE,
   resolveSourceRgb,
   restorePoints,
+  setLineColor,
+  setPointSize,
+  updateNeighborLines,
 } from "./papers";
 import { createScene } from "./scene";
 import { attachSearch } from "./search";
@@ -20,6 +25,9 @@ import { type Preference, themeForPreference } from "./theme";
 const BASE = import.meta.env.BASE_URL;
 const DATA_DIR = `${BASE}data`;
 const SQL_WASM_URL = `${BASE}sql-wasm.wasm`;
+
+/** How many nearest papers to link when one is selected. */
+const NEIGHBOR_COUNT = 5;
 
 const THEME_KEY = "paperverse-theme";
 const themeQuery = window.matchMedia("(prefers-color-scheme: dark)");
@@ -80,6 +88,8 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
     const working = baseline.slice();
     const points = buildPointsCloud(positions, working);
     handle.add(points);
+    const neighborLines = createNeighborLines(NEIGHBOR_COUNT);
+    handle.add(neighborLines);
     setStatus(null);
     // Frame the camera on the actual cloud bounds — UMAP coordinates are not
     // centered on the origin, so a fixed camera would look at empty space.
@@ -87,15 +97,28 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
     const sphere = points.geometry.boundingSphere;
     let pickThreshold = POINT_SIZE;
     if (sphere) {
-      handle.frameSphere([sphere.center.x, sphere.center.y, sphere.center.z], sphere.radius);
-      pickThreshold = Math.max(POINT_SIZE, sphere.radius * 0.03);
+      const center: [number, number, number] = [sphere.center.x, sphere.center.y, sphere.center.z];
+      const radius = sphere.radius;
+      handle.frameSphere(center, radius);
+      pickThreshold = Math.max(POINT_SIZE, radius * 0.03);
+      setPointSize(points, radius * 0.04);
+      document
+        .querySelector("#reset")
+        ?.addEventListener("click", () => handle.frameSphere(center, radius));
     }
 
     const readColour = (name: string): [number, number, number] =>
       hexToRgb01(getComputedStyle(document.documentElement).getPropertyValue(name).trim());
-    let hoverRgb = readColour("--data-positive");
-    let dimmed = dimColors(baseline, 0.22, readColour("--bg"));
-    handle.setFogColor(readColour("--bg"));
+    // Theme-derived colours: re-applied wholesale on a light/dark or system switch.
+    let hoverRgb: [number, number, number];
+    let dimmed: Float32Array;
+    const applyThemeColors = (): void => {
+      hoverRgb = readColour("--data-positive");
+      dimmed = dimColors(baseline, 0.22, readColour("--bg"));
+      handle.setFogColor(readColour("--bg"));
+      setLineColor(neighborLines, readColour("--text"));
+    };
+    applyThemeColors();
     let hoverHits: number[] = [];
     let searchHits: number[] = [];
     const repaint = (): void => {
@@ -109,12 +132,19 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
     // Re-resolve point colours after a theme switch, then repaint.
     const recolour = (): void => {
       baseline = buildColorBuffer(db.sourcesByIdx(), resolveSourceRgb(document.documentElement));
-      hoverRgb = readColour("--data-positive");
-      dimmed = dimColors(baseline, 0.22, readColour("--bg"));
-      handle.setFogColor(readColour("--bg"));
+      applyThemeColors();
       repaint();
     };
 
+    // Selecting a paper links it to its nearest neighbours (proximity ≈ similarity).
+    const showNeighbors = (idx: number | null): void => {
+      if (idx === null) {
+        neighborLines.visible = false;
+        return;
+      }
+      const neighbors = nearestNeighbors(positions, idx, NEIGHBOR_COUNT);
+      updateNeighborLines(neighborLines, positions, idx, neighbors);
+    };
     const els = interactionElements();
     if (els) {
       attachInteraction(
@@ -126,6 +156,7 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
           hoverHits = indices;
           repaint();
         },
+        showNeighbors,
         pickThreshold,
       );
     }
