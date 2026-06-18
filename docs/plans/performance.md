@@ -1,6 +1,9 @@
 # Plan: Visualization performance
 
-> Tracking: [#43](https://github.com/qte77/paperverse/issues/43) · Status: deferred
+> Tracking: [#43](https://github.com/qte77/paperverse/issues/43) · Status: partial
+>
+> Shipped: rAF-coalesced pointermove picking. Open: bundle code-split / lazy WASM,
+> culling / LOD, spatial-index or GPU picking, sql.js Web Worker.
 
 ## Context
 

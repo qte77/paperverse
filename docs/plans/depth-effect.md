@@ -3,8 +3,8 @@
 > Tracking: [#44](https://github.com/qte77/paperverse/issues/44) · Status: partial
 >
 > Shipped: gentle idle auto-rotation, distance fog toward `--bg`, perspective size
-> attenuation, neighbour-link lines. Open: round soft sprites, an explicit z-axis
-> (date) label.
+> attenuation, neighbour-link lines, round soft-edged sprites. Open: an explicit
+> z-axis (date) label.
 
 ## Context
 
