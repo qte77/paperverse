@@ -21,11 +21,13 @@ Self-hosted Inter font + custom favicon
 ([#41](https://github.com/qte77/paperverse/issues/41) · [plan](plans/favicon.md));
 node-free `make preview` (uv + `python -m http.server`); loading / empty / error
 status overlay; theme picker beside the search input; subtle 3D depth (idle
-auto-rotate + distance fog); perspective point sizing; richer hover tooltip;
-neighbour-link lines on select; source + axis legend; `scriv` changelog tooling
+auto-rotate + distance fog); perspective point sizing; round soft-edged sprites;
+richer hover tooltip; neighbour-link lines on select; source + axis legend;
+rAF-coalesced hover picking; `scriv` changelog tooling
 ([#58](https://github.com/qte77/paperverse/issues/58)). Partial delivery on
-[#42](https://github.com/qte77/paperverse/issues/42) and
-[#44](https://github.com/qte77/paperverse/issues/44).
+[#42](https://github.com/qte77/paperverse/issues/42),
+[#44](https://github.com/qte77/paperverse/issues/44), and
+[#43](https://github.com/qte77/paperverse/issues/43).
 
 ## Next
 
@@ -36,9 +38,10 @@ Nothing queued — the deferred items under **Later** are the candidates.
 - Visual appearance polish — *partial*; open: adaptive point sizing, colour-contrast
   audit — [#42](https://github.com/qte77/paperverse/issues/42) ·
   [plan](plans/visual-polish.md)
-- Slight 3D depth effect — *partial*; open: round sprites, z-axis (date) label —
+- Slight 3D depth effect — *partial*; open: z-axis (date) label —
   [#44](https://github.com/qte77/paperverse/issues/44) · [plan](plans/depth-effect.md)
-- Visualization performance — [#43](https://github.com/qte77/paperverse/issues/43) ·
+- Visualization performance — *partial*; open: code-split / lazy WASM, culling/LOD,
+  worker — [#43](https://github.com/qte77/paperverse/issues/43) ·
   [plan](plans/performance.md)
 
 ## Data
