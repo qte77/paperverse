@@ -5,6 +5,7 @@ import {
   applyHighlight,
   buildColorBuffer,
   dimColors,
+  nearestNeighbors,
   paintPoints,
   parsePositions,
   restorePoints,
@@ -108,5 +109,30 @@ describe("restorePoints", () => {
     const working = new Float32Array([0, 0, 0, 0, 0, 0, 0, 0, 0]);
     restorePoints(working, baseline, [1]);
     expect(working).toEqual(new Float32Array([0, 0, 0, 2, 2, 2, 0, 0, 0]));
+  });
+});
+
+describe("nearestNeighbors", () => {
+  // four points on the x-axis at x = 0, 1, 2, 5
+  const line = new Float32Array([0, 0, 0, 1, 0, 0, 2, 0, 0, 5, 0, 0]);
+
+  it("returns the k nearest point indices, closest first, excluding self", () => {
+    expect(nearestNeighbors(line, 0, 2)).toEqual([1, 2]);
+    expect(nearestNeighbors(line, 3, 2)).toEqual([2, 1]);
+  });
+
+  it("clamps k to the number of other points", () => {
+    expect(nearestNeighbors(line, 0, 10)).toEqual([1, 2, 3]);
+  });
+
+  it("returns an empty list for k <= 0", () => {
+    expect(nearestNeighbors(line, 0, 0)).toEqual([]);
+  });
+
+  it("breaks ties by ascending index (deterministic)", () => {
+    // points 1 and 2 are equidistant (distance 1) from point 0
+    const tie = new Float32Array([0, 0, 0, 1, 0, 0, -1, 0, 0]);
+    expect(nearestNeighbors(tie, 0, 1)).toEqual([1]);
+    expect(nearestNeighbors(tie, 0, 2)).toEqual([1, 2]);
   });
 });

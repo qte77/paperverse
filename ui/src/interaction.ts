@@ -29,18 +29,27 @@ export interface InteractionElements {
   panelAbstract: HTMLElement;
 }
 
-/** Wire hover (tooltip + highlight) and click (detail panel) on the point cloud. */
+/** Wire hover (tooltip + highlight) and click (detail panel + neighbour select). */
 export function attachInteraction(
   handle: SceneHandle,
   points: THREE.Points,
   db: PapersDb,
   els: InteractionElements,
   highlight: (indices: number[]) => void,
+  onSelect: (idx: number | null) => void,
   threshold: number = POINT_SIZE,
 ): void {
   const raycaster = new THREE.Raycaster();
   raycaster.params.Points = { threshold };
   const ndc = new THREE.Vector2();
+
+  // Tooltip content: a title line + a muted meta line, built once and reused.
+  // textContent only (never innerHTML) so DB strings can't inject markup.
+  const tipTitle = document.createElement("div");
+  const tipMeta = document.createElement("div");
+  tipMeta.style.opacity = "0.7";
+  tipMeta.style.fontSize = "0.85em";
+  els.tooltip.replaceChildren(tipTitle, tipMeta);
 
   const pick = (event: MouseEvent): number | null => {
     const { x, y } = mouseToNdc(
@@ -62,7 +71,8 @@ export function attachInteraction(
       highlight([]);
       return;
     }
-    els.tooltip.textContent = paper.title;
+    tipTitle.textContent = paper.title;
+    tipMeta.textContent = `${paper.source} · ${paper.published}`;
     els.tooltip.style.left = `${event.clientX + 12}px`;
     els.tooltip.style.top = `${event.clientY + 12}px`;
     els.tooltip.hidden = false;
@@ -73,6 +83,7 @@ export function attachInteraction(
     const idx = pick(event);
     const paper = idx === null ? null : db.paperByIdx(idx);
     if (paper === null) {
+      onSelect(null);
       return;
     }
     els.panelTitle.textContent = paper.title;
@@ -80,5 +91,6 @@ export function attachInteraction(
       `${paper.authors} · ${paper.categories.join(", ")} · ${paper.source} · ${paper.published}`;
     els.panelAbstract.textContent = paper.abstract;
     els.panel.hidden = false;
+    onSelect(idx);
   });
 }

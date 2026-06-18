@@ -86,13 +86,15 @@
         border: 1px solid var(--text);
         border-radius: 6px;
       }
-      #theme {
+      #theme,
+      #reset {
         padding: 0.4rem 0.5rem;
         font: 0.9rem var(--font-sans);
         color: var(--text);
         background: var(--surface);
         border: 1px solid var(--text);
         border-radius: 6px;
+        cursor: pointer;
       }
       #status {
         position: fixed;
@@ -104,6 +106,42 @@
         color: var(--text);
         background: var(--surface);
         border-radius: 6px;
+      }
+      /* Read-only key: source colours (= the clusters) + what the axes encode.
+         Swatch colours reference the same --data-* tokens the points use. */
+      #legend {
+        position: fixed;
+        bottom: 1rem;
+        left: 1rem;
+        padding: 0.4rem 0.6rem;
+        font: 0.8rem/1.5 var(--font-sans);
+        color: var(--text);
+        background: var(--surface);
+        border-radius: 6px;
+        pointer-events: none;
+      }
+      #legend .swatch {
+        display: inline-block;
+        width: 0.65em;
+        height: 0.65em;
+        margin-right: 0.2em;
+        border-radius: 50%;
+        vertical-align: middle;
+      }
+      #legend .arxiv {
+        background: var(--data-caution);
+      }
+      #legend .biorxiv {
+        background: var(--data-alt);
+      }
+      #legend .medrxiv {
+        background: var(--data-negative);
+      }
+      #legend .axis {
+        display: block;
+        margin-top: 0.25rem;
+        font-size: 0.75rem;
+        opacity: 0.7;
       }
     </style>
   </head>
@@ -118,6 +156,7 @@
         <option value="light">Light</option>
         <option value="dark">Dark</option>
       </select>
+      <button id="reset" type="button" title="Reset view" aria-label="Reset view">Reset</button>
     </div>
     <div id="status" role="status" aria-live="polite">Loading…</div>
     <div id="tooltip" hidden aria-live="polite"></div>
@@ -127,6 +166,12 @@
       <p id="detail-meta"></p>
       <p id="detail-abstract"></p>
     </aside>
+    <div id="legend" aria-label="Legend">
+      <span class="swatch arxiv"></span>arXiv
+      <span class="swatch biorxiv"></span>bioRxiv
+      <span class="swatch medrxiv"></span>medRxiv
+      <span class="axis">position = category similarity · depth = date (old → new)</span>
+    </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
