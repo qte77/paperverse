@@ -63,20 +63,29 @@ export function attachInteraction(
     return raycaster.intersectObject(points)[0]?.index ?? null;
   };
 
+  let rafPending = false;
+  let lastPointerEvent: MouseEvent | null = null;
   handle.domElement.addEventListener("pointermove", (event) => {
-    const idx = pick(event);
-    const paper = idx === null ? null : db.paperByIdx(idx);
-    if (paper === null || idx === null) {
-      els.tooltip.hidden = true;
-      highlight([]);
-      return;
-    }
-    tipTitle.textContent = paper.title;
-    tipMeta.textContent = `${paper.source} · ${paper.published}`;
-    els.tooltip.style.left = `${event.clientX + 12}px`;
-    els.tooltip.style.top = `${event.clientY + 12}px`;
-    els.tooltip.hidden = false;
-    highlight([idx]);
+    lastPointerEvent = event;
+    if (rafPending) return;
+    rafPending = true;
+    requestAnimationFrame(() => {
+      rafPending = false;
+      const e = lastPointerEvent!;
+      const idx = pick(e);
+      const paper = idx === null ? null : db.paperByIdx(idx);
+      if (paper === null || idx === null) {
+        els.tooltip.hidden = true;
+        highlight([]);
+        return;
+      }
+      tipTitle.textContent = paper.title;
+      tipMeta.textContent = `${paper.source} · ${paper.published}`;
+      els.tooltip.style.left = `${e.clientX + 12}px`;
+      els.tooltip.style.top = `${e.clientY + 12}px`;
+      els.tooltip.hidden = false;
+      highlight([idx]);
+    });
   });
 
   handle.domElement.addEventListener("click", (event) => {
