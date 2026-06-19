@@ -34,7 +34,7 @@ contract: [ADR-0002](decisions/0002-in-browser-store-and-data-contract.md).
 data/<source>/**/*.csv   (Date,ISOWeek,DOI,Version,Category,Title,Authors,Abstract)
         │  ingest  (one Paper per uid, date-sorted; source inferred from dir)
         ▼
-   list[Paper]  ─►  layout  (UMAP x/y on category one-hot, seeded; z = normalized date)
+   list[Paper]  ─►  layout  (UMAP x/y on category + TF-IDF(title+abstract), seeded; z = date)
         │                       │  dict[uid -> (x, y, z)]
         ▼                       ▼
    export ─►  papers.db       (papers table + source/published indexes + ext-content FTS5)
