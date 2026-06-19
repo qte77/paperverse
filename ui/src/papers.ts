@@ -127,20 +127,22 @@ export function resolveSourceRgb(el: Element): Record<Source, [number, number, n
 // Round soft-edged sprite shader. Discards fragments outside the unit circle
 // and applies a smooth alpha falloff so points render as anti-aliased discs.
 // Perspective size attenuation is handled manually (divide by -mv.z) because
-// ShaderMaterial does not inherit PointsMaterial's sizeAttenuation; a small
-// pixel floor keeps far points (and large clouds) from shrinking to invisibility.
-// Linear fog (THREE.Fog) is wired via the fogNear/fogFar/fogColor uniforms so
-// distant points fade toward the page background, matching the scene fog. Depth is
-// read mainly via the colour mix; alpha only dips slightly so points stay solid.
+// ShaderMaterial does not inherit PointsMaterial's sizeAttenuation. gl_PointSize
+// is in FRAMEBUFFER pixels, so it is multiplied by `pixelRatio` (else points are
+// ~half size on hi-dpi/retina screens); a CSS-pixel floor keeps far points
+// (and large clouds) visible. Linear fog (fogNear/fogFar/fogColor) only lightly
+// tints colour toward the page background for depth — kept subtle so points never
+// wash out, especially on the light theme's bright background.
 const _VERT = /* glsl */ `
   uniform float pointSize;
+  uniform float pixelRatio;
   attribute vec3 color;
   varying vec3 vColor;
   varying float vFogDepth;
   void main() {
     vColor = color;
     vec4 mv = modelViewMatrix * vec4(position, 1.0);
-    gl_PointSize = max(3.0, pointSize * (300.0 / -mv.z));
+    gl_PointSize = max(4.0, pointSize * (300.0 / -mv.z)) * pixelRatio;
     gl_Position = projectionMatrix * mv;
     vFogDepth = -mv.z;
   }
@@ -155,12 +157,13 @@ const _FRAG = /* glsl */ `
     vec2 uv = gl_PointCoord * 2.0 - 1.0;
     float d = dot(uv, uv);
     if (d > 1.0) discard;
-    // Larger opaque core with only a thin anti-aliased rim (was 0.36 -> mushy).
-    float alpha = 1.0 - smoothstep(0.55, 1.0, d);
+    // Bold disc with only a thin anti-aliased rim.
+    float alpha = 1.0 - smoothstep(0.62, 1.0, d);
+    // Subtle depth tint toward the background (max ~20%); points keep their colour
+    // and full opacity so they stay clearly visible in both themes.
     float fogFactor = smoothstep(fogNear, fogFar, vFogDepth);
-    vec3 col = mix(vColor, fogColor, fogFactor);
-    // Depth cue is the colour mix above; keep alpha high so far points stay legible.
-    gl_FragColor = vec4(col, alpha * (1.0 - 0.4 * fogFactor));
+    vec3 col = mix(vColor, fogColor, fogFactor * 0.2);
+    gl_FragColor = vec4(col, alpha);
   }
 `;
 
@@ -174,6 +177,7 @@ export function buildPointsCloud(positions: Float32Array, colors: Float32Array):
     fragmentShader: _FRAG,
     uniforms: {
       pointSize: { value: 0.1 },
+      pixelRatio: { value: 1 },
       fogColor: { value: new THREE.Color(0x000000) },
       fogNear: { value: 0.1 },
       fogFar: { value: 1000 },
@@ -188,6 +192,13 @@ export function buildPointsCloud(positions: Float32Array, colors: Float32Array):
 export function setPointSize(points: THREE.Points, size: number): void {
   const mat = points.material as THREE.ShaderMaterial;
   mat.uniforms["pointSize"].value = size;
+}
+
+/** Set the device pixel ratio so point size is consistent across hi-dpi screens
+ * (gl_PointSize is in framebuffer pixels). */
+export function setPixelRatio(points: THREE.Points, ratio: number): void {
+  const mat = points.material as THREE.ShaderMaterial;
+  mat.uniforms["pixelRatio"].value = ratio;
 }
 
 /** Sync the cloud shader's fog uniforms so distant points fade toward the page bg. */

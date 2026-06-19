@@ -15,6 +15,7 @@ import {
   restorePoints,
   setCloudFog,
   setLineColor,
+  setPixelRatio,
   setPointSize,
   updateNeighborLines,
 } from "./papers";
@@ -106,6 +107,10 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
     let baseline = buildColorBuffer(meta.sources, resolveSourceRgb(document.documentElement));
     const working = baseline.slice();
     const points = buildPointsCloud(positions, working);
+    // gl_PointSize is in framebuffer pixels; scale by the (clamped) device pixel
+    // ratio so points aren't ~half size on hi-dpi/retina screens. Matches the
+    // renderer's maxPixelRatio = 2 (see computeRenderSize in renderer.ts).
+    setPixelRatio(points, Math.min(Math.max(window.devicePixelRatio || 1, 1), 2));
     handle.add(points);
     const neighborLines = createNeighborLines(NEIGHBOR_COUNT);
     handle.add(neighborLines);
@@ -130,7 +135,7 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
       const radius = sphere.radius;
       handle.frameSphere(center, radius);
       pickThreshold = Math.max(POINT_SIZE, radius * 0.03);
-      setPointSize(points, radius * 0.06);
+      setPointSize(points, radius * 0.08);
       const safeRadius = Math.max(radius, 0.01);
       const dist = (safeRadius * 1.4) / Math.sin((60 * Math.PI) / 360);
       fogNear = dist - safeRadius;
