@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 
@@ -27,6 +27,42 @@ def encode_categories(papers: Sequence[Paper], vocab: list[str]) -> np.ndarray:
         for category in paper.categories:
             matrix[row, index[category]] = 1.0
     return matrix
+
+
+def encode_tfidf(papers: Sequence[Paper], *, max_features: int = 5000) -> np.ndarray:
+    """Encode each paper's title + abstract as a TF-IDF row vector (dense float32).
+
+    Deterministic. The default token pattern needs 2+ char tokens, so degenerate
+    corpora raise an empty-vocabulary error, which is caught and returned as a zero
+    ``(n, 1)`` matrix so the pipeline never crashes.
+    """
+    from sklearn.feature_extraction.text import TfidfVectorizer
+
+    corpus = [f"{paper.title} {paper.abstract}" for paper in papers]
+    min_df = 1 if len(papers) < 50 else 2
+    vectorizer = TfidfVectorizer(max_features=max_features, min_df=min_df, sublinear_tf=True)
+    # sklearn's fit_transform is typed as a broad union; cast at that boundary (the
+    # project already relaxes the untyped-library reports) and densify to float32.
+    try:
+        rows = cast("Any", vectorizer.fit_transform(corpus)).toarray()
+    except ValueError:
+        return np.zeros((len(papers), 1), dtype=np.float32)
+    return np.asarray(rows, dtype=np.float32)
+
+
+def l2_normalize_rows(matrix: np.ndarray) -> np.ndarray:
+    """Scale each row to unit L2 norm; all-zero rows stay zero (no divide-by-zero)."""
+    norms = np.linalg.norm(matrix, axis=1, keepdims=True)
+    return np.divide(matrix, norms, out=np.zeros_like(matrix), where=norms > 0)
+
+
+def encode_features(
+    papers: Sequence[Paper], *, max_features: int = 5000, category_weight: float = 1.0
+) -> np.ndarray:
+    """Hybrid UMAP input: TF-IDF(title+abstract) plus weighted, L2-normalized categories."""
+    tfidf = encode_tfidf(papers, max_features=max_features)
+    cats = l2_normalize_rows(encode_categories(papers, category_vocab(papers))) * category_weight
+    return np.hstack([tfidf, cats]).astype(np.float32)
 
 
 def date_axis(papers: Sequence[Paper]) -> np.ndarray:

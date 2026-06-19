@@ -11,6 +11,7 @@ license = "Apache-2.0"
 dependencies = [
     "umap-learn>=0.5",
     "numpy>=1.26",
+    "scikit-learn>=1.5",
     "pydantic>=2.9",
     "pydantic-settings>=2.6",
 ]
