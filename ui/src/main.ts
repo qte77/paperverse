@@ -21,7 +21,7 @@ import {
 } from "./papers";
 import { createScene, type SceneHandle } from "./scene";
 import { attachSearch } from "./search";
-import { type Preference, themeForPreference } from "./theme";
+import { nextPreference, type Preference, THEME_TOGGLE_LABEL, themeForPreference } from "./theme";
 
 // Data artifacts + the sql.js WASM are copied into the site by the Pages build
 // and served under the Vite base path (e.g. /paperverse/).
@@ -204,14 +204,17 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
       searchInput.disabled = true;
     }
 
-    // Theme picker: apply + persist the choice, recolouring the cloud on switch.
-    const themeControl = document.querySelector<HTMLSelectElement>("#theme");
+    // Theme toggle: a button that cycles system -> light -> dark on click,
+    // applying + persisting the choice and recolouring the cloud.
+    const themeControl = document.querySelector<HTMLButtonElement>("#theme-toggle");
     if (themeControl) {
-      themeControl.value = readThemePreference();
-      themeControl.addEventListener("change", () => {
-        const pref = themeControl.value as Preference;
+      let pref = readThemePreference();
+      themeControl.textContent = THEME_TOGGLE_LABEL[pref];
+      themeControl.addEventListener("click", () => {
+        pref = nextPreference(pref);
         localStorage.setItem(THEME_KEY, pref);
         applyThemePreference(pref);
+        themeControl.textContent = THEME_TOGGLE_LABEL[pref];
         recolour();
       });
     }
