@@ -19,7 +19,7 @@ import {
   setPointSize,
   updateNeighborLines,
 } from "./papers";
-import { createScene } from "./scene";
+import { createScene, type SceneHandle } from "./scene";
 import { attachSearch } from "./search";
 import { type Preference, themeForPreference } from "./theme";
 
@@ -81,7 +81,17 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
       statusEl.hidden = false;
     }
   };
-  const handle = await createScene(canvas);
+  // Renderer init is awaited before the data-load try below, so guard it on its
+  // own: the WebGL2 backend can be unavailable (very old browser, blocklisted
+  // GPU). Without this, a failure would leave the page stuck on "Loading…".
+  let handle: SceneHandle;
+  try {
+    handle = await createScene(canvas);
+  } catch (error) {
+    setStatus("This visualization needs WebGL2, which isn't available in this browser.");
+    console.warn("paperverse: renderer init failed (WebGL2 unavailable?)", error);
+    return;
+  }
   try {
     setStatus("Loading…");
     // First paint needs only the small positions binary + meta.json. The ~1 MB+
