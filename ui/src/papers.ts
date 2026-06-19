@@ -127,9 +127,11 @@ export function resolveSourceRgb(el: Element): Record<Source, [number, number, n
 // Round soft-edged sprite shader. Discards fragments outside the unit circle
 // and applies a smooth alpha falloff so points render as anti-aliased discs.
 // Perspective size attenuation is handled manually (divide by -mv.z) because
-// ShaderMaterial does not inherit PointsMaterial's sizeAttenuation.
+// ShaderMaterial does not inherit PointsMaterial's sizeAttenuation; a small
+// pixel floor keeps far points (and large clouds) from shrinking to invisibility.
 // Linear fog (THREE.Fog) is wired via the fogNear/fogFar/fogColor uniforms so
-// distant points fade toward the page background, matching the scene fog.
+// distant points fade toward the page background, matching the scene fog. Depth is
+// read mainly via the colour mix; alpha only dips slightly so points stay solid.
 const _VERT = /* glsl */ `
   uniform float pointSize;
   attribute vec3 color;
@@ -138,7 +140,7 @@ const _VERT = /* glsl */ `
   void main() {
     vColor = color;
     vec4 mv = modelViewMatrix * vec4(position, 1.0);
-    gl_PointSize = pointSize * (300.0 / -mv.z);
+    gl_PointSize = max(3.0, pointSize * (300.0 / -mv.z));
     gl_Position = projectionMatrix * mv;
     vFogDepth = -mv.z;
   }
@@ -153,10 +155,12 @@ const _FRAG = /* glsl */ `
     vec2 uv = gl_PointCoord * 2.0 - 1.0;
     float d = dot(uv, uv);
     if (d > 1.0) discard;
-    float alpha = 1.0 - smoothstep(0.36, 1.0, d);
+    // Larger opaque core with only a thin anti-aliased rim (was 0.36 -> mushy).
+    float alpha = 1.0 - smoothstep(0.55, 1.0, d);
     float fogFactor = smoothstep(fogNear, fogFar, vFogDepth);
     vec3 col = mix(vColor, fogColor, fogFactor);
-    gl_FragColor = vec4(col, alpha * (1.0 - fogFactor));
+    // Depth cue is the colour mix above; keep alpha high so far points stay legible.
+    gl_FragColor = vec4(col, alpha * (1.0 - 0.4 * fogFactor));
   }
 `;
 
