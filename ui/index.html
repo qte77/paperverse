@@ -91,8 +91,11 @@
         left: 50%;
         transform: translateX(-50%);
         display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
         align-items: center;
         gap: 0.5rem;
+        max-width: 96vw;
       }
       #search-form {
         margin: 0;
@@ -127,25 +130,19 @@
         background: var(--surface);
         border-radius: 6px;
       }
-      /* Read-only key: source colours (= the clusters) + what the axes encode.
-         Swatch colours reference the same --data-* tokens the points use. */
+      /* Read-only source colour key, sitting inline in the toolbar. Swatch
+         colours reference the same --data-* tokens the points use; the axis
+         encoding + date range is the chip's title (set in main.ts). */
       #legend {
-        position: fixed;
-        bottom: 1rem;
-        left: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.2rem 0.5rem;
         padding: 0.4rem 0.6rem;
-        font: 0.8rem/1.5 var(--font-sans);
+        font: 0.85rem var(--font-sans);
         color: var(--text);
         background: var(--surface);
+        border: 1px solid var(--text);
         border-radius: 6px;
-        pointer-events: none;
-        transition: opacity 0.2s;
-      }
-      /* Fade the legend out while the detail panel is open (#detail precedes
-         #legend in the DOM) so the panel never covers it on narrow screens. */
-      #detail:not([hidden]) ~ #legend {
-        opacity: 0;
-        visibility: hidden;
       }
       #legend .swatch {
         display: inline-block;
@@ -164,11 +161,8 @@
       #legend .medrxiv {
         background: var(--data-negative);
       }
-      #legend .axis {
-        display: block;
-        margin-top: 0.25rem;
-        font-size: 0.75rem;
-        opacity: 0.7;
+      #legend .src {
+        white-space: nowrap;
       }
     </style>
   </head>
@@ -180,6 +174,11 @@
       </form>
       <button id="theme-toggle" type="button" aria-label="Theme" title="Theme">◐ System</button>
       <button id="reset" type="button" title="Reset view" aria-label="Reset view">Reset</button>
+      <div id="legend" aria-label="Source colour key">
+        <span class="src"><span class="swatch arxiv"></span>arXiv</span>
+        <span class="src"><span class="swatch biorxiv"></span>bioRxiv</span>
+        <span class="src"><span class="swatch medrxiv"></span>medRxiv</span>
+      </div>
     </div>
     <div id="status" role="status" aria-live="polite">Loading…</div>
     <div id="tooltip" hidden aria-live="polite"></div>
@@ -189,12 +188,6 @@
       <p id="detail-meta"></p>
       <p id="detail-abstract"></p>
     </aside>
-    <div id="legend" aria-label="Legend">
-      <span class="swatch arxiv"></span>arXiv
-      <span class="swatch biorxiv"></span>bioRxiv
-      <span class="swatch medrxiv"></span>medRxiv
-      <span class="axis">position = category similarity · depth = date (old → new)</span>
-    </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

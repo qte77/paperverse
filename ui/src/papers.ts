@@ -264,23 +264,3 @@ export function setLineColor(
 ): void {
   (lines.material as THREE.LineBasicMaterial).color.setRGB(rgb[0], rgb[1], rgb[2]);
 }
-
-/** A faint line along the z (date/depth) axis through the cloud's x/y centre — a
- * quiet depth reference that reads as the cloud rotates. Colour tracks the theme
- * via setLineColor; the low opacity keeps it subtle. */
-export function createDepthAxis(
-  x: number,
-  y: number,
-  zMin: number,
-  zMax: number,
-): THREE.LineSegments {
-  const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute(
-    "position",
-    new THREE.BufferAttribute(new Float32Array([x, y, zMin, x, y, zMax]), 3),
-  );
-  const material = new THREE.LineBasicMaterial({ transparent: true, opacity: 0.15 });
-  const axis = new THREE.LineSegments(geometry, material);
-  axis.frustumCulled = false;
-  return axis;
-}
