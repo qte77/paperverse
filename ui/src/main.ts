@@ -1,5 +1,6 @@
-import { hexToRgb01 } from "./colors";
+import { hexToRgb01, type Source } from "./colors";
 import { openPapersDb } from "./db";
+import { formatDateRange } from "./legend";
 import { attachInteraction, type InteractionElements } from "./interaction";
 import {
   buildColorBuffer,
@@ -26,6 +27,15 @@ import { type Preference, themeForPreference } from "./theme";
 const BASE = import.meta.env.BASE_URL;
 const DATA_DIR = `${BASE}data`;
 const SQL_WASM_URL = `${BASE}sql-wasm.wasm`;
+
+/** First-paint metadata (meta.json): point count, date endpoints, and the
+ * per-point source list (parallel to positions.bin, entry `i` == point `i`). */
+interface CloudMeta {
+  count: number;
+  dateMin: string;
+  dateMax: string;
+  sources: Source[];
+}
 
 /** How many nearest papers to link when one is selected. */
 const NEIGHBOR_COUNT = 5;
@@ -73,25 +83,39 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
   const handle = await createScene(canvas);
   try {
     setStatus("Loading…");
-    const [positionsResponse, dbResponse] = await Promise.all([
+    // First paint needs only the small positions binary + meta.json. The ~1 MB+
+    // papers.db and sql.js WASM load in the background (further down) so the cloud
+    // appears without blocking on them.
+    const [positionsResponse, metaResponse] = await Promise.all([
       fetch(`${DATA_DIR}/positions.bin`),
-      fetch(`${DATA_DIR}/papers.db`),
+      fetch(`${DATA_DIR}/meta.json`),
     ]);
     const positions = parsePositions(await positionsResponse.arrayBuffer());
     if (positions.length === 0) {
       setStatus("No papers to display.");
       return;
     }
-    const db = await openPapersDb(new Uint8Array(await dbResponse.arrayBuffer()), SQL_WASM_URL);
+    const meta = (await metaResponse.json()) as CloudMeta;
+    if (meta.sources.length !== positions.length / 3) {
+      setStatus("Data mismatch — please reload.");
+      return;
+    }
 
     // Colour state — `let` so a theme switch can re-resolve the EyeRest tokens.
-    let baseline = buildColorBuffer(db.sourcesByIdx(), resolveSourceRgb(document.documentElement));
+    // Per-point sources come from meta.json, so colouring never waits on the DB.
+    let baseline = buildColorBuffer(meta.sources, resolveSourceRgb(document.documentElement));
     const working = baseline.slice();
     const points = buildPointsCloud(positions, working);
     handle.add(points);
     const neighborLines = createNeighborLines(NEIGHBOR_COUNT);
     handle.add(neighborLines);
     setStatus(null);
+    // Label the depth axis with the corpus's real year span (from meta.json),
+    // replacing the static "old → new" placeholder. DOM text → immune to fog.
+    const axisEl = document.querySelector<HTMLElement>("#legend .axis");
+    if (axisEl) {
+      axisEl.textContent = formatDateRange(meta.dateMin, meta.dateMax);
+    }
     // Frame the camera on the actual cloud bounds — UMAP coordinates are not
     // centered on the origin, so a fixed camera would look at empty space.
     points.geometry.computeBoundingSphere();
@@ -142,7 +166,7 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
     };
     // Re-resolve point colours after a theme switch, then repaint.
     const recolour = (): void => {
-      baseline = buildColorBuffer(db.sourcesByIdx(), resolveSourceRgb(document.documentElement));
+      baseline = buildColorBuffer(meta.sources, resolveSourceRgb(document.documentElement));
       applyThemeColors();
       repaint();
     };
@@ -156,33 +180,13 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
       const neighbors = nearestNeighbors(positions, idx, NEIGHBOR_COUNT);
       updateNeighborLines(neighborLines, positions, idx, neighbors);
     };
+    // Resolve interaction DOM up front; hover/click handlers are wired once the
+    // DB is ready (background load below). Search powers FTS queries, so disable
+    // it until then rather than letting clicks fall into a not-yet-ready DB.
     const els = interactionElements();
-    if (els) {
-      attachInteraction(
-        handle,
-        points,
-        db,
-        els,
-        (indices) => {
-          hoverHits = indices;
-          repaint();
-        },
-        showNeighbors,
-        pickThreshold,
-      );
-    }
     const searchInput = document.querySelector<HTMLInputElement>("#search");
     if (searchInput) {
-      attachSearch({
-        input: searchInput,
-        db,
-        positions,
-        onResults: (indices) => {
-          searchHits = indices;
-          repaint();
-        },
-        flyTo: (target) => handle.flyTo(target),
-      });
+      searchInput.disabled = true;
     }
 
     // Theme picker: apply + persist the choice, recolouring the cloud on switch.
@@ -202,6 +206,49 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
         recolour();
       }
     });
+
+    // Background load: fetch papers.db + the sql.js WASM, then wire hover/click
+    // metadata and enable search. On failure the cloud stays usable (orbit,
+    // theme, legend) — only metadata lookup and search are lost — so we log
+    // rather than overwrite the working canvas with an error banner.
+    void (async (): Promise<void> => {
+      try {
+        const dbResponse = await fetch(`${DATA_DIR}/papers.db`);
+        const db = await openPapersDb(
+          new Uint8Array(await dbResponse.arrayBuffer()),
+          SQL_WASM_URL,
+        );
+        if (els) {
+          attachInteraction(
+            handle,
+            points,
+            db,
+            els,
+            (indices) => {
+              hoverHits = indices;
+              repaint();
+            },
+            showNeighbors,
+            pickThreshold,
+          );
+        }
+        if (searchInput) {
+          attachSearch({
+            input: searchInput,
+            db,
+            positions,
+            onResults: (indices) => {
+              searchHits = indices;
+              repaint();
+            },
+            flyTo: (target) => handle.flyTo(target),
+          });
+          searchInput.disabled = false;
+        }
+      } catch (error) {
+        console.warn("paperverse: search and details unavailable (data load failed)", error);
+      }
+    })();
   } catch (error) {
     setStatus("Couldn't load the paper cloud. Please reload the page.");
     console.warn("paperverse: failed to load the paper cloud", error);

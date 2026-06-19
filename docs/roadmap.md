@@ -29,6 +29,15 @@ rAF-coalesced hover picking; `scriv` changelog tooling
 [#44](https://github.com/qte77/paperverse/issues/44), and
 [#43](https://github.com/qte77/paperverse/issues/43).
 
+## v0.1.3 — Faster first paint + dated legend (shipped)
+
+`meta.json` export sidecar (count, date range, per-point sources). First paint
+renders from `positions.bin` + `meta.json`, while `papers.db` and the sql.js WASM
+load in the background — the cloud no longer waits on them
+([#43](https://github.com/qte77/paperverse/issues/43)). The depth-axis legend now
+shows the corpus's real year span instead of "old → new"
+([#44](https://github.com/qte77/paperverse/issues/44)).
+
 ## Next
 
 Nothing queued — the deferred items under **Later** are the candidates.
@@ -38,10 +47,12 @@ Nothing queued — the deferred items under **Later** are the candidates.
 - Visual appearance polish — *partial*; open: adaptive point sizing, colour-contrast
   audit — [#42](https://github.com/qte77/paperverse/issues/42) ·
   [plan](plans/visual-polish.md)
-- Slight 3D depth effect — *partial*; open: z-axis (date) label —
+- Slight 3D depth effect — *partial*; open: explicit 3D z-axis ticks (the legend
+  now shows the real year span) —
   [#44](https://github.com/qte77/paperverse/issues/44) · [plan](plans/depth-effect.md)
-- Visualization performance — *partial*; open: code-split / lazy WASM, culling/LOD,
-  worker — [#43](https://github.com/qte77/paperverse/issues/43) ·
+- Visualization performance — *partial*; shipped: `papers.db` + WASM off the
+  first-paint path; open: bundle code-split, culling/LOD, sql.js worker —
+  [#43](https://github.com/qte77/paperverse/issues/43) ·
   [plan](plans/performance.md)
 
 ## Data

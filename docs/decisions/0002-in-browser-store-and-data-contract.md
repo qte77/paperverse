@@ -45,7 +45,7 @@ The UI workload is row-lookup-by-point-index plus FTS over three text columns
 
 ### Export data contract (L1 → L4)
 
-`paperverse export` writes two artifacts into the output directory:
+`paperverse export` writes three artifacts into the output directory:
 
 + **`papers.db`** (cold metadata). A `papers` table keyed by `idx INTEGER PRIMARY
   KEY` — which equals the point index in the positions binary — with `uid`
@@ -56,6 +56,11 @@ The UI workload is row-lookup-by-point-index plus FTS over three text columns
   text duplication, to keep `papers.db` under the < 100 MB NFR.
 + **`positions.bin`** (hot render path). Tightly-packed **little-endian Float32**
   `[x, y, z]` per point, in `papers.idx` order: point `i` ↔ `papers.idx = i`.
++ **`meta.json`** (first-paint path; added 2026-06-19). A small JSON sidecar:
+  paper `count`, the corpus date range (`dateMin` / `dateMax`, ISO), and `sources`
+  — the per-point source string in `papers.idx` order, parallel to `positions.bin`.
+  It lets the UI colour the cloud and label the date axis on first paint without
+  opening `papers.db` or instantiating the sql.js WASM.
 
 Per-point **color and size are derived in the UI** (color from `source` via the
 zero-blue EyeRest palette), not baked into the binary — deferred until STORY-009
@@ -68,6 +73,12 @@ The frontend MUST use an FTS5-enabled sql.js build (`sql.js-fts5`): the default
 sql.js bundles FTS3, not FTS5. Lazy loading via `sql.js-httpvfs` is optional and,
 on GitHub Pages, needs an explicit `fileLength` because the CDN's gzip
 transfer-encoding breaks the `Content-Length` of Range responses.
+
+**Update (2026-06-19):** first paint is now decoupled from the database. The UI
+renders the cloud from `positions.bin` + `meta.json`, then loads `papers.db` and
+the sql.js WASM in a background task that enables search and hover/click metadata
+once ready. This is the whole-DB-in-memory path made non-blocking; HTTP-Range
+loading via `sql.js-httpvfs` remains the future option for large corpora.
 
 ## Consequences
 

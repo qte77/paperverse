@@ -9,6 +9,7 @@ concern, not re-tested here.
 """
 
 import datetime
+import json
 import sqlite3
 import struct
 from pathlib import Path
@@ -16,7 +17,7 @@ from pathlib import Path
 import pytest
 from inline_snapshot import snapshot
 
-from paperverse.db import build_db, build_positions, export
+from paperverse.db import build_db, build_meta, build_positions, export
 from paperverse.models import Paper, Source
 
 Positions = dict[str, tuple[float, float, float]]
@@ -30,6 +31,7 @@ def _paper(
     authors: str = "",
     abstract: str = "",
     day: int = 1,
+    published: datetime.date | None = None,
     source: Source = Source.ARXIV,
     version: int = 1,
 ) -> Paper:
@@ -38,7 +40,7 @@ def _paper(
         id=rawid,
         title=title,
         categories=categories if categories is not None else ["cs.LG"],
-        published=datetime.date(2024, 1, day),
+        published=published if published is not None else datetime.date(2024, 1, day),
         version=version,
         authors=authors,
         abstract=abstract,
@@ -50,13 +52,48 @@ def _positions(papers: list[Paper]) -> Positions:
     return {p.uid: (float(i), float(i) + 0.5, float(i) * 0.25) for i, p in enumerate(papers)}
 
 
-def test_export_writes_both_artifacts(tmp_path: Path) -> None:
-    papers = [_paper("a", day=1), _paper("b", day=2)]
-    db_path, bin_path = export(papers, _positions(papers), tmp_path)
+def test_export_writes_all_three_artifacts(tmp_path: Path) -> None:
+    papers = [_paper("a", day=1), _paper("b", day=2, source=Source.BIORXIV)]
+    db_path, bin_path, meta_path = export(papers, _positions(papers), tmp_path)
     assert db_path == tmp_path / "papers.db"
     assert bin_path == tmp_path / "positions.bin"
+    assert meta_path == tmp_path / "meta.json"
     assert db_path.exists()
     assert bin_path.exists()
+    assert meta_path.exists()
+    # meta.json carries the real payload, in point order, not an empty stub.
+    meta = json.loads(meta_path.read_text())
+    assert meta["count"] == 2
+    assert meta["sources"] == ["arxiv", "biorxiv"]
+
+
+def test_build_meta_reports_count_dates_and_sources_in_point_order() -> None:
+    # dateMin/dateMax must scan all papers (min/max), not read the first/last
+    # element: the min is last here and the max is in the middle.
+    papers = [
+        _paper("a", published=datetime.date(2021, 1, 30), source=Source.ARXIV),
+        _paper("b", published=datetime.date(2023, 6, 1), source=Source.BIORXIV),
+        _paper("c", published=datetime.date(2019, 3, 15), source=Source.MEDRXIV),
+    ]
+    meta = build_meta(papers)
+    assert meta["count"] == 3
+    assert meta["dateMin"] == "2019-03-15"
+    assert meta["dateMax"] == "2023-06-01"
+    # sources stay in paper/idx order (== positions.bin order), never sorted.
+    assert meta["sources"] == ["arxiv", "biorxiv", "medrxiv"]
+
+
+def test_build_meta_single_paper_has_equal_endpoints() -> None:
+    papers = [_paper("solo", published=datetime.date(2021, 3, 10), source=Source.MEDRXIV)]
+    meta = build_meta(papers)
+    assert meta["count"] == 1
+    assert meta["dateMin"] == "2021-03-10"
+    assert meta["dateMax"] == "2021-03-10"
+    assert meta["sources"] == ["medrxiv"]
+
+
+def test_build_meta_empty_corpus_returns_sentinel() -> None:
+    assert build_meta([]) == {"count": 0, "dateMin": "", "dateMax": "", "sources": []}
 
 
 def test_build_db_contains_all_papers_with_positions(tmp_path: Path) -> None:
