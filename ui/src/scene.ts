@@ -1,5 +1,11 @@
-/** Imperative Three.js scene: a WebGPU renderer (with WebGL2 fallback),
+/** Imperative Three.js scene: a renderer forced to the WebGL2 backend,
  * OrbitControls, and a responsive full-viewport canvas.
+ *
+ * WebGL2 (not WebGPU) is required: the point cloud is a `THREE.Points` with a
+ * GLSL `ShaderMaterial` that sizes sprites via `gl_PointSize`, which the WebGPU
+ * backend ignores — every point would render at a single physical pixel
+ * (three.js #30612). WebGL2 honours `gl_PointSize`, so the round sprites size
+ * correctly.
  *
  * The canvas is transparent, so the themed page background (driven by the
  * `data-theme` attribute) shows through an empty viewport — keeping brand
@@ -11,7 +17,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { WebGPURenderer } from "three/webgpu";
 
-import { computeRenderSize, detectBackend } from "./renderer";
+import { computeRenderSize } from "./renderer";
 
 /** A running scene; call `dispose` to stop the loop and release resources. */
 export interface SceneHandle {
@@ -37,7 +43,9 @@ export async function createScene(canvas: HTMLCanvasElement): Promise<SceneHandl
     canvas,
     antialias: true,
     alpha: true,
-    forceWebGL: detectBackend(navigator) === "webgl2",
+    // Force WebGL2: the WebGPU backend renders THREE.Points at 1px (ignores
+    // gl_PointSize), which makes the cloud invisible (three.js #30612).
+    forceWebGL: true,
   });
 
   const scene = new THREE.Scene();
