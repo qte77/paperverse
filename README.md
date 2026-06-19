@@ -2,9 +2,9 @@
 
 A 3D academic-paper cloud — a static GitHub Pages visualization of arXiv, bioRxiv,
 and medRxiv papers. A Python pipeline ingests weekly canonical CSVs, lays the
-papers out in 3D with UMAP, and exports a SQLite + FTS5 database and a Float32
-positions binary; a Three.js + sql.js frontend renders the cloud and searches it
-entirely in the browser.
+papers out in 3D with UMAP, and exports a SQLite + FTS5 database, a Float32
+positions binary, and a small `meta.json` sidecar; a Three.js + sql.js frontend
+renders the cloud and searches it entirely in the browser.
 
 ## Architecture
 
@@ -31,7 +31,7 @@ uv sync
 
 ## Usage
 
-Lay out and export a corpus to `papers.db` + `positions.bin`:
+Lay out and export a corpus to `papers.db`, `positions.bin`, and `meta.json`:
 
 ```bash
 uv run paperverse --data-dir data --output dist/data
@@ -50,7 +50,7 @@ data/
 | Flag | Default | Description |
 | --- | --- | --- |
 | `--data-dir` | `data` | Root holding one CSV subdirectory per source |
-| `--output` | `dist/data` | Directory to receive `papers.db` + `positions.bin` |
+| `--output` | `dist/data` | Directory to receive `papers.db`, `positions.bin`, and `meta.json` |
 | `--sources` | all | Restrict to sources; repeatable (`--sources arxiv --sources biorxiv`) |
 | `--seed` | `42` | UMAP seed for reproducible layouts |
 
