@@ -77,4 +77,6 @@ legend) deployed to GitHub Pages. What shipped and what's next:
 
 ## License
 
-Apache-2.0.
+Apache-2.0 — see [LICENSE](LICENSE). Third-party components bundled in the web UI
+(three.js and sql.js-fts5 under MIT, the Inter font under the SIL OFL 1.1) are
+attributed in [NOTICE](NOTICE).
