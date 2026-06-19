@@ -670,6 +670,7 @@ dependencies = [
     { name = "numpy" },
     { name = "pydantic" },
     { name = "pydantic-settings" },
+    { name = "scikit-learn" },
     { name = "umap-learn" },
 ]
 
@@ -690,6 +691,7 @@ requires-dist = [
     { name = "numpy", specifier = ">=1.26" },
     { name = "pydantic", specifier = ">=2.9" },
     { name = "pydantic-settings", specifier = ">=2.6" },
+    { name = "scikit-learn", specifier = ">=1.5" },
     { name = "umap-learn", specifier = ">=0.5" },
 ]
 
