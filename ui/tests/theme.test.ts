@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { resolveTheme, themeForPreference } from "../src/theme";
+import { nextPreference, resolveTheme, themeForPreference } from "../src/theme";
 
 describe("resolveTheme", () => {
   it("follows the system preference by default", () => {
@@ -23,5 +23,13 @@ describe("themeForPreference", () => {
   it("uses the explicit preference, ignoring the system value", () => {
     expect(themeForPreference("light", true)).toBe("light");
     expect(themeForPreference("dark", false)).toBe("dark");
+  });
+});
+
+describe("nextPreference", () => {
+  it("cycles system -> light -> dark and wraps back to system", () => {
+    expect(nextPreference("system")).toBe("light");
+    expect(nextPreference("light")).toBe("dark");
+    expect(nextPreference("dark")).toBe("system");
   });
 });

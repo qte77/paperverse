@@ -25,3 +25,17 @@ export type Preference = "system" | "light" | "dark";
 export function themeForPreference(pref: Preference, systemPrefersDark: boolean): Theme {
   return resolveTheme(systemPrefersDark, pref === "system" ? null : pref);
 }
+
+/** Glyph + word shown on the cycling theme toggle, keyed by preference. */
+export const THEME_TOGGLE_LABEL: Record<Preference, string> = {
+  system: "◐ System",
+  light: "○ Light",
+  dark: "● Dark",
+};
+
+const PREFERENCE_CYCLE: Preference[] = ["system", "light", "dark"];
+
+/** The next preference when the toggle is clicked: system -> light -> dark -> system. */
+export function nextPreference(pref: Preference): Preference {
+  return PREFERENCE_CYCLE[(PREFERENCE_CYCLE.indexOf(pref) + 1) % PREFERENCE_CYCLE.length];
+}
