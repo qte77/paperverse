@@ -1,11 +1,12 @@
-/** Imperative Three.js scene: a renderer forced to the WebGL2 backend,
- * OrbitControls, and a responsive full-viewport canvas.
+/** Imperative Three.js scene: a classic WebGLRenderer, OrbitControls, and a
+ * responsive full-viewport canvas.
  *
- * WebGL2 (not WebGPU) is required: the point cloud is a `THREE.Points` with a
- * GLSL `ShaderMaterial` that sizes sprites via `gl_PointSize`, which the WebGPU
- * backend ignores — every point would render at a single physical pixel
- * (three.js #30612). WebGL2 honours `gl_PointSize`, so the round sprites size
- * correctly.
+ * The classic `WebGLRenderer` (not the node-based `WebGPURenderer`) is required:
+ * the point cloud is a `THREE.Points` with a GLSL `ShaderMaterial` that sizes
+ * round sprites via `gl_PointSize`. `WebGPURenderer` ignores `gl_PointSize` in
+ * both its WebGPU and WebGL backends, so every point renders at one pixel
+ * regardless of the GPU's point-size range; `WebGLRenderer` honours it, so the
+ * sprites size correctly.
  *
  * The canvas is transparent, so the themed page background (driven by the
  * `data-theme` attribute) shows through an empty viewport — keeping brand
@@ -15,7 +16,6 @@
 
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { WebGPURenderer } from "three/webgpu";
 
 import { computeRenderSize } from "./renderer";
 
@@ -39,13 +39,10 @@ export interface SceneHandle {
 
 /** Create and start a responsive, orbit-controlled scene on `canvas`. */
 export async function createScene(canvas: HTMLCanvasElement): Promise<SceneHandle> {
-  const renderer = new WebGPURenderer({
+  const renderer = new THREE.WebGLRenderer({
     canvas,
     antialias: true,
     alpha: true,
-    // Force WebGL2: the WebGPU backend renders THREE.Points at 1px (ignores
-    // gl_PointSize), which makes the cloud invisible (three.js #30612).
-    forceWebGL: true,
   });
 
   const scene = new THREE.Scene();
@@ -76,7 +73,6 @@ export async function createScene(canvas: HTMLCanvasElement): Promise<SceneHandl
   };
 
   let flyTarget: THREE.Vector3 | null = null;
-  await renderer.init();
   applySize();
   window.addEventListener("resize", applySize);
   renderer.setAnimationLoop(() => {

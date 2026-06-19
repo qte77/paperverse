@@ -1,18 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { computeRenderSize, detectBackend } from "../src/renderer";
-
-describe("detectBackend", () => {
-  it("uses WebGPU when the navigator exposes it", () => {
-    expect(detectBackend({ gpu: {} })).toBe("webgpu");
-  });
-
-  it("falls back to WebGL2 when WebGPU is absent or empty", () => {
-    expect(detectBackend({})).toBe("webgl2");
-    expect(detectBackend({ gpu: undefined })).toBe("webgl2");
-    expect(detectBackend({ gpu: null })).toBe("webgl2");
-  });
-});
+import { computeRenderSize } from "../src/renderer";
 
 describe("computeRenderSize", () => {
   it("derives the camera aspect from a non-square viewport", () => {

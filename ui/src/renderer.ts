@@ -4,18 +4,6 @@
  * The imperative scene wiring (see `scene.ts`) consumes them.
  */
 
-export type Backend = "webgpu" | "webgl2";
-
-/**
- * Choose the render backend from a navigator-like object.
- *
- * Prefers WebGPU when the runtime exposes it; otherwise falls back to WebGL2.
- * `WebGPURenderer` honours this via its `forceWebGL` option.
- */
-export function detectBackend(nav: { gpu?: unknown }): Backend {
-  return nav.gpu != null ? "webgpu" : "webgl2";
-}
-
 /** Resolved renderer sizing plus the camera aspect for a viewport. */
 export interface RenderSize {
   /** Device-independent width passed to `renderer.setSize`. */
