@@ -159,10 +159,10 @@ const _FRAG = /* glsl */ `
     if (d > 1.0) discard;
     // Bold disc with only a thin anti-aliased rim.
     float alpha = 1.0 - smoothstep(0.62, 1.0, d);
-    // Subtle depth tint toward the background (max ~20%); points keep their colour
+    // Subtle depth tint toward the background (max ~30%); points keep their colour
     // and full opacity so they stay clearly visible in both themes.
     float fogFactor = smoothstep(fogNear, fogFar, vFogDepth);
-    vec3 col = mix(vColor, fogColor, fogFactor * 0.2);
+    vec3 col = mix(vColor, fogColor, fogFactor * 0.3);
     gl_FragColor = vec4(col, alpha);
   }
 `;
@@ -263,4 +263,24 @@ export function setLineColor(
   rgb: readonly [number, number, number],
 ): void {
   (lines.material as THREE.LineBasicMaterial).color.setRGB(rgb[0], rgb[1], rgb[2]);
+}
+
+/** A faint line along the z (date/depth) axis through the cloud's x/y centre — a
+ * quiet depth reference that reads as the cloud rotates. Colour tracks the theme
+ * via setLineColor; the low opacity keeps it subtle. */
+export function createDepthAxis(
+  x: number,
+  y: number,
+  zMin: number,
+  zMax: number,
+): THREE.LineSegments {
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute(
+    "position",
+    new THREE.BufferAttribute(new Float32Array([x, y, zMin, x, y, zMax]), 3),
+  );
+  const material = new THREE.LineBasicMaterial({ transparent: true, opacity: 0.15 });
+  const axis = new THREE.LineSegments(geometry, material);
+  axis.frustumCulled = false;
+  return axis;
 }

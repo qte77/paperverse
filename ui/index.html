@@ -139,6 +139,13 @@
         background: var(--surface);
         border-radius: 6px;
         pointer-events: none;
+        transition: opacity 0.2s;
+      }
+      /* Fade the legend out while the detail panel is open (#detail precedes
+         #legend in the DOM) so the panel never covers it on narrow screens. */
+      #detail:not([hidden]) ~ #legend {
+        opacity: 0;
+        visibility: hidden;
       }
       #legend .swatch {
         display: inline-block;
