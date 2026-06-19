@@ -1,10 +1,12 @@
-"""Export papers to a SQLite + FTS5 store and a Float32 positions binary.
+"""Export papers to a SQLite + FTS5 store, a Float32 positions binary, and meta JSON.
 
-Two artifacts feed the UI: ``papers.db`` (cold metadata path: a ``papers`` table
+Three artifacts feed the UI: ``papers.db`` (cold metadata path: a ``papers`` table
 indexed on source/published, plus an external-content FTS5 index over
-title/authors/abstract) and ``positions.bin`` (hot render path: little-endian
-Float32 ``[x, y, z]`` per point). Point ``i`` in the binary corresponds to
-``papers.idx = i``, so the renderer can index metadata by row.
+title/authors/abstract), ``positions.bin`` (hot render path: little-endian
+Float32 ``[x, y, z]`` per point), and ``meta.json`` (first-paint path: paper
+count, date endpoints, and the per-point source list). Point ``i`` in the binary
+and ``sources[i]`` in the JSON both correspond to ``papers.idx = i``, so the
+renderer can colour and index by row without opening the database.
 """
 
 from __future__ import annotations
@@ -12,7 +14,7 @@ from __future__ import annotations
 import json
 import sqlite3
 import struct
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypedDict
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -84,6 +86,43 @@ def build_positions(papers: Sequence[Paper], positions: dict[str, Position]) -> 
     return struct.pack(f"<{len(coords)}f", *coords)
 
 
+class MetaJson(TypedDict):
+    """The ``meta.json`` payload the UI reads for first paint and the axis legend.
+
+    ``sources`` is parallel to ``positions.bin`` (entry ``i`` == ``papers.idx = i``),
+    so the renderer can colour points by source without opening ``papers.db``.
+    """
+
+    count: int
+    dateMin: str
+    dateMax: str
+    sources: list[str]
+
+
+def build_meta(papers: Sequence[Paper]) -> MetaJson:
+    """Build the ``meta.json`` payload: count, ISO date endpoints, per-point sources.
+
+    First paint reads this small file so the cloud renders (coloured by source) and
+    labels its date axis without waiting on ``papers.db`` or the sql.js WASM. Date
+    endpoints scan the whole corpus (``min``/``max``), independent of paper order.
+
+    Args:
+        papers: Papers in the order the export artifacts follow.
+
+    Returns:
+        The payload; an empty corpus yields ``count=0`` with empty endpoints.
+    """
+    if not papers:
+        return {"count": 0, "dateMin": "", "dateMax": "", "sources": []}
+    published = [paper.published for paper in papers]
+    return {
+        "count": len(papers),
+        "dateMin": min(published).isoformat(),
+        "dateMax": max(published).isoformat(),
+        "sources": [paper.source.value for paper in papers],
+    }
+
+
 def build_db(papers: Sequence[Paper], positions: dict[str, Position], db_path: Path) -> None:
     """Write ``papers.db``: a papers table, source/published indexes, and FTS5.
 
@@ -125,20 +164,23 @@ def build_db(papers: Sequence[Paper], positions: dict[str, Position], db_path: P
 
 def export(
     papers: Sequence[Paper], positions: dict[str, Position], out_dir: Path
-) -> tuple[Path, Path]:
-    """Write both export artifacts into ``out_dir`` and return their paths.
+) -> tuple[Path, Path, Path]:
+    """Write all three export artifacts into ``out_dir`` and return their paths.
 
     Args:
         papers: Papers to export, in stable order.
         positions: Mapping of uid -> (x, y, z) from ``layout()``.
-        out_dir: Directory to receive ``papers.db`` and ``positions.bin``.
+        out_dir: Directory to receive ``papers.db``, ``positions.bin``, and
+            ``meta.json``.
 
     Returns:
-        ``(db_path, positions_path)``.
+        ``(db_path, positions_path, meta_path)``.
     """
     out_dir.mkdir(parents=True, exist_ok=True)
     db_path = out_dir / "papers.db"
     positions_path = out_dir / "positions.bin"
+    meta_path = out_dir / "meta.json"
     build_db(papers, positions, db_path)
     positions_path.write_bytes(build_positions(papers, positions))
-    return db_path, positions_path
+    meta_path.write_text(json.dumps(build_meta(papers)))
+    return db_path, positions_path, meta_path

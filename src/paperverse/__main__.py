@@ -44,11 +44,11 @@ def main(argv: Sequence[str] | None = None) -> int:
             wanted = set(settings.sources)
             papers = [paper for paper in papers if paper.source in wanted]
         positions = layout(papers, seed=settings.seed)
-        db_path, positions_path = export(papers, positions, settings.output)
+        db_path, positions_path, meta_path = export(papers, positions, settings.output)
     except Exception as exc:  # CLI boundary: report any failure and exit non-zero
         print(f"paperverse: {exc}", file=sys.stderr)
         return 1
-    print(f"wrote {db_path} ({len(papers)} papers) and {positions_path}")
+    print(f"wrote {db_path}, {positions_path}, {meta_path} ({len(papers)} papers)")
     return 0
 
 
