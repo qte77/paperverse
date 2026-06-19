@@ -58,7 +58,7 @@ export async function createScene(canvas: HTMLCanvasElement): Promise<SceneHandl
   // Gentle idle drift so the cloud reads as 3D; OrbitControls pauses it while the
   // user is actively dragging.
   controls.autoRotate = true;
-  controls.autoRotateSpeed = 0.4;
+  controls.autoRotateSpeed = 0.8;
 
   const applySize = (): void => {
     const { width, height, pixelRatio, aspect } = computeRenderSize(
@@ -73,6 +73,26 @@ export async function createScene(canvas: HTMLCanvasElement): Promise<SceneHandl
   };
 
   let flyTarget: THREE.Vector3 | null = null;
+
+  // Cursor parallax: a few-degree camera tilt toward the pointer, eased and
+  // layered on the orbit each frame. Magnitude is fitted to the cloud in
+  // frameSphere; the target is the pointer in NDC ([-1, 1], y up).
+  let parallaxMag = 0;
+  const parallaxTarget = { x: 0, y: 0 };
+  const parallaxCurrent = { x: 0, y: 0 };
+  const right = new THREE.Vector3();
+  const up = new THREE.Vector3();
+  const onPointerMove = (event: PointerEvent): void => {
+    parallaxTarget.x = (event.clientX / window.innerWidth) * 2 - 1;
+    parallaxTarget.y = 1 - (event.clientY / window.innerHeight) * 2;
+  };
+  const onPointerLeave = (): void => {
+    parallaxTarget.x = 0;
+    parallaxTarget.y = 0;
+  };
+  renderer.domElement.addEventListener("pointermove", onPointerMove);
+  renderer.domElement.addEventListener("pointerleave", onPointerLeave);
+
   applySize();
   window.addEventListener("resize", applySize);
   renderer.setAnimationLoop(() => {
@@ -83,6 +103,19 @@ export async function createScene(canvas: HTMLCanvasElement): Promise<SceneHandl
       }
     }
     controls.update();
+    // Parallax shift along the camera's own right/up axes, then re-aim at the
+    // target. Applied after update() and never read back, so OrbitControls'
+    // internal state is untouched and it composes with the auto-rotate.
+    parallaxCurrent.x += (parallaxTarget.x - parallaxCurrent.x) * 0.05;
+    parallaxCurrent.y += (parallaxTarget.y - parallaxCurrent.y) * 0.05;
+    if (parallaxMag > 0) {
+      right.set(1, 0, 0).applyQuaternion(camera.quaternion);
+      up.set(0, 1, 0).applyQuaternion(camera.quaternion);
+      camera.position
+        .addScaledVector(right, parallaxCurrent.x * parallaxMag)
+        .addScaledVector(up, parallaxCurrent.y * parallaxMag);
+      camera.lookAt(controls.target);
+    }
     renderer.render(scene, camera);
   });
 
@@ -100,6 +133,7 @@ export async function createScene(canvas: HTMLCanvasElement): Promise<SceneHandl
       const c = new THREE.Vector3(center[0], center[1], center[2]);
       controls.target.copy(c);
       const safeRadius = Math.max(radius, 0.01);
+      parallaxMag = safeRadius * 0.05;
       const dist = (safeRadius * 1.4) / Math.sin((camera.fov * Math.PI) / 360);
       camera.position.set(c.x, c.y, c.z + dist);
       camera.near = Math.max(0.01, dist - safeRadius * 2);
@@ -117,6 +151,8 @@ export async function createScene(canvas: HTMLCanvasElement): Promise<SceneHandl
     },
     dispose(): void {
       window.removeEventListener("resize", applySize);
+      renderer.domElement.removeEventListener("pointermove", onPointerMove);
+      renderer.domElement.removeEventListener("pointerleave", onPointerLeave);
       renderer.setAnimationLoop(null);
       controls.dispose();
       renderer.dispose();

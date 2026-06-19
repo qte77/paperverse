@@ -5,6 +5,7 @@ import { attachInteraction, type InteractionElements } from "./interaction";
 import {
   buildColorBuffer,
   buildPointsCloud,
+  createDepthAxis,
   createNeighborLines,
   dimColors,
   nearestNeighbors,
@@ -140,12 +141,20 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
     // the shader's manual fog uniform stays in sync with the scene fog.
     let fogNear = 0.1;
     let fogFar = 1000;
+    let depthAxis: ReturnType<typeof createDepthAxis> | null = null;
     if (sphere) {
       const center: [number, number, number] = [sphere.center.x, sphere.center.y, sphere.center.z];
       const radius = sphere.radius;
       handle.frameSphere(center, radius);
       pickThreshold = Math.max(POINT_SIZE, radius * 0.03);
       setPointSize(points, radius * 0.08);
+      // Faint date (z) axis through the cloud centre, for a depth reference.
+      points.geometry.computeBoundingBox();
+      const box = points.geometry.boundingBox;
+      if (box) {
+        depthAxis = createDepthAxis(center[0], center[1], box.min.z, box.max.z);
+        handle.add(depthAxis);
+      }
       const safeRadius = Math.max(radius, 0.01);
       const dist = (safeRadius * 1.4) / Math.sin((60 * Math.PI) / 360);
       fogNear = dist - safeRadius;
@@ -167,6 +176,7 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
       handle.setFogColor(bgRgb);
       setCloudFog(points, bgRgb, fogNear, fogFar);
       setLineColor(neighborLines, readColour("--text"));
+      if (depthAxis) setLineColor(depthAxis, readColour("--text"));
     };
     applyThemeColors();
     let hoverHits: number[] = [];
