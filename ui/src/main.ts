@@ -130,7 +130,7 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
       const radius = sphere.radius;
       handle.frameSphere(center, radius);
       pickThreshold = Math.max(POINT_SIZE, radius * 0.03);
-      setPointSize(points, radius * 0.04);
+      setPointSize(points, radius * 0.06);
       const safeRadius = Math.max(radius, 0.01);
       const dist = (safeRadius * 1.4) / Math.sin((60 * Math.PI) / 360);
       fogNear = dist - safeRadius;
