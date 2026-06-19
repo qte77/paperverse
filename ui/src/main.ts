@@ -1,5 +1,6 @@
 import { hexToRgb01, type Source } from "./colors";
 import { openPapersDb } from "./db";
+import { formatDateRange } from "./legend";
 import { attachInteraction, type InteractionElements } from "./interaction";
 import {
   buildColorBuffer,
@@ -109,6 +110,12 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
     const neighborLines = createNeighborLines(NEIGHBOR_COUNT);
     handle.add(neighborLines);
     setStatus(null);
+    // Label the depth axis with the corpus's real year span (from meta.json),
+    // replacing the static "old → new" placeholder. DOM text → immune to fog.
+    const axisEl = document.querySelector<HTMLElement>("#legend .axis");
+    if (axisEl) {
+      axisEl.textContent = formatDateRange(meta.dateMin, meta.dateMax);
+    }
     // Frame the camera on the actual cloud bounds — UMAP coordinates are not
     // centered on the origin, so a fixed camera would look at empty space.
     points.geometry.computeBoundingSphere();
