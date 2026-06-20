@@ -9,6 +9,10 @@ quality is the library's concern, not re-tested here.
 import datetime
 
 import numpy as np
+from conftest import papers_st
+from hypothesis import given, settings
+from hypothesis import strategies as st
+from hypothesis.extra.numpy import array_shapes, arrays
 
 from paperverse.layout import (
     category_vocab,
@@ -132,3 +136,47 @@ def test_layout_is_deterministic_complete_and_date_keyed() -> None:
 
 def test_layout_empty() -> None:
     assert layout([]) == {}
+
+
+# --- Property-based (Hypothesis) edge-case coverage (#83) ---
+
+
+@given(papers=papers_st(min_size=1))
+@settings(deadline=None)
+def test_date_axis_in_unit_interval_and_date_monotonic(papers: list[Paper]) -> None:
+    z = date_axis(papers)
+    assert z.shape == (len(papers),)
+    assert float(z.min()) >= 0.0
+    assert float(z.max()) <= 1.0
+    published = [p.published for p in papers]
+    if min(published) == max(published):
+        assert not z.any()  # constant dates -> all zeros (no divide-by-zero NaN)
+    else:
+        assert float(z.min()) == 0.0  # earliest date pinned to 0
+        assert float(z.max()) == 1.0  # latest date pinned to 1
+    # Ordering papers by date yields non-decreasing z (z is a monotonic date transform).
+    by_date = sorted(range(len(papers)), key=lambda i: published[i])
+    zs = [float(z[i]) for i in by_date]
+    assert zs == sorted(zs)
+
+
+@given(
+    matrix=arrays(
+        dtype=np.float32,
+        shape=array_shapes(min_dims=2, max_dims=2, min_side=0, max_side=5),
+        elements=st.floats(
+            min_value=-1e6, max_value=1e6, allow_nan=False, allow_infinity=False, width=32
+        ),
+    )
+)
+@settings(deadline=None)
+def test_l2_normalize_rows_unit_or_zero_never_nan(matrix: np.ndarray) -> None:
+    out = l2_normalize_rows(matrix)
+    assert out.shape == matrix.shape
+    assert not np.isnan(out).any()
+    assert not np.isinf(out).any()
+    for row_in, row_out in zip(matrix, out, strict=True):
+        if float(np.linalg.norm(row_in)) > 0.0:
+            assert abs(float(np.linalg.norm(row_out)) - 1.0) < 1e-4  # non-zero -> unit norm
+        else:
+            assert not row_out.any()  # zero row stays exactly zero

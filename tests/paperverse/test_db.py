@@ -15,6 +15,9 @@ import struct
 from pathlib import Path
 
 import pytest
+from conftest import papers_st
+from hypothesis import given, settings
+from hypothesis import strategies as st
 from inline_snapshot import snapshot
 
 from paperverse.db import build_db, build_meta, build_positions, export
@@ -240,3 +243,34 @@ def test_missing_position_fails_loudly() -> None:
     papers = [_paper("a")]
     with pytest.raises(ValueError, match="missing layout position"):
         build_positions(papers, {})
+
+
+# --- Property-based (Hypothesis) edge-case coverage (#83) ---
+
+# float32-exact values so the positions binary round-trips bit-for-bit.
+_f32 = st.floats(allow_nan=False, allow_infinity=False, width=32)
+
+
+@given(papers=papers_st(min_size=1))
+def test_build_meta_count_endpoints_and_sources_invariant(papers: list[Paper]) -> None:
+    meta = build_meta(papers)
+    published = [p.published for p in papers]
+    assert meta["count"] == len(papers)
+    # min/max scan the whole corpus, independent of order (not first/last element).
+    assert meta["dateMin"] == min(published).isoformat()
+    assert meta["dateMax"] == max(published).isoformat()
+    # sources stay in paper/idx order (== positions.bin order), never sorted.
+    assert meta["sources"] == [p.source.value for p in papers]
+
+
+@given(papers=papers_st(), data=st.data())
+@settings(deadline=None)
+def test_build_positions_packs_float32_in_paper_order(
+    papers: list[Paper], data: st.DataObject
+) -> None:
+    positions = {p.uid: (data.draw(_f32), data.draw(_f32), data.draw(_f32)) for p in papers}
+    blob = build_positions(papers, positions)
+    assert len(blob) == 12 * len(papers)  # three float32 per point
+    unpacked = struct.unpack(f"<{3 * len(papers)}f", blob)
+    expected = tuple(coord for p in papers for coord in positions[p.uid])
+    assert unpacked == expected  # exact round-trip, point i <-> papers[i]

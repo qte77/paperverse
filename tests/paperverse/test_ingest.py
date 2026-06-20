@@ -6,8 +6,13 @@ version wins), and date ordering. csv parsing itself is covered by the
 loader tests.
 """
 
+import csv
 import datetime
+import tempfile
 from pathlib import Path
+
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
 from paperverse.ingest import ingest, source_from_dir
 from paperverse.models import Source
@@ -63,3 +68,41 @@ def test_ingest_result_is_date_sorted(tmp_path: Path) -> None:
         datetime.date(2024, 1, 1),
         datetime.date(2024, 3, 3),
     ]
+
+
+# --- Property-based (Hypothesis) edge-case coverage (#83) ---
+
+# A small id pool forces uid collisions, so arbitrary version/date orderings exercise
+# the dedup (highest version wins) and the final date sort.
+_record_st = st.tuples(
+    st.sampled_from(["a", "b", "c"]),
+    st.integers(min_value=1, max_value=9),
+    st.dates(min_value=datetime.date(2000, 1, 1), max_value=datetime.date(2030, 12, 31)),
+)
+
+
+@given(records=st.lists(_record_st, min_size=1, max_size=12))
+@settings(max_examples=25, deadline=None)
+def test_ingest_dedups_highest_version_and_date_sorts(
+    records: list[tuple[str, int, datetime.date]],
+) -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        week_dir = Path(tmp) / "arxiv" / "2024"
+        week_dir.mkdir(parents=True)
+        with (week_dir / "data.csv").open("w", encoding="utf-8", newline="") as handle:
+            writer = csv.writer(handle)
+            writer.writerow(HEADER.split(","))
+            for rid, version, day in records:
+                writer.writerow([day.isoformat(), "1", rid, str(version), "cs.LG", "t", "", ""])
+        papers = ingest(Path(tmp))
+
+    uids = [p.uid for p in papers]
+    assert len(uids) == len(set(uids))  # one paper per uid (deduped)
+    assert [p.published for p in papers] == sorted(p.published for p in papers)  # date-sorted
+
+    highest: dict[str, int] = {}
+    for rid, version, _day in records:
+        uid = f"arxiv:{rid}"
+        highest[uid] = max(version, highest.get(uid, 0))
+    for paper in papers:
+        assert paper.version == highest[paper.uid]  # highest version wins per uid
