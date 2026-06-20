@@ -72,6 +72,7 @@
         font: 1rem/1.5 var(--font-sans);
         background: var(--surface);
         color: var(--text);
+        z-index: 2; /* above the search results listbox */
       }
       #detail-close {
         float: right;
@@ -189,6 +190,50 @@
       #legend .src {
         white-space: nowrap;
       }
+      /* Keyboard-navigable search results: the accessible equivalent of clicking a
+         point. Shown under the toolbar only while a query has matches. */
+      #results {
+        position: fixed;
+        top: 3.5rem;
+        left: 50%;
+        transform: translateX(-50%);
+        width: min(28rem, 80vw);
+        max-height: 50vh;
+        margin: 0;
+        padding: 0.25rem;
+        list-style: none;
+        overflow-y: auto;
+        background: var(--surface);
+        color: var(--text);
+        border: 1px solid var(--text);
+        border-radius: 6px;
+        z-index: 1;
+      }
+      #results[hidden] {
+        display: none;
+      }
+      #results li {
+        padding: 0.4rem 0.6rem;
+        border-radius: 4px;
+        font: 0.9rem var(--font-sans);
+        cursor: pointer;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      #results li:hover,
+      #results li[aria-selected="true"] {
+        background: var(--bg);
+      }
+      #results li[aria-selected="true"] {
+        outline: 2px solid var(--text);
+        outline-offset: -2px;
+      }
+      #results .more {
+        cursor: default;
+        opacity: 0.7;
+        font-size: 0.8rem;
+      }
     </style>
   </head>
   <body>
@@ -205,6 +250,7 @@
         <span class="src"><span class="swatch medrxiv"></span>medRxiv</span>
       </div>
     </div>
+    <ul id="results" role="listbox" aria-label="Search results" hidden></ul>
     <div id="status" role="status" aria-live="polite">Loading…</div>
     <div id="theme-status" class="sr-only" role="status" aria-live="polite"></div>
     <div id="tooltip" hidden aria-live="polite"></div>
