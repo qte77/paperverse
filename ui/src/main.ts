@@ -5,6 +5,7 @@ import { attachInteraction, type InteractionElements } from "./interaction";
 import {
   buildColorBuffer,
   buildPointsCloud,
+  createDateAxis,
   createNeighborLines,
   dimColors,
   nearestNeighbors,
@@ -13,6 +14,7 @@ import {
   POINT_SIZE,
   resolveSourceRgb,
   restorePoints,
+  setAxisColor,
   setCloudFog,
   setLineColor,
   setPixelRatio,
@@ -133,6 +135,9 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
     // the shader's manual fog uniform stays in sync with the scene fog.
     let fogNear = 0.1;
     let fogFar = 1000;
+    // Time-axis arrow (older -> newer along z); themed in applyThemeColors. Stays
+    // null for a single-date corpus (no z span) so no zero-length arrow is added.
+    let dateAxis: ReturnType<typeof createDateAxis> | null = null;
     if (sphere) {
       const center: [number, number, number] = [sphere.center.x, sphere.center.y, sphere.center.z];
       const radius = sphere.radius;
@@ -146,6 +151,13 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
       document
         .querySelector("#reset")
         ?.addEventListener("click", () => handle.frameSphere(center, radius));
+      // The depth dimension encodes date; an older -> newer arrow makes that legible.
+      points.geometry.computeBoundingBox();
+      const bbox = points.geometry.boundingBox;
+      if (bbox && bbox.max.z > bbox.min.z) {
+        dateAxis = createDateAxis(center[0], center[1], bbox.min.z, bbox.max.z);
+        handle.add(dateAxis);
+      }
     }
 
     const readColour = (name: string): [number, number, number] =>
@@ -160,6 +172,9 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
       handle.setFogColor(bgRgb);
       setCloudFog(points, bgRgb, fogNear, fogFar);
       setLineColor(neighborLines, readColour("--text"));
+      if (dateAxis) {
+        setAxisColor(dateAxis, readColour("--text"));
+      }
     };
     applyThemeColors();
     let hoverHits: number[] = [];

@@ -264,3 +264,43 @@ export function setLineColor(
 ): void {
   (lines.material as THREE.LineBasicMaterial).color.setRGB(rgb[0], rgb[1], rgb[2]);
 }
+
+/** An older→newer time-axis arrow along world-z: tail at `zMin` (oldest), cone head
+ * at `zMax` (newest). The arrowhead gives the depth=date dimension a direction, so
+ * it reads as "the time axis, older → newer" rather than the stray bar that the
+ * plain line (#80) did. Kept subtle (low opacity) so it hints rather than dominates. */
+export function createDateAxis(
+  x: number,
+  y: number,
+  zMin: number,
+  zMax: number,
+): THREE.ArrowHelper {
+  const length = zMax - zMin;
+  const headLength = length * 0.18;
+  const headWidth = headLength * 0.6;
+  const arrow = new THREE.ArrowHelper(
+    new THREE.Vector3(0, 0, 1),
+    new THREE.Vector3(x, y, zMin),
+    length,
+    0xffffff,
+    headLength,
+    headWidth,
+  );
+  const lineMat = arrow.line.material as THREE.LineBasicMaterial;
+  const coneMat = arrow.cone.material as THREE.MeshBasicMaterial;
+  lineMat.transparent = true;
+  lineMat.opacity = 0.4;
+  coneMat.transparent = true;
+  coneMat.opacity = 0.4;
+  arrow.frustumCulled = false;
+  return arrow;
+}
+
+/** Set the time-axis arrow colour (RGB 0–1) so it can track the theme. `setColor`
+ * touches only the colour, so the opacity set in `createDateAxis` is preserved. */
+export function setAxisColor(
+  arrow: THREE.ArrowHelper,
+  rgb: readonly [number, number, number],
+): void {
+  arrow.setColor(new THREE.Color(rgb[0], rgb[1], rgb[2]));
+}
