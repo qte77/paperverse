@@ -61,8 +61,9 @@ Nothing queued — the deferred items under **Later** are the candidates.
 - Visual appearance polish — *partial*; open: adaptive point sizing, colour-contrast
   audit — [#42](https://github.com/qte77/paperverse/issues/42) ·
   [plan](plans/visual-polish.md)
-- Slight 3D depth effect — *partial*; open: explicit 3D z-axis ticks (the legend
-  now shows the real year span) —
+- Slight 3D depth effect — *partial*; shipped: older → newer time-axis direction arrow
+  ([#82](https://github.com/qte77/paperverse/issues/82)); open: explicit z-axis tick
+  labels (deferred until the multi-year feed #107) —
   [#44](https://github.com/qte77/paperverse/issues/44) · [plan](plans/depth-effect.md)
 - Visualization performance — *partial*; shipped: `papers.db` + WASM off the
   first-paint path; open: bundle code-split, culling/LOD, sql.js worker —
