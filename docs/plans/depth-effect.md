@@ -5,7 +5,8 @@
 > Shipped: gentle idle auto-rotation (prefers-reduced-motion gated, #77), distance fog
 > toward `--bg`, perspective size
 > attenuation, neighbour-link lines, round soft-edged sprites, dated axis legend
-> (real year span). Open: explicit 3D z-axis ticks (optional polish).
+> (real year span), older → newer time-axis arrow (#82). Open: explicit z-axis tick
+> labels (deferred until the multi-year feed #107).
 
 ## Context
 
@@ -21,7 +22,8 @@ on-brand.
 - Gentle **idle auto-rotation** (stop on pointer input); optional cursor parallax.
 - Round, softly-shaded sprites instead of flat squares.
 - Make the z-axis (publication date) legible as the depth axis — *shipped*: the
-  legend shows the real year span (`date (YYYY → YYYY)`).
+  legend shows the real year span (`date (YYYY → YYYY)`), and an on-canvas older → newer
+  arrow marks the axis direction (#82).
 
 ## Out of scope
 

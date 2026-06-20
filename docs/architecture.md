@@ -60,7 +60,8 @@ ui/src/
                   flyTo, setFogColor) + idle auto-rotate (prefers-reduced-motion gated)
                   + distance fog
   papers.ts       parsePositions / buildColorBuffer / buildPointsCloud (perspective size) +
-                  highlight helpers / nearestNeighbors / neighbour-line helpers
+                  highlight helpers / nearestNeighbors / neighbour-line + date-axis-arrow
+                  (older->newer, #82) helpers
   colors.ts       Source -> EyeRest data-arc token; hexToRgb01
   db.ts           openPapersDb (sql.js-fts5) -> sourcesByIdx / paperByIdx / search
   interaction.ts  raycast hover/click -> tooltip (title + source·date) + openDetail
