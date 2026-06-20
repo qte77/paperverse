@@ -1,5 +1,12 @@
 # paperverse
 
+> Explore arXiv, bioRxiv, and medRxiv papers as one navigable 3D cloud — in your browser.
+
+[![Validate](https://github.com/qte77/paperverse/actions/workflows/validate.yml/badge.svg)](https://github.com/qte77/paperverse/actions/workflows/validate.yml)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
+
+**[Open the live demo →](https://qte77.github.io/paperverse/)**
+
 A 3D academic-paper cloud — a static GitHub Pages visualization of arXiv, bioRxiv,
 and medRxiv papers. A Python pipeline ingests weekly canonical CSVs, lays the
 papers out in 3D with UMAP, and exports a SQLite + FTS5 database, a Float32
@@ -54,6 +61,10 @@ data/
 | `--sources` | all | Restrict to sources; repeatable (`--sources arxiv --sources biorxiv`) |
 | `--seed` | `42` | UMAP seed for reproducible layouts |
 
+> paperverse is an internal pipeline tool, not a published library — there is no
+> `pip install paperverse` or public API. Use the `paperverse` CLI (above) to run the
+> pipeline, or the hosted UI to explore.
+
 ## Development
 
 ```bash
@@ -61,6 +72,7 @@ make setup      # uv sync + lychee + markdownlint-cli2
 make validate   # ruff + pyright (strict) + markdownlint + pip-audit + pytest (cov >= 90%)
 make test       # fast pytest (red-green-refactor loop)
 make test_js    # ui/ vitest
+make preview    # build the UI and serve it at http://localhost:8143
 ```
 
 Run `make help` for all recipes. See [CONTRIBUTING.md](CONTRIBUTING.md) for the
