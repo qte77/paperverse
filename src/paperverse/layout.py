@@ -36,6 +36,8 @@ def encode_tfidf(papers: Sequence[Paper], *, max_features: int = 5000) -> np.nda
     corpora raise an empty-vocabulary error, which is caught and returned as a zero
     ``(n, 1)`` matrix so the pipeline never crashes.
     """
+    # Lazy import: sklearn (+ its scipy stack) is a multi-second import, so keep it off
+    # the import path of callers that never lay out (models/db/ingest, CLI ``--help``).
     from sklearn.feature_extraction.text import TfidfVectorizer
 
     corpus = [f"{paper.title} {paper.abstract}" for paper in papers]
@@ -79,9 +81,10 @@ def date_axis(papers: Sequence[Paper]) -> np.ndarray:
 def layout(papers: Sequence[Paper], seed: int = 42) -> dict[str, Position]:
     """Compute a deterministic 3D position per paper, keyed by uid.
 
-    x and y come from a UMAP 2-D reduction of the multi-label category
-    vectors (fixed ``seed`` -> reproducible); z is the normalized publication
-    date (chronological depth).
+    x and y come from a UMAP 2-D reduction of the hybrid feature vectors
+    (TF-IDF on title+abstract, hstacked with weighted categories; fixed
+    ``seed`` -> reproducible), so papers placed near each other are topically
+    similar; z is the normalized publication date (chronological depth).
 
     Args:
         papers: Papers to lay out.
@@ -92,9 +95,11 @@ def layout(papers: Sequence[Paper], seed: int = 42) -> dict[str, Position]:
     """
     if not papers:
         return {}
+    # Lazy import: umap pulls in numba, whose first import is slow to JIT-warm; defer it
+    # so importing this module (e.g. for Position/date_axis) doesn't pay that cost.
     import umap
 
-    vectors = encode_categories(papers, category_vocab(papers))
+    vectors = encode_features(papers)
     z = date_axis(papers)
     n_neighbors = min(15, len(papers) - 1)
     # init="random" (seeded) instead of the default spectral init, whose

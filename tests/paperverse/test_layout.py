@@ -70,6 +70,34 @@ def test_encode_tfidf_falls_back_when_no_tokens() -> None:
     assert not out.any()
 
 
+def test_encode_tfidf_happy_path_is_dense_float32_and_deterministic() -> None:
+    # Now load-bearing (wired into layout): a real corpus yields one dense, non-negative
+    # float32 row per paper over a true vocabulary, identical across calls (no randomness).
+    papers = [
+        _paper_txt("a", "neural network training", "gradient descent optimisation", ["cs.LG"]),
+        _paper_txt("b", "protein folding study", "molecular dynamics simulation", ["q-bio.BM"]),
+        _paper_txt("c", "graph neural networks", "message passing over graphs", ["cs.LG"]),
+    ]
+    out = encode_tfidf(papers)
+    assert out.shape[0] == 3
+    assert 1 < out.shape[1] <= 5000  # a real vocabulary, not the (n, 1) fallback
+    assert out.dtype == np.float32
+    assert (out >= 0.0).all()  # TF-IDF weights are non-negative
+    assert np.array_equal(out, encode_tfidf(papers))  # deterministic
+
+
+def test_encode_tfidf_min_df_prunes_singletons_past_50_papers() -> None:
+    # min_df switches 1 -> 2 at len(papers) >= 50: a term in exactly one paper survives
+    # below the threshold but is pruned at/above it, so the singleton adds a column only
+    # in the small corpus.
+    base = "shared common vocabulary tokens here"
+    small = [_paper_txt(str(i), base, "", ["cs.LG"]) for i in range(40)]
+    small[0] = _paper_txt("0", f"{base} singletonword", "", ["cs.LG"])
+    big = [_paper_txt(str(i), base, "", ["cs.LG"]) for i in range(60)]
+    big[0] = _paper_txt("0", f"{base} singletonword", "", ["cs.LG"])
+    assert encode_tfidf(small).shape[1] == encode_tfidf(big).shape[1] + 1
+
+
 def test_l2_normalize_rows_zero_row_is_safe() -> None:
     out = l2_normalize_rows(np.array([[0.0, 0.0], [3.0, 4.0]], dtype=np.float32))
     assert not np.isnan(out).any()
