@@ -31,8 +31,8 @@ contract: [ADR-0002](decisions/0002-in-browser-store-and-data-contract.md).
 ## Data flow
 
 ```text
-data/<source>/**/*.csv   (Date,ISOWeek,DOI,Version,Category,Title,Authors,Abstract)
-        │  ingest  (one Paper per uid, date-sorted; source inferred from dir)
+data[/real]/<source>/**/*.{csv,jsonl}   (demo: canonical CSV · real: curated paper-eval JSONL)
+        │  ingest  (one Paper per uid, date-sorted; source inferred from dir, loader by ext)
         ▼
    list[Paper]  ─►  layout  (UMAP x/y on category + TF-IDF(title+abstract), seeded; z = date)
         │                       │  dict[uid -> (x, y, z)]
@@ -41,8 +41,8 @@ data/<source>/**/*.csv   (Date,ISOWeek,DOI,Version,Category,Title,Authors,Abstra
           ├►  positions.bin   (LE Float32 [x,y,z] per point; point i == papers.idx)
           └►  meta.json       (count + date range + per-point source list; first-paint path)
         │
-        ▼   Vite build bundles all three into the site (ADR-0001: no data branch)
-   Three.js + sql.js-fts5 UI  ─►  GitHub Pages
+        ▼   run per dataset (demo + real) → data/<dataset>/; Vite bundles all (ADR-0001: no data branch)
+   Three.js + sql.js-fts5 UI (demo↔real toggle)  ─►  GitHub Pages
 ```
 
 ## Module map
@@ -88,7 +88,10 @@ ui/src/
 
 - **Producer** — `gha-rxiv-feed-action` emits the canonical CSV (one schema across
   arxiv/biorxiv/medrxiv; an arXiv id rides the DOI column). Schema gated by its issue
-  #107; paperverse ships a demo `data/` corpus until then.
+  #107; paperverse ships a demo `data/` corpus.
+- **Real feed** — the curated AI-agent subset from `qte77/ai-agents-research` (produced by
+  `gha-rxiv-paper-eval`) is synced weekly into `data/real/` by
+  `.github/workflows/sync-real-feed.yml`; the UI's demo↔real toggle selects the dataset.
 - **sql.js-fts5 WASM** (~1.16 MB) — FTS5-enabled SQLite in the browser; the default
   sql.js bundles FTS3 only. Served from the Pages base path, loaded in the background
   after first paint so it never blocks the cloud appearing.
