@@ -106,7 +106,7 @@ PORT ?= 8143
 UI_BASE ?= /paperverse/
 # Both datasets are bundled (demo corpus + curated real feed); the UI's dataset
 # toggle picks one at load. Overridable for local builds.
-DATA_DIR_DEMO ?= data
+DATA_DIR_DEMO ?= data/demo
 DATA_DIR_REAL ?= data/real
 
 setup_js:  ## Install ui/ npm devDependencies (npm ci)

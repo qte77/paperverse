@@ -31,7 +31,7 @@ contract: [ADR-0002](decisions/0002-in-browser-store-and-data-contract.md).
 ## Data flow
 
 ```text
-data[/real]/<source>/**/*.{csv,jsonl}   (demo: canonical CSV · real: curated paper-eval JSONL)
+data/{demo,real}/<source>/**/*.{csv,jsonl}   (demo: canonical CSV · real: curated paper-eval JSONL)
         │  ingest  (one Paper per uid, date-sorted; source inferred from dir, loader by ext)
         ▼
    list[Paper]  ─►  layout  (UMAP x/y on category + TF-IDF(title+abstract), seeded; z = date)
@@ -88,7 +88,7 @@ ui/src/
 
 - **Producer** — `gha-rxiv-feed-action` emits the canonical CSV (one schema across
   arxiv/biorxiv/medrxiv; an arXiv id rides the DOI column). Schema gated by its issue
-  #107; paperverse ships a demo `data/` corpus.
+  #107; paperverse ships a demo `data/demo/` corpus.
 - **Real feed** — the curated AI-agent subset from `qte77/ai-agents-research` (produced by
   `gha-rxiv-paper-eval`) is synced weekly into `data/real/` by
   `.github/workflows/sync-real-feed.yml`; the UI's demo↔real toggle selects the dataset.
