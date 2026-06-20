@@ -59,7 +59,8 @@ interface CloudMeta {
 /** How many nearest papers to link when one is selected. */
 const NEIGHBOR_COUNT = 5;
 
-const THEME_KEY = "paperverse-theme";
+// Shared across qte77.github.io project sites (same origin) per the brand ui-kit contract.
+const THEME_KEY = "qte77-theme";
 const themeQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
 function readThemePreference(): Preference {
@@ -68,7 +69,19 @@ function readThemePreference(): Preference {
 }
 
 function applyThemePreference(pref: Preference): void {
-  document.documentElement.dataset.theme = themeForPreference(pref, themeQuery.matches);
+  // "system" must leave the attribute UNSET so the prefers-color-scheme cascade governs;
+  // writing a concrete value would freeze the theme and ignore later OS changes.
+  if (pref === "system") {
+    document.documentElement.removeAttribute("data-theme");
+  } else {
+    document.documentElement.dataset.theme = pref;
+  }
+  // Brand contract: emit so canvases/charts can recolour off the flip.
+  document.dispatchEvent(
+    new CustomEvent("themechange", {
+      detail: { preference: pref, theme: themeForPreference(pref, themeQuery.matches) },
+    }),
+  );
 }
 
 async function mount(canvas: HTMLCanvasElement): Promise<void> {

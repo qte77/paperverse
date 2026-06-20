@@ -12,14 +12,18 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url("./assets/fonts/Inter-Regular.ttf") format("truetype");
+  src:
+    url("./assets/fonts/Inter-Regular.woff2") format("woff2"),
+    url("./assets/fonts/Inter-Regular.ttf") format("truetype");
 }
 @font-face {
   font-family: "Inter";
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url("./assets/fonts/Inter-Bold.ttf") format("truetype");
+  src:
+    url("./assets/fonts/Inter-Bold.woff2") format("woff2"),
+    url("./assets/fonts/Inter-Bold.ttf") format("truetype");
 }
 
 :root,
@@ -27,7 +31,11 @@
   --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
   --bg: #ece8d8;
   --surface: #e2dec8;
+  --border: #c8c4b0;
   --text: #2c2818;
+  --text-muted: #686040;
+  --primary: #7a6010;
+  --primary-on: #ece8d8;
   --data-positive: #4a6818;
   --data-caution: #787010;
   --data-negative: #983828;
@@ -37,7 +45,11 @@
 [data-theme="dark"] {
   --bg: #1c1a14;
   --surface: #242018;
+  --border: #383428;
   --text: #d8d0b8;
+  --text-muted: #a89878;
+  --primary: #c8a858;
+  --primary-on: #1c1a14;
   --data-positive: #8aa860;
   --data-caution: #c8b868;
   --data-negative: #c08060;
@@ -51,7 +63,11 @@
   :root:not([data-theme]) {
     --bg: #1c1a14;
     --surface: #242018;
+    --border: #383428;
     --text: #d8d0b8;
+    --text-muted: #a89878;
+    --primary: #c8a858;
+    --primary-on: #1c1a14;
     --data-positive: #8aa860;
     --data-caution: #c8b868;
     --data-negative: #c08060;

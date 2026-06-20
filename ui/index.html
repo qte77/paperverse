@@ -9,10 +9,11 @@
       // Apply a saved Light/Dark choice before the stylesheet loads, so a
       // returning visitor never sees a flash of the wrong theme. "system" stores
       // nothing and is handled by the prefers-color-scheme media query in
-      // theme.css; main.ts later resolves it to a concrete data-theme.
+      // theme.css; main.ts later re-applies the saved choice (leaving "system"
+      // attribute-less so the OS scheme keeps governing).
       (function () {
         try {
-          var t = localStorage.getItem("paperverse-theme");
+          var t = localStorage.getItem("qte77-theme");
           if (t === "light" || t === "dark") {
             document.documentElement.dataset.theme = t;
           }
@@ -151,6 +152,7 @@
         margin: -1px;
         overflow: hidden;
         clip: rect(0 0 0 0);
+        clip-path: inset(50%);
         white-space: nowrap;
         border: 0;
       }
