@@ -92,11 +92,21 @@ export function restorePoints(
   }
 }
 
-/** Indices of the `k` points nearest to `index` (Euclidean, 3D), closest first,
- * excluding `index` itself. Proximity in the UMAP layout ≈ similarity, so these
- * are a paper's most-related neighbours. Ties break by ascending index; `k` is
- * clamped to the number of other points. */
-export function nearestNeighbors(positions: Float32Array, index: number, k: number): number[] {
+/** Indices of the `k` points nearest to `index`, closest first, excluding `index`
+ * itself. Proximity in the UMAP layout ≈ similarity, so these are a paper's
+ * most-related neighbours. Ties break by ascending index; `k` is clamped to the
+ * number of other points.
+ *
+ * `includeZ` (default `true`) selects the metric: full 3D distance weighs the
+ * z=date axis, so neighbours are similar *and* near in time; `false` weighs only
+ * the x/y topic plane, so same-topic papers link across the (time-stretched) z
+ * axis regardless of year. */
+export function nearestNeighbors(
+  positions: Float32Array,
+  index: number,
+  k: number,
+  includeZ = true,
+): number[] {
   if (k <= 0) return [];
   const count = positions.length / 3;
   const ox = positions[index * 3];
@@ -107,7 +117,7 @@ export function nearestNeighbors(positions: Float32Array, index: number, k: numb
     if (i === index) continue;
     const dx = positions[i * 3] - ox;
     const dy = positions[i * 3 + 1] - oy;
-    const dz = positions[i * 3 + 2] - oz;
+    const dz = includeZ ? positions[i * 3 + 2] - oz : 0;
     ranked.push({ idx: i, d2: dx * dx + dy * dy + dz * dz });
   }
   ranked.sort((a, b) => a.d2 - b.d2 || a.idx - b.idx);
@@ -276,7 +286,9 @@ export function createDateAxis(
   zMax: number,
 ): THREE.ArrowHelper {
   const length = zMax - zMin;
-  const headLength = length * 0.18;
+  // Kept small (was 0.18) so the head doesn't balloon with the balanced z
+  // time-stretch (#105) — it should mark the arrow's direction, not dominate it.
+  const headLength = length * 0.06;
   const headWidth = headLength * 0.6;
   const arrow = new THREE.ArrowHelper(
     new THREE.Vector3(0, 0, 1),

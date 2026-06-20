@@ -37,6 +37,10 @@ deployment via GitHub Pages.
   no server setup is required
 + As a keyboard user, I want to navigate search results with the arrow keys
   and open a paper with Enter so that I can explore the cloud without a mouse
++ As a researcher, I want neighbour links weighted by topic regardless of year
+  so that I can find related work across the time axis
++ As a user, I want to pause the rotation and snap to axis-aligned views so that
+  I can inspect the cloud from a fixed orientation
 
 ## Success Criteria
 

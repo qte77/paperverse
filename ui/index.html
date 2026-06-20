@@ -121,7 +121,10 @@
       }
       #theme-toggle,
       #reset,
-      #dataset-toggle {
+      #dataset-toggle,
+      #links-toggle,
+      #pause-toggle,
+      #view-cycle {
         padding: 0.4rem 0.5rem;
         font: 0.9rem var(--font-sans);
         color: var(--text);
@@ -256,6 +259,9 @@
       <button id="theme-toggle" type="button" aria-label="Theme" title="Theme">◐ System</button>
       <button id="reset" type="button" title="Reset view" aria-label="Reset view">Reset</button>
       <button id="dataset-toggle" type="button" aria-label="Dataset" title="Dataset">Demo</button>
+      <button id="links-toggle" type="button" aria-label="Neighbour links" title="Neighbour links">Links: Topic</button>
+      <button id="pause-toggle" type="button" aria-label="Pause rotation" title="Pause rotation">Pause</button>
+      <button id="view-cycle" type="button" aria-label="View axis" title="View axis">View: X</button>
       <div id="legend" role="img" aria-label="Paper source colour key: arXiv, bioRxiv, medRxiv">
         <span class="src"><span class="swatch arxiv"></span>arXiv</span>
         <span class="src"><span class="swatch biorxiv"></span>bioRxiv</span>
@@ -266,6 +272,9 @@
     <div id="status" role="status" aria-live="polite">Loading…</div>
     <div id="theme-status" class="sr-only" role="status" aria-live="polite"></div>
     <div id="dataset-status" class="sr-only" role="status" aria-live="polite"></div>
+    <div id="links-status" class="sr-only" role="status" aria-live="polite"></div>
+    <div id="rotation-status" class="sr-only" role="status" aria-live="polite"></div>
+    <div id="view-status" class="sr-only" role="status" aria-live="polite"></div>
     <div id="tooltip" hidden aria-live="polite"></div>
     <aside id="detail" hidden>
       <button id="detail-close" aria-label="Close">✕</button>

@@ -136,3 +136,25 @@ describe("nearestNeighbors", () => {
     expect(nearestNeighbors(tie, 0, 2)).toEqual([1, 2]);
   });
 });
+
+describe("nearestNeighbors link weighting (includeZ)", () => {
+  // z encodes date; with the time-stretch it dominates raw 3D distance. Point 1 is
+  // closer in full 3D (small z gap), point 2 is closest in the x/y topic plane but
+  // far along z. The includeZ flag decides which one links.
+  const cloud = new Float32Array([
+    0, 0, 0, // 0: origin (the selected paper)
+    5, 0, 1, // 1: nearer in 3D (z-close), farther across topic
+    2, 0, 6, // 2: nearest in the x/y topic plane, but far along z (a different year)
+  ]);
+
+  it("includes z by default (3D), ranking the z-near point first", () => {
+    // d2: point 1 = 25 + 1 = 26; point 2 = 4 + 36 = 40 -> point 1 wins.
+    expect(nearestNeighbors(cloud, 0, 1)).toEqual([1]);
+  });
+
+  it("with includeZ=false weighs only x/y, so an x/y-near point outranks a z-near one", () => {
+    // d2 (z ignored): point 1 = 25; point 2 = 4 -> point 2 (topic-near) now wins,
+    // i.e. same-topic papers link across the time axis.
+    expect(nearestNeighbors(cloud, 0, 1, false)).toEqual([2]);
+  });
+});

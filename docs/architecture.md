@@ -57,11 +57,11 @@ src/paperverse/
   __main__.py            AppSettings(BaseSettings) CLI via CliApp.run
 ui/src/
   scene.ts        createScene -> SceneHandle (WebGPU + WebGL2, OrbitControls, frameSphere,
-                  flyTo, setFogColor) + idle auto-rotate (prefers-reduced-motion gated)
-                  + distance fog
+                  viewAxis, flyTo, setFogColor) + idle auto-rotate (prefers-reduced-motion
+                  gated, pausable) + distance fog
   papers.ts       parsePositions / buildColorBuffer / buildPointsCloud (perspective size) +
-                  highlight helpers / nearestNeighbors / neighbour-line + date-axis-arrow
-                  (older->newer, #82) helpers
+                  highlight helpers / nearestNeighbors (topic x/y or full 3D) / neighbour-line
+                  + date-axis-arrow (older->newer, #82) helpers
   colors.ts       Source -> EyeRest data-arc token; hexToRgb01
   db.ts           openPapersDb (sql.js-fts5) -> sourcesByIdx / paperByIdx / search
   interaction.ts  raycast hover/click -> tooltip (title + source·date) + openDetail
@@ -72,7 +72,7 @@ ui/src/
   main.ts         mount: fetch positions+meta -> build cloud (first paint) -> frame;
                   papers.db + WASM load in background -> wire interaction + search + results;
                   detail open/close (Escape restores focus), status overlay, dated
-                  source/axis legend, reset-view button
+                  source/axis legend, reset-view + link-weight + pause + axis-view buttons
   theme.ts/.css   system theme + vendored EyeRest tokens (light/dark)
 ```
 
@@ -82,7 +82,7 @@ ui/src/
 | --- | --- | --- |
 | `Paper` | `models.py` | frozen pydantic paper; computed `uid` |
 | `PapersDb` | `ui/src/db.ts` | in-browser handle: `sourcesByIdx` / `paperByIdx` / `search` |
-| `SceneHandle` | `ui/src/scene.ts` | camera/controls + `add` / `frameSphere` / `flyTo` / `setFogColor` / `dispose` |
+| `SceneHandle` | `ui/src/scene.ts` | camera/controls + `add` / `frameSphere` / `viewAxis` / `flyTo` / `setFogColor` / `dispose` |
 
 ## External boundaries
 

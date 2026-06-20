@@ -47,6 +47,16 @@ const DATASET: Dataset = readDataset();
 const DATA_DIR = `${BASE}data/${DATASET}`;
 const SQL_WASM_URL = `${BASE}sql-wasm.wasm`;
 
+// Neighbour-link weighting (persisted, applied live without a reload — unlike the
+// dataset toggle). "topic" weighs only the x/y topic plane, so same-topic papers
+// link across the time-stretched z (date) axis; "time" uses full 3D distance.
+// Default "topic" so cross-year topic links work out of the box (#106).
+const LINKS_KEY = "paperverse-links";
+type LinkMode = "topic" | "time";
+function readLinkMode(): LinkMode {
+  return localStorage.getItem(LINKS_KEY) === "time" ? "time" : "topic";
+}
+
 /** First-paint metadata (meta.json): point count, date endpoints, and the
  * per-point source list (parallel to positions.bin, entry `i` == point `i`). */
 interface CloudMeta {
@@ -181,6 +191,61 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
         dateAxis = createDateAxis(center[0], center[1], bbox.min.z, bbox.max.z);
         handle.add(dateAxis);
       }
+
+      // Cloud-view controls: pause/resume the idle rotation, and snap the camera to
+      // look down each world axis. The scene's prefers-reduced-motion gate stays the
+      // top-priority override of auto-rotate.
+      const pauseControl = document.querySelector<HTMLButtonElement>("#pause-toggle");
+      const rotationStatus = document.querySelector<HTMLElement>("#rotation-status");
+      // Reduced-motion-honest: when rotation is already off, the button reads "Rotate"
+      // (start) rather than "Pause"; the label always tracks the live autoRotate state.
+      const reflectPause = (): void => {
+        if (!pauseControl) return;
+        const rotating = handle.controls.autoRotate;
+        pauseControl.textContent = rotating ? "Pause" : "Rotate";
+        const aria = rotating ? "Pause rotation" : "Start rotation";
+        pauseControl.setAttribute("aria-label", aria);
+        pauseControl.title = aria;
+      };
+      reflectPause();
+      pauseControl?.addEventListener("click", () => {
+        handle.controls.autoRotate = !handle.controls.autoRotate;
+        reflectPause();
+        if (rotationStatus) {
+          rotationStatus.textContent = handle.controls.autoRotate
+            ? "Rotation on"
+            : "Rotation paused";
+        }
+      });
+
+      const viewControl = document.querySelector<HTMLButtonElement>("#view-cycle");
+      const viewStatus = document.querySelector<HTMLElement>("#view-status");
+      if (viewControl) {
+        const axes = ["x", "y", "z"] as const;
+        const axisName = { x: "X", y: "Y", z: "Z" } as const;
+        let axisIndex = 0;
+        const reflectView = (): void => {
+          const axis = axes[axisIndex];
+          const next = axes[(axisIndex + 1) % axes.length];
+          viewControl.textContent = `View: ${axisName[axis]}`;
+          const aria = `View down the ${axisName[axis]} axis (activate for ${axisName[next]})`;
+          viewControl.setAttribute("aria-label", aria);
+          viewControl.title = aria;
+        };
+        reflectView();
+        viewControl.addEventListener("click", () => {
+          const axis = axes[axisIndex];
+          handle.viewAxis(axis, center, radius);
+          // Stop the drift so the snapped view stays on-axis; keep the pause label honest.
+          handle.controls.autoRotate = false;
+          reflectPause();
+          if (viewStatus) {
+            viewStatus.textContent = `View down the ${axisName[axis]} axis`;
+          }
+          axisIndex = (axisIndex + 1) % axes.length;
+          reflectView();
+        });
+      }
     }
 
     const readColour = (name: string): [number, number, number] =>
@@ -218,12 +283,17 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
     };
 
     // Selecting a paper links it to its nearest neighbours (proximity ≈ similarity).
+    // linkMode weights the metric (topic = x/y only, time = full 3D); lastSelectedIdx
+    // lets the links toggle re-draw the current selection live.
+    let linkMode = readLinkMode();
+    let lastSelectedIdx: number | null = null;
     const showNeighbors = (idx: number | null): void => {
+      lastSelectedIdx = idx;
       if (idx === null) {
         neighborLines.visible = false;
         return;
       }
-      const neighbors = nearestNeighbors(positions, idx, NEIGHBOR_COUNT);
+      const neighbors = nearestNeighbors(positions, idx, NEIGHBOR_COUNT, linkMode === "time");
       updateNeighborLines(neighborLines, positions, idx, neighbors);
     };
     // Detail panel: one open/close controller shared by the canvas click
@@ -326,6 +396,35 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
         recolour();
       }
     });
+
+    // Link-weighting toggle: cycle Topic <-> Time. Topic weighs only the x/y plane so
+    // same-topic papers link across the time axis (#106); persisted + re-draws the
+    // current selection live. a11y: dynamic aria-label + sr-only announce (mirrors theme).
+    const linksControl = document.querySelector<HTMLButtonElement>("#links-toggle");
+    const linksStatus = document.querySelector<HTMLElement>("#links-status");
+    if (linksControl) {
+      const linkLabel: Record<LinkMode, string> = { topic: "Topic", time: "Time" };
+      const reflectLinksControl = (): void => {
+        const other: LinkMode = linkMode === "topic" ? "time" : "topic";
+        linksControl.textContent = `Links: ${linkLabel[linkMode]}`;
+        const aria = `Neighbour links: ${linkLabel[linkMode]} (activate to weigh by ${linkLabel[other]})`;
+        linksControl.setAttribute("aria-label", aria);
+        linksControl.title = aria;
+      };
+      reflectLinksControl();
+      linksControl.addEventListener("click", () => {
+        linkMode = linkMode === "topic" ? "time" : "topic";
+        localStorage.setItem(LINKS_KEY, linkMode);
+        reflectLinksControl();
+        if (linksStatus) {
+          linksStatus.textContent = `Neighbour links: ${linkLabel[linkMode]}`;
+        }
+        // Re-draw the currently selected paper's links under the new weighting.
+        if (lastSelectedIdx !== null) {
+          showNeighbors(lastSelectedIdx);
+        }
+      });
+    }
 
     // Background load: fetch papers.db + the sql.js WASM, then wire hover/click
     // metadata and enable search. On failure the cloud stays usable (orbit,
