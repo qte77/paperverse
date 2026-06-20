@@ -52,6 +52,14 @@ search-results listbox (`ui/src/results.ts` — Arrow/Home/End/Enter, Escape res
 focus) gives the mouse-only canvas a keyboard path
 ([#78](https://github.com/qte77/paperverse/issues/78)).
 
+## v0.1.5 — real papers (demo↔real toggle, shipped)
+
+The UI bundles two datasets and a toolbar toggle switches between the demo corpus and a
+curated **real** AI-agent feed: a JSONL adapter ingests the `gha-rxiv-paper-eval` extracts
+(from `ai-agents-research`), the build emits `data/{demo,real}`, and a weekly
+`sync-real-feed` workflow refreshes `data/real/`
+([#92](https://github.com/qte77/paperverse/issues/92)).
+
 ## Next
 
 Nothing queued — the deferred items under **Later** are the candidates.
@@ -72,5 +80,8 @@ Nothing queued — the deferred items under **Later** are the candidates.
 
 ## Data
 
-- Replace the demo sample corpus (`data/`) with the real feed when the producer
-  `gha-rxiv-feed-action` (its issue #107) lands a canonical schema.
+- Real papers shipped: the curated AI-agent subset (`gha-rxiv-paper-eval` via
+  `ai-agents-research`) is synced weekly into `data/real/` and shown via the demo↔real
+  toggle ([#92](https://github.com/qte77/paperverse/issues/92)).
+- Open: a broader / full real corpus beyond the agent-curated subset once the producer
+  `gha-rxiv-feed-action` (its issue #107) lands a stable canonical schema.

@@ -1,0 +1,75 @@
+---
+# Weekly sync of the curated AI-agent paper feed from `qte77/ai-agents-research` into
+# `data/real/`, opening a PR with any changes. ai-agents-research runs the LLM relevance
+# eval on Tuesdays; this runs Wednesday so it picks up the freshest curated jsonl. The
+# gh-pages workflow already redeploys on `data/**`, so merging the sync PR refreshes the
+# deployed "Real" dataset. Merging follows the repo's normal flow (signed-commit ruleset);
+# enabling repo auto-merge + `gh pr merge --auto` would make the refresh fully hands-off.
+
+name: sync-real-feed
+
+on:
+  schedule:
+    - cron: "0 9 * * 3" # Wed 09:00 UTC, after ai-agents-research's Tuesday eval
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: sync-real-feed
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    name: sync curated real feed
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - name: Sync curated jsonl from ai-agents-research
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SRC_REPO: qte77/ai-agents-research
+          SRC_PATH: triage/rxiv/data
+        run: |
+          set -euo pipefail
+          mkdir -p data/real/arxiv data/real/biorxiv data/real/medrxiv
+          # List + download each curated jsonl, routing to data/real/<source>/ by the
+          # filename's server prefix. Source is a trusted sibling repo I control; names
+          # that don't match a known prefix are skipped rather than trusted blindly.
+          gh api "repos/${SRC_REPO}/contents/${SRC_PATH}" \
+            --jq '.[] | select(.name | endswith(".jsonl")) | [.name, .download_url] | @tsv' \
+            > /tmp/feed-files.tsv
+          while IFS=$'\t' read -r name url; do
+            case "$name" in
+              arxiv-*) dest="data/real/arxiv/${name}" ;;
+              biorxiv-*) dest="data/real/biorxiv/${name}" ;;
+              medrxiv-*) dest="data/real/medrxiv/${name}" ;;
+              *) echo "::warning::skipping unrecognized feed file ${name}"; continue ;;
+            esac
+            curl -fsSL --proto '=https' --tlsv1.2 "$url" -o "$dest"
+            echo "synced ${dest}"
+          done < /tmp/feed-files.tsv
+
+      - name: Open a PR if the feed changed
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- data/real; then
+            echo "No curated-feed changes; nothing to sync."
+            exit 0
+          fi
+          branch="chore/sync-real-feed-${RUN_ID}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "${branch}"
+          git add data/real
+          git commit --no-gpg-sign -m "chore: sync curated real feed from ai-agents-research (#92)"
+          git push origin "${branch}"
+          gh pr create --base main --head "${branch}" \
+            --title "chore: sync curated real feed" \
+            --body "Automated weekly sync of the curated AI-agent paper feed from qte77/ai-agents-research (#92). Merge to refresh the deployed Real dataset."
