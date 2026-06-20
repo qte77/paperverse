@@ -57,17 +57,21 @@ src/paperverse/
   __main__.py            AppSettings(BaseSettings) CLI via CliApp.run
 ui/src/
   scene.ts        createScene -> SceneHandle (WebGPU + WebGL2, OrbitControls, frameSphere,
-                  flyTo, setFogColor) + idle auto-rotate + distance fog
+                  flyTo, setFogColor) + idle auto-rotate (prefers-reduced-motion gated)
+                  + distance fog
   papers.ts       parsePositions / buildColorBuffer / buildPointsCloud (perspective size) +
                   highlight helpers / nearestNeighbors / neighbour-line helpers
   colors.ts       Source -> EyeRest data-arc token; hexToRgb01
   db.ts           openPapersDb (sql.js-fts5) -> sourcesByIdx / paperByIdx / search
-  interaction.ts  raycast hover/click -> tooltip (title + source·date) + detail panel +
-                  onSelect (neighbour links)
+  interaction.ts  raycast hover/click -> tooltip (title + source·date) + openDetail
+                  (shared with results.ts) + onSelect (neighbour links)
   search.ts       debounced FTS5 prefix search -> highlight + camera fly-to
+  results.ts      ARIA listbox of search hits; roving-tabindex Arrow/Home/End/Enter,
+                  Escape -> search input; opens a paper via the shared openDetail (#78)
   main.ts         mount: fetch positions+meta -> build cloud (first paint) -> frame;
-                  papers.db + WASM load in background -> wire interaction + search;
-                  status overlay, dated source/axis legend, reset-view button
+                  papers.db + WASM load in background -> wire interaction + search + results;
+                  detail open/close (Escape restores focus), status overlay, dated
+                  source/axis legend, reset-view button
   theme.ts/.css   system theme + vendored EyeRest tokens (light/dark)
 ```
 

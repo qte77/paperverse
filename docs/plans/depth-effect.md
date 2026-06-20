@@ -2,7 +2,8 @@
 
 > Tracking: [#44](https://github.com/qte77/paperverse/issues/44) · Status: partial
 >
-> Shipped: gentle idle auto-rotation, distance fog toward `--bg`, perspective size
+> Shipped: gentle idle auto-rotation (prefers-reduced-motion gated, #77), distance fog
+> toward `--bg`, perspective size
 > attenuation, neighbour-link lines, round soft-edged sprites, dated axis legend
 > (real year span). Open: explicit 3D z-axis ticks (optional polish).
 

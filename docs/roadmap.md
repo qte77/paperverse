@@ -38,6 +38,20 @@ load in the background — the cloud no longer waits on them
 shows the corpus's real year span instead of "old → new"
 ([#44](https://github.com/qte77/paperverse/issues/44)).
 
+## v0.1.4 — UI accessibility (shipped)
+
+Theme toggle reserves its widest-label width so the centered toolbar no longer shifts on
+cycle ([#76](https://github.com/qte77/paperverse/issues/76)) and exposes its mode via a
+dynamic `aria-label` + an sr-only live region
+([#75](https://github.com/qte77/paperverse/issues/75)); the cloud's idle auto-rotate is
+gated by `prefers-reduced-motion`
+([#77](https://github.com/qte77/paperverse/issues/77)); `#legend` carries `role="img"`
+with a full text alternative
+([#79](https://github.com/qte77/paperverse/issues/79)); and a keyboard-navigable
+search-results listbox (`ui/src/results.ts` — Arrow/Home/End/Enter, Escape restores
+focus) gives the mouse-only canvas a keyboard path
+([#78](https://github.com/qte77/paperverse/issues/78)).
+
 ## Next
 
 Nothing queued — the deferred items under **Later** are the candidates.
