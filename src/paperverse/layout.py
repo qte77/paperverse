@@ -78,13 +78,28 @@ def date_axis(papers: Sequence[Paper]) -> np.ndarray:
     return (ordinals - ordinals.min()) / span
 
 
+def balance_depth(date_norm: np.ndarray, xy_extent: float) -> np.ndarray:
+    """Scale the ``[0, 1]`` date axis to span the x/y topic extent, centred on 0.
+
+    The raw date axis is tiny next to UMAP's x/y coordinates, so the time depth is
+    invisible and the 3D nearest-neighbour distance effectively ignores it. Scaling z to
+    the topic extent gives a *balanced* stretch: the cloud spreads by date and neighbours
+    weigh topic and era comparably. Constant dates (or a degenerate extent) stay flat.
+    """
+    if not date_norm.any() or xy_extent == 0.0:
+        return np.zeros(len(date_norm))
+    return (date_norm - 0.5) * xy_extent
+
+
 def layout(papers: Sequence[Paper], seed: int = 42) -> dict[str, Position]:
     """Compute a deterministic 3D position per paper, keyed by uid.
 
     x and y come from a UMAP 2-D reduction of the hybrid feature vectors
     (TF-IDF on title+abstract, hstacked with weighted categories; fixed
     ``seed`` -> reproducible), so papers placed near each other are topically
-    similar; z is the normalized publication date (chronological depth).
+    similar; z is the publication date scaled to the x/y topic extent
+    (``balance_depth``), so the cloud stretches by time and neighbours weigh
+    topic and era comparably.
 
     Args:
         papers: Papers to lay out.
@@ -100,7 +115,6 @@ def layout(papers: Sequence[Paper], seed: int = 42) -> dict[str, Position]:
     import umap
 
     vectors = encode_features(papers)
-    z = date_axis(papers)
     n_neighbors = min(15, len(papers) - 1)
     # metric="cosine": correct for high-dim sparse TF-IDF (Euclidean concentrates there).
     # init="random" (seeded) over the default spectral init, whose eigensolver start vector
@@ -114,8 +128,11 @@ def layout(papers: Sequence[Paper], seed: int = 42) -> dict[str, Position]:
         random_state=seed,
         init="random",
     )
-    coords = np.asarray(reducer.fit_transform(vectors), dtype=np.float64).tolist()
+    xy = np.asarray(reducer.fit_transform(vectors), dtype=np.float64)
+    # Stretch z (date) to the larger of the x/y ranges so time is a balanced third axis.
+    extent = float((xy.max(axis=0) - xy.min(axis=0)).max())
+    z = balance_depth(date_axis(papers), extent)
     return {
-        paper.uid: (float(coords[i][0]), float(coords[i][1]), float(z[i]))
+        paper.uid: (float(xy[i, 0]), float(xy[i, 1]), float(z[i]))
         for i, paper in enumerate(papers)
     }

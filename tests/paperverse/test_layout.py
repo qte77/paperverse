@@ -15,6 +15,7 @@ from hypothesis import strategies as st
 from hypothesis.extra.numpy import array_shapes, arrays
 
 from paperverse.layout import (
+    balance_depth,
     category_vocab,
     date_axis,
     encode_categories,
@@ -149,6 +150,18 @@ def test_date_axis_handles_single_date() -> None:
     assert [float(v) for v in date_axis(papers)] == [0.0, 0.0]
 
 
+def test_balance_depth_span_matches_extent() -> None:
+    # [0, 0.5, 1] dates scaled to span the x/y topic extent (10), centred on 0, monotonic.
+    z = balance_depth(np.array([0.0, 0.5, 1.0]), 10.0)
+    assert [float(v) for v in z] == [-5.0, 0.0, 5.0]
+
+
+def test_balance_depth_flat_for_constant_or_empty() -> None:
+    assert not balance_depth(np.array([0.0, 0.0, 0.0]), 10.0).any()  # constant date -> flat
+    assert not balance_depth(np.array([0.0, 0.5, 1.0]), 0.0).any()  # zero extent -> flat
+    assert balance_depth(np.array([]), 10.0).shape == (0,)  # empty -> empty
+
+
 def test_layout_is_deterministic_complete_and_date_keyed() -> None:
     papers = [
         _paper_txt(str(i), f"study topic{i}", f"methods topic{i}", [f"cat{i}", "shared"], 1 + i)
@@ -158,8 +171,10 @@ def test_layout_is_deterministic_complete_and_date_keyed() -> None:
     second = layout(papers, seed=7)
     assert set(first) == {p.uid for p in papers}  # every paper placed
     assert first == second  # deterministic under a fixed seed
-    z = [float(v) for v in date_axis(papers)]
-    assert [first[p.uid][2] for p in papers] == z  # z is the normalized date
+    # z is the date axis scaled to the topic spread (balanced stretch): still monotonic in date.
+    by_date = sorted(papers, key=lambda paper: paper.published)
+    zs = [first[paper.uid][2] for paper in by_date]
+    assert zs == sorted(zs)
 
 
 def test_layout_empty() -> None:
