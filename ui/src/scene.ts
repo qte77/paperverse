@@ -56,9 +56,16 @@ export async function createScene(canvas: HTMLCanvasElement): Promise<SceneHandl
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
   // Gentle idle drift so the cloud reads as 3D; OrbitControls pauses it while the
-  // user is actively dragging.
-  controls.autoRotate = true;
+  // user is actively dragging. Honour prefers-reduced-motion: vestibular-sensitive
+  // users get a static (still draggable) cloud, and we respond live if they toggle
+  // the OS setting.
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  controls.autoRotate = !reducedMotion.matches;
   controls.autoRotateSpeed = 0.8;
+  const onReducedMotionChange = (): void => {
+    controls.autoRotate = !reducedMotion.matches;
+  };
+  reducedMotion.addEventListener("change", onReducedMotionChange);
 
   const applySize = (): void => {
     const { width, height, pixelRatio, aspect } = computeRenderSize(
@@ -117,6 +124,7 @@ export async function createScene(canvas: HTMLCanvasElement): Promise<SceneHandl
     },
     dispose(): void {
       window.removeEventListener("resize", applySize);
+      reducedMotion.removeEventListener("change", onReducedMotionChange);
       renderer.setAnimationLoop(null);
       controls.dispose();
       renderer.dispose();
