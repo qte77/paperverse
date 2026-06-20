@@ -34,9 +34,17 @@ import {
 } from "./theme";
 
 // Data artifacts + the sql.js WASM are copied into the site by the Pages build
-// and served under the Vite base path (e.g. /paperverse/).
+// and served under the Vite base path (e.g. /paperverse/). Two datasets are
+// bundled — the demo corpus and the curated real feed — under data/<dataset>/;
+// the dataset toggle picks one (persisted, applied on reload).
 const BASE = import.meta.env.BASE_URL;
-const DATA_DIR = `${BASE}data`;
+const DATASET_KEY = "paperverse-dataset";
+type Dataset = "demo" | "real";
+function readDataset(): Dataset {
+  return localStorage.getItem(DATASET_KEY) === "real" ? "real" : "demo";
+}
+const DATASET: Dataset = readDataset();
+const DATA_DIR = `${BASE}data/${DATASET}`;
 const SQL_WASM_URL = `${BASE}sql-wasm.wasm`;
 
 /** First-paint metadata (meta.json): point count, date endpoints, and the
@@ -350,6 +358,29 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
 
 // Apply the saved theme preference before the scene reads the EyeRest variables.
 applyThemePreference(readThemePreference());
+
+// Dataset toggle: switch between the demo corpus and the curated real feed. Each
+// dataset is a separate build-time bundle under data/<dataset>/ (ADR-0001), so the
+// choice is persisted and applied on reload rather than swapped in place.
+function wireDatasetToggle(): void {
+  const control = document.querySelector<HTMLButtonElement>("#dataset-toggle");
+  if (!control) return;
+  const datasetStatus = document.querySelector<HTMLElement>("#dataset-status");
+  const label: Record<Dataset, string> = { demo: "Demo", real: "Real" };
+  const other: Dataset = DATASET === "demo" ? "real" : "demo";
+  const aria = `Dataset: ${label[DATASET]} (activate to show ${label[other]} papers)`;
+  control.textContent = label[DATASET];
+  control.setAttribute("aria-label", aria);
+  control.title = aria;
+  control.addEventListener("click", () => {
+    localStorage.setItem(DATASET_KEY, other);
+    if (datasetStatus) {
+      datasetStatus.textContent = `Dataset: ${label[other]}`;
+    }
+    location.reload();
+  });
+}
+wireDatasetToggle();
 
 const canvas = document.querySelector<HTMLCanvasElement>("#cloud");
 if (canvas) {

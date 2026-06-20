@@ -111,7 +111,8 @@
         border-radius: 6px;
       }
       #theme-toggle,
-      #reset {
+      #reset,
+      #dataset-toggle {
         padding: 0.4rem 0.5rem;
         font: 0.9rem var(--font-sans);
         color: var(--text);
@@ -244,6 +245,7 @@
       </form>
       <button id="theme-toggle" type="button" aria-label="Theme" title="Theme">◐ System</button>
       <button id="reset" type="button" title="Reset view" aria-label="Reset view">Reset</button>
+      <button id="dataset-toggle" type="button" aria-label="Dataset" title="Dataset">Demo</button>
       <div id="legend" role="img" aria-label="Paper source colour key: arXiv, bioRxiv, medRxiv">
         <span class="src"><span class="swatch arxiv"></span>arXiv</span>
         <span class="src"><span class="swatch biorxiv"></span>bioRxiv</span>
@@ -253,6 +255,7 @@
     <ul id="results" role="listbox" aria-label="Search results" hidden></ul>
     <div id="status" role="status" aria-live="polite">Loading…</div>
     <div id="theme-status" class="sr-only" role="status" aria-live="polite"></div>
+    <div id="dataset-status" class="sr-only" role="status" aria-live="polite"></div>
     <div id="tooltip" hidden aria-live="polite"></div>
     <aside id="detail" hidden>
       <button id="detail-close" aria-label="Close">✕</button>

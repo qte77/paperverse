@@ -38,10 +38,11 @@ jobs:
         with:
           enable-cache: true
 
-      - name: Generate papers.db + positions.bin
+      - name: Generate papers.db + positions.bin (demo + real datasets)
         run: |
           uv sync
-          uv run paperverse --data-dir data --output ui/public/data
+          uv run paperverse --data-dir data --output ui/public/data/demo
+          uv run paperverse --data-dir data/real --output ui/public/data/real
 
       - name: Build the UI
         working-directory: ui
