@@ -148,8 +148,7 @@ CREATE TABLE papers (
     doi TEXT,
     x REAL NOT NULL,
     y REAL NOT NULL,
-    z REAL NOT NULL,
-    r REAL NOT NULL DEFAULT 1.0
+    z REAL NOT NULL
 )\
 """,
             "papers_fts": """\

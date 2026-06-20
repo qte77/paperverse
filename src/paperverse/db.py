@@ -39,8 +39,7 @@ CREATE TABLE papers (
     doi TEXT,
     x REAL NOT NULL,
     y REAL NOT NULL,
-    z REAL NOT NULL,
-    r REAL NOT NULL DEFAULT 1.0
+    z REAL NOT NULL
 );
 CREATE INDEX idx_papers_source ON papers(source);
 CREATE INDEX idx_papers_published ON papers(published);
