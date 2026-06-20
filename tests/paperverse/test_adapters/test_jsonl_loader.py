@@ -25,6 +25,9 @@ def _rec(
     title: str = "A Title",
     authors: str = "",
     abstract: str = "An abstract",
+    summary: str = "s",
+    subjects: list[str] | None = None,
+    key_findings: list[str] | None = None,
 ) -> dict[str, object]:
     return {
         "date": date,
@@ -35,7 +38,12 @@ def _rec(
         "title": title,
         "authors": authors,
         "abstract": abstract,
-        "extracted": {"summary": "s", "methods": ["m"], "key_findings": ["k"]},
+        "extracted": {
+            "summary": summary,
+            "subjects": subjects if subjects is not None else [],
+            "methods": ["m"],
+            "key_findings": key_findings if key_findings is not None else ["k"],
+        },
     }
 
 
@@ -129,3 +137,40 @@ def test_missing_required_field_raises(tmp_path: Path) -> None:
     path = _write(tmp_path, record)
     with pytest.raises(KeyError):
         load_jsonl(path, Source.ARXIV)
+
+
+def test_empty_authors_falls_back_to_subjects(tmp_path: Path) -> None:
+    path = _write(tmp_path, _rec(authors="", subjects=["Graph Nets", "Gemma 4"]))
+    [p] = load_jsonl(path, Source.ARXIV)
+    assert p.authors == "Graph Nets; Gemma 4"
+
+
+def test_present_authors_preserved_over_subjects(tmp_path: Path) -> None:
+    path = _write(tmp_path, _rec(authors="Doe J; Roe A", subjects=["Graph Nets"]))
+    [p] = load_jsonl(path, Source.ARXIV)
+    assert p.authors == "Doe J; Roe A"
+
+
+def test_empty_authors_no_subjects_stays_empty(tmp_path: Path) -> None:
+    path = _write(tmp_path, _rec(authors="", subjects=[]))
+    [p] = load_jsonl(path, Source.ARXIV)
+    assert p.authors == ""
+
+
+def test_maps_extracted_summary_and_key_findings(tmp_path: Path) -> None:
+    path = _write(
+        tmp_path,
+        _rec(summary="A short eval summary.", key_findings=["Finding one.", "Finding two."]),
+    )
+    [p] = load_jsonl(path, Source.ARXIV)
+    assert p.summary == "A short eval summary."
+    assert p.key_findings == ["Finding one.", "Finding two."]
+
+
+def test_missing_extracted_defaults(tmp_path: Path) -> None:
+    record = _rec()
+    del record["extracted"]
+    path = _write(tmp_path, record)
+    [p] = load_jsonl(path, Source.ARXIV)
+    assert p.summary == ""
+    assert p.key_findings == []

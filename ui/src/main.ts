@@ -218,6 +218,10 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
     const detailTitle = document.querySelector<HTMLElement>("#detail-title");
     const detailMeta = document.querySelector<HTMLElement>("#detail-meta");
     const detailAbstract = document.querySelector<HTMLElement>("#detail-abstract");
+    const detailSummarySection = document.querySelector<HTMLElement>("#detail-summary-section");
+    const detailSummary = document.querySelector<HTMLElement>("#detail-summary");
+    const detailFindingsSection = document.querySelector<HTMLElement>("#detail-findings-section");
+    const detailKeyFindings = document.querySelector<HTMLUListElement>("#detail-key-findings");
     const detailClose = document.querySelector<HTMLButtonElement>("#detail-close");
     let lastFocused: HTMLElement | null = null;
     const openDetail = (paper: PaperMeta): void => {
@@ -226,6 +230,22 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
       detailMeta.textContent =
         `${paper.authors} · ${paper.categories.join(", ")} · ${paper.source} · ${paper.published}`;
       detailAbstract.textContent = paper.abstract;
+      // Eval enrichment (real feed only): show summary/findings, hide the slots when empty
+      // so demo papers — which have neither — render no blank sections.
+      if (detailSummarySection && detailSummary) {
+        detailSummary.textContent = paper.summary;
+        detailSummarySection.hidden = paper.summary.length === 0;
+      }
+      if (detailFindingsSection && detailKeyFindings) {
+        detailKeyFindings.replaceChildren(
+          ...paper.key_findings.map((finding) => {
+            const item = document.createElement("li");
+            item.textContent = finding;
+            return item;
+          }),
+        );
+        detailFindingsSection.hidden = paper.key_findings.length === 0;
+      }
       // Remember focus so Escape/close can restore it (e.g. back to a result row).
       lastFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
       detailPanel.hidden = false;

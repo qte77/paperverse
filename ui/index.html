@@ -86,6 +86,14 @@
         opacity: 0.75;
         font-size: 0.85rem;
       }
+      #detail h3 {
+        margin: 1.25rem 0 0.25rem;
+        font-size: 0.95rem;
+      }
+      #detail-key-findings {
+        margin: 0;
+        padding-left: 1.2rem;
+      }
       #toolbar {
         position: fixed;
         top: 1rem;
@@ -262,6 +270,14 @@
       <h2 id="detail-title"></h2>
       <p id="detail-meta"></p>
       <p id="detail-abstract"></p>
+      <section id="detail-summary-section" hidden>
+        <h3>Summary</h3>
+        <p id="detail-summary"></p>
+      </section>
+      <section id="detail-findings-section" hidden>
+        <h3>Key findings</h3>
+        <ul id="detail-key-findings"></ul>
+      </section>
     </aside>
     <script type="module" src="/src/main.ts"></script>
   </body>

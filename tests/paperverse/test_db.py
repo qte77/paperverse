@@ -143,6 +143,8 @@ CREATE TABLE papers (
     version INTEGER NOT NULL,
     authors TEXT NOT NULL DEFAULT '',
     abstract TEXT NOT NULL DEFAULT '',
+    summary TEXT NOT NULL DEFAULT '',
+    key_findings TEXT NOT NULL DEFAULT '[]',
     doi TEXT,
     x REAL NOT NULL,
     y REAL NOT NULL,

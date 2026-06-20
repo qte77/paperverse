@@ -3,21 +3,30 @@
 The ``rxiv-paper-eval`` pipeline (see ``ai-agents-research``) LLM-filters the raw rxiv
 feed down to topic-relevant papers and emits one JSON object per line with the fields
 ``date, iso_week, doi, version, category, title, authors, abstract`` plus an
-``extracted`` block (summary/methods/key_findings) that the cloud does not need and so is
-ignored here. This is the "real" data source, parallel to the canonical CSVs the demo
-corpus uses (see ``csv_loader``).
+``extracted`` block (summary/subjects/methods/key_findings/study_type). The eval often
+leaves ``authors`` blank, so we fall back to ``extracted.subjects`` for a contributors
+line, and carry ``extracted.summary`` / ``extracted.key_findings`` onto the paper for the
+detail panel (``methods`` / ``study_type`` are not surfaced). This is the "real" data
+source, parallel to the canonical CSVs the demo corpus uses (see ``csv_loader``).
 """
 
 from __future__ import annotations
 
 import datetime
 import json
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from paperverse.models import Paper, Source
 
 if TYPE_CHECKING:
     from pathlib import Path
+
+
+def _str_list(value: object) -> list[str]:
+    """Coerce a JSON array to ``list[str]``; anything else (incl. missing) becomes ``[]``."""
+    if not isinstance(value, list):
+        return []
+    return [str(item) for item in cast("list[object]", value)]
 
 
 def load_jsonl(path: Path, source: Source) -> list[Paper]:
@@ -51,6 +60,14 @@ def load_jsonl(path: Path, source: Source) -> list[Paper]:
 def _record_to_paper(record: dict[str, object], source: Source) -> Paper:
     identifier = str(record["doi"])
     categories = [c.strip() for c in str(record["category"]).split(";") if c.strip()]
+    raw_extracted = record.get("extracted")
+    extracted: dict[str, object] = (
+        cast("dict[str, object]", raw_extracted) if isinstance(raw_extracted, dict) else {}
+    )
+    # The eval frequently leaves authors blank; fall back to the extracted subjects.
+    authors = str(record.get("authors", "")).strip()
+    if not authors:
+        authors = "; ".join(_str_list(extracted.get("subjects")))
     return Paper(
         source=source,
         id=identifier,
@@ -59,6 +76,8 @@ def _record_to_paper(record: dict[str, object], source: Source) -> Paper:
         categories=categories,
         published=datetime.date.fromisoformat(str(record["date"])),
         version=int(str(record["version"])),
-        authors=str(record.get("authors", "")),
+        authors=authors,
         abstract=str(record.get("abstract", "")),
+        summary=str(extracted.get("summary", "")),
+        key_findings=_str_list(extracted.get("key_findings")),
     )

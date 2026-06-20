@@ -18,6 +18,8 @@ export interface PaperMeta {
   published: string;
   authors: string;
   abstract: string;
+  summary: string;
+  key_findings: string[];
   doi: string | null;
 }
 
@@ -49,8 +51,8 @@ export async function openPapersDb(bytes: Uint8Array, wasmUrl: string): Promise<
     },
     paperByIdx(idx: number): PaperMeta | null {
       const stmt = db.prepare(
-        "SELECT idx, uid, source, title, categories, published, authors, abstract, doi " +
-          "FROM papers WHERE idx = ?",
+        "SELECT idx, uid, source, title, categories, published, authors, abstract, " +
+          "summary, key_findings, doi FROM papers WHERE idx = ?",
       );
       stmt.bind([idx]);
       if (!stmt.step()) {
@@ -68,6 +70,8 @@ export async function openPapersDb(bytes: Uint8Array, wasmUrl: string): Promise<
         published: row.published as string,
         authors: row.authors as string,
         abstract: row.abstract as string,
+        summary: (row.summary as string | null) ?? "",
+        key_findings: JSON.parse((row.key_findings as string | null) ?? "[]") as string[],
         doi: (row.doi as string | null) ?? null,
       };
     },
