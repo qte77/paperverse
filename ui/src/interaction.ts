@@ -6,7 +6,7 @@
 
 import * as THREE from "three";
 
-import type { PapersDb } from "./db";
+import type { PaperMeta, PapersDb } from "./db";
 import { POINT_SIZE } from "./papers";
 import type { SceneHandle } from "./scene";
 
@@ -23,18 +23,17 @@ export function mouseToNdc(
 /** The DOM nodes the interaction drives. */
 export interface InteractionElements {
   tooltip: HTMLElement;
-  panel: HTMLElement;
-  panelTitle: HTMLElement;
-  panelMeta: HTMLElement;
-  panelAbstract: HTMLElement;
 }
 
-/** Wire hover (tooltip + highlight) and click (detail panel + neighbour select). */
+/** Wire hover (tooltip + highlight) and click (detail panel + neighbour select).
+ * `openDetail` is shared with the keyboard results list so both paths open a
+ * paper identically. */
 export function attachInteraction(
   handle: SceneHandle,
   points: THREE.Points,
   db: PapersDb,
   els: InteractionElements,
+  openDetail: (paper: PaperMeta) => void,
   highlight: (indices: number[]) => void,
   onSelect: (idx: number | null) => void,
   threshold: number = POINT_SIZE,
@@ -91,15 +90,11 @@ export function attachInteraction(
   handle.domElement.addEventListener("click", (event) => {
     const idx = pick(event);
     const paper = idx === null ? null : db.paperByIdx(idx);
-    if (paper === null) {
+    if (paper === null || idx === null) {
       onSelect(null);
       return;
     }
-    els.panelTitle.textContent = paper.title;
-    els.panelMeta.textContent =
-      `${paper.authors} · ${paper.categories.join(", ")} · ${paper.source} · ${paper.published}`;
-    els.panelAbstract.textContent = paper.abstract;
-    els.panel.hidden = false;
+    openDetail(paper);
     onSelect(idx);
   });
 }

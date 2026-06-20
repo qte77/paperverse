@@ -108,6 +108,10 @@ fills the viewport. Defaults to the user's system theme
 (`prefers-color-scheme`, light/dark) with a manual toggle; EyeRest brand
 tokens by pointer.
 
+> Note (a11y #75–77): the toggle exposes its mode via a dynamic `aria-label` + an
+> sr-only live region (#75) and reserves a stable width so the centered toolbar doesn't
+> shift on cycle (#76); the idle auto-rotate is gated by `prefers-reduced-motion` (#77).
+
 #### Feature 9: Paper Points Rendering
 
 Load the positions binary into a BufferGeometry Points buffer (hot path);
@@ -123,11 +127,18 @@ hover. On click, lazily query full metadata from SQLite and show a detail
 panel (title, authors, categories, source, date, link). (depends:
 Feature 9)
 
+> Note (a11y #78): a keyboard-navigable ARIA listbox over the search results mirrors the
+> click path via a shared `openDetail` (Arrow/Home/End/Enter; Escape closes the panel and
+> restores focus), making papers reachable without a pointer (`ui/src/results.ts`).
+
 #### Feature 11: Full-Text Search
 
 FTS5 query via sql.js on title/authors/abstract. Search input with
 debounced query. Highlight matching points (change color/size). Animate
 camera to the centroid of results. (depends: Feature 9)
+
+> Note (a11y #78): search hits also render in the keyboard-navigable listbox described
+> under Feature 10.
 
 ### Area 4: Deployment
 
@@ -146,6 +157,8 @@ GitHub Actions workflow: install uv, run the pipeline CLI, build the Vite
 + All Python pipeline code has TDD tests (pytest + Hypothesis), Red→Green
   per behaviour
 + Frontend tests via Vitest
++ Baseline accessibility: a keyboard path to papers (results listbox + Escape),
+  ARIA on controls and the legend, and `prefers-reduced-motion` honoured (#75–79)
 + Python 3.12+, strict pydantic, ruff (graduated rule set),
   `max-complexity = 10`
 

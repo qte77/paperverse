@@ -1,5 +1,5 @@
 import { hexToRgb01, type Source } from "./colors";
-import { openPapersDb } from "./db";
+import { openPapersDb, type PaperMeta } from "./db";
 import { formatDateRange } from "./legend";
 import { attachInteraction, type InteractionElements } from "./interaction";
 import {
@@ -19,6 +19,7 @@ import {
   setPointSize,
   updateNeighborLines,
 } from "./papers";
+import { attachResults } from "./results";
 import { createScene, type SceneHandle } from "./scene";
 import { attachSearch } from "./search";
 import {
@@ -58,21 +59,6 @@ function readThemePreference(): Preference {
 
 function applyThemePreference(pref: Preference): void {
   document.documentElement.dataset.theme = themeForPreference(pref, themeQuery.matches);
-}
-
-function interactionElements(): InteractionElements | null {
-  const tooltip = document.querySelector<HTMLElement>("#tooltip");
-  const panel = document.querySelector<HTMLElement>("#detail");
-  const panelTitle = document.querySelector<HTMLElement>("#detail-title");
-  const panelMeta = document.querySelector<HTMLElement>("#detail-meta");
-  const panelAbstract = document.querySelector<HTMLElement>("#detail-abstract");
-  if (!tooltip || !panel || !panelTitle || !panelMeta || !panelAbstract) {
-    return null;
-  }
-  document
-    .querySelector("#detail-close")
-    ?.addEventListener("click", () => (panel.hidden = true));
-  return { tooltip, panel, panelTitle, panelMeta, panelAbstract };
 }
 
 async function mount(canvas: HTMLCanvasElement): Promise<void> {
@@ -202,10 +188,46 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
       const neighbors = nearestNeighbors(positions, idx, NEIGHBOR_COUNT);
       updateNeighborLines(neighborLines, positions, idx, neighbors);
     };
-    // Resolve interaction DOM up front; hover/click handlers are wired once the
-    // DB is ready (background load below). Search powers FTS queries, so disable
-    // it until then rather than letting clicks fall into a not-yet-ready DB.
-    const els = interactionElements();
+    // Detail panel: one open/close controller shared by the canvas click
+    // (interaction.ts), the keyboard results list (results.ts), the close button,
+    // and Escape — so focus handling lives in exactly one place.
+    const detailPanel = document.querySelector<HTMLElement>("#detail");
+    const detailTitle = document.querySelector<HTMLElement>("#detail-title");
+    const detailMeta = document.querySelector<HTMLElement>("#detail-meta");
+    const detailAbstract = document.querySelector<HTMLElement>("#detail-abstract");
+    const detailClose = document.querySelector<HTMLButtonElement>("#detail-close");
+    let lastFocused: HTMLElement | null = null;
+    const openDetail = (paper: PaperMeta): void => {
+      if (!detailPanel || !detailTitle || !detailMeta || !detailAbstract) return;
+      detailTitle.textContent = paper.title;
+      detailMeta.textContent =
+        `${paper.authors} · ${paper.categories.join(", ")} · ${paper.source} · ${paper.published}`;
+      detailAbstract.textContent = paper.abstract;
+      // Remember focus so Escape/close can restore it (e.g. back to a result row).
+      lastFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      detailPanel.hidden = false;
+      detailClose?.focus();
+    };
+    const closeDetail = (): void => {
+      if (!detailPanel || detailPanel.hidden) return;
+      detailPanel.hidden = true;
+      showNeighbors(null);
+      lastFocused?.focus();
+      lastFocused = null;
+    };
+    detailClose?.addEventListener("click", closeDetail);
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        closeDetail();
+      }
+    });
+
+    // Resolve interaction DOM up front; hover/click + results handlers are wired
+    // once the DB is ready (background load below). Search powers FTS queries, so
+    // disable it until then rather than letting input fall into a not-yet-ready DB.
+    const tooltip = document.querySelector<HTMLElement>("#tooltip");
+    const els: InteractionElements | null = tooltip ? { tooltip } : null;
+    const resultsList = document.querySelector<HTMLUListElement>("#results");
     const searchInput = document.querySelector<HTMLInputElement>("#search");
     if (searchInput) {
       searchInput.disabled = true;
@@ -264,6 +286,7 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
             points,
             db,
             els,
+            openDetail,
             (indices) => {
               hoverHits = indices;
               repaint();
@@ -273,12 +296,27 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
           );
         }
         if (searchInput) {
+          // Keyboard fallback for the mouse-only canvas: search hits become a
+          // focusable, arrow/enter-navigable listbox that opens a paper's detail.
+          let updateResults: (indices: number[]) => void = () => {};
+          if (resultsList) {
+            updateResults = attachResults({
+              list: resultsList,
+              searchInput,
+              db,
+              positions,
+              openDetail,
+              flyTo: (target) => handle.flyTo(target),
+              onSelect: showNeighbors,
+            }).update;
+          }
           attachSearch({
             input: searchInput,
             db,
             positions,
             onResults: (indices) => {
               searchHits = indices;
+              updateResults(indices);
               repaint();
             },
             flyTo: (target) => handle.flyTo(target),

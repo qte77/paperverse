@@ -1,6 +1,9 @@
 # Plan: Theme picker (System / Light / Dark)
 
 > Tracking: [#46](https://github.com/qte77/paperverse/issues/46) · Status: shipped
+>
+> Follow-on a11y: dynamic `aria-label` + sr-only live region (#75), stable toggle
+> width so the toolbar doesn't shift on cycle (#76).
 
 ## Context
 

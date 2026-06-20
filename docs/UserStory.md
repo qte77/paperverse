@@ -35,6 +35,8 @@ deployment via GitHub Pages.
   the structure of research fields
 + As a user, I want the visualization to load from a static site so that
   no server setup is required
++ As a keyboard user, I want to navigate search results with the arrow keys
+  and open a paper with Enter so that I can explore the cloud without a mouse
 
 ## Success Criteria
 
@@ -47,6 +49,8 @@ deployment via GitHub Pages.
   pointer
 + Deploys as static site to GitHub Pages via GitHub Actions
 + All pipeline code has TDD tests (pytest + Hypothesis)
++ Baseline accessibility: keyboard-navigable results, ARIA labels on controls
+  and the legend, and `prefers-reduced-motion` honoured (#75–79)
 
 ## Constraints
 
