@@ -76,7 +76,9 @@ function applyThemePreference(pref: Preference): void {
   } else {
     document.documentElement.dataset.theme = pref;
   }
-  // Brand contract: emit so canvases/charts can recolour off the flip.
+  // Brand-contract event so consumers can recolour off a theme flip. Inert in paperverse
+  // today — nothing here listens; the cloud recolours via the direct recolour() calls in the
+  // toggle + matchMedia handlers. Kept for cross-app / ui-kit conformance and future consumers.
   document.dispatchEvent(
     new CustomEvent("themechange", {
       detail: { preference: pref, theme: themeForPreference(pref, themeQuery.matches) },
