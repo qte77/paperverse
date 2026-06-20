@@ -21,7 +21,14 @@ import {
 } from "./papers";
 import { createScene, type SceneHandle } from "./scene";
 import { attachSearch } from "./search";
-import { nextPreference, type Preference, THEME_TOGGLE_LABEL, themeForPreference } from "./theme";
+import {
+  nextPreference,
+  type Preference,
+  themeAnnouncement,
+  THEME_TOGGLE_LABEL,
+  themeForPreference,
+  themeToggleAria,
+} from "./theme";
 
 // Data artifacts + the sql.js WASM are copied into the site by the Pages build
 // and served under the Vite base path (e.g. /paperverse/).
@@ -207,14 +214,29 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
     // Theme toggle: a button that cycles system -> light -> dark on click,
     // applying + persisting the choice and recolouring the cloud.
     const themeControl = document.querySelector<HTMLButtonElement>("#theme-toggle");
+    const themeStatus = document.querySelector<HTMLElement>("#theme-status");
     if (themeControl) {
       let pref = readThemePreference();
-      themeControl.textContent = THEME_TOGGLE_LABEL[pref];
+      // Keep the visible label AND the accessible name (aria-label + tooltip) in
+      // sync with the active mode, so assistive tech can tell System/Light/Dark
+      // apart instead of hearing only a static "Theme".
+      const reflectThemeControl = (): void => {
+        themeControl.textContent = THEME_TOGGLE_LABEL[pref];
+        const aria = themeToggleAria(pref);
+        themeControl.setAttribute("aria-label", aria);
+        themeControl.title = aria;
+      };
+      reflectThemeControl();
       themeControl.addEventListener("click", () => {
         pref = nextPreference(pref);
         localStorage.setItem(THEME_KEY, pref);
         applyThemePreference(pref);
-        themeControl.textContent = THEME_TOGGLE_LABEL[pref];
+        reflectThemeControl();
+        // Focus stays on the button after the click, so the changed name alone
+        // won't be re-read — announce the new mode via the live region.
+        if (themeStatus) {
+          themeStatus.textContent = themeAnnouncement(pref);
+        }
         recolour();
       });
     }

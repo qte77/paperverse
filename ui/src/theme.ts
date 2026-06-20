@@ -33,6 +33,24 @@ export const THEME_TOGGLE_LABEL: Record<Preference, string> = {
   dark: "● Dark",
 };
 
+/** Human mode name (no glyph) shared by the toggle's a11y strings below. */
+const THEME_MODE_NAME: Record<Preference, string> = {
+  system: "System",
+  light: "Light",
+  dark: "Dark",
+};
+
+/** Dynamic accessible name for the cycling toggle, reflecting the active mode. */
+export function themeToggleAria(pref: Preference): string {
+  return `Theme: ${THEME_MODE_NAME[pref]} (activate to change)`;
+}
+
+/** Terse live-region announcement for a theme change (focus stays on the button,
+ * so the changed accessible name alone isn't re-read by screen readers). */
+export function themeAnnouncement(pref: Preference): string {
+  return `Theme: ${THEME_MODE_NAME[pref]}`;
+}
+
 const PREFERENCE_CYCLE: Preference[] = ["system", "light", "dark"];
 
 /** The next preference when the toggle is clicked: system -> light -> dark -> system. */

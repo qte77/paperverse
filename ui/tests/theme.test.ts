@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { nextPreference, resolveTheme, themeForPreference } from "../src/theme";
+import {
+  nextPreference,
+  resolveTheme,
+  themeAnnouncement,
+  themeForPreference,
+  themeToggleAria,
+} from "../src/theme";
 
 describe("resolveTheme", () => {
   it("follows the system preference by default", () => {
@@ -31,5 +37,21 @@ describe("nextPreference", () => {
     expect(nextPreference("system")).toBe("light");
     expect(nextPreference("light")).toBe("dark");
     expect(nextPreference("dark")).toBe("system");
+  });
+});
+
+describe("themeToggleAria", () => {
+  it("names the active mode with the activate-to-change affordance", () => {
+    expect(themeToggleAria("system")).toBe("Theme: System (activate to change)");
+    expect(themeToggleAria("light")).toBe("Theme: Light (activate to change)");
+    expect(themeToggleAria("dark")).toBe("Theme: Dark (activate to change)");
+  });
+});
+
+describe("themeAnnouncement", () => {
+  it("announces the active mode tersely for the live region", () => {
+    expect(themeAnnouncement("system")).toBe("Theme: System");
+    expect(themeAnnouncement("light")).toBe("Theme: Light");
+    expect(themeAnnouncement("dark")).toBe("Theme: Dark");
   });
 });
