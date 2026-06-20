@@ -60,6 +60,14 @@ curated **real** AI-agent feed: a JSONL adapter ingests the `gha-rxiv-paper-eval
 `sync-real-feed` workflow refreshes `data/real/`
 ([#92](https://github.com/qte77/paperverse/issues/92)).
 
+## v0.1.6 — cloud controls (link toggle, pause, axis views, shipped)
+
+Neighbour links can be weighted by **topic** (x/y plane only, so same-topic papers connect
+across the time axis) or by **time** (full 3D), via a toolbar toggle defaulting to topic
+([#106](https://github.com/qte77/paperverse/issues/106)); new toolbar buttons pause the idle
+rotation (reduced-motion-honest) and snap the camera down each world axis (X/Y/Z); and the
+time-axis arrowhead is smaller so it no longer balloons with the balanced z time-stretch.
+
 ## Next
 
 Nothing queued — the deferred items under **Later** are the candidates.

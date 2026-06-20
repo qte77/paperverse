@@ -111,6 +111,12 @@ tokens by pointer.
 > Note (a11y #75–77): the toggle exposes its mode via a dynamic `aria-label` + an
 > sr-only live region (#75) and reserves a stable width so the centered toolbar doesn't
 > shift on cycle (#76); the idle auto-rotate is gated by `prefers-reduced-motion` (#77).
+>
+> Note (#106): toolbar buttons pause the idle auto-rotate (reduced-motion-honest — the
+> `prefers-reduced-motion` gate stays the top-priority override) and snap the camera to look
+> down each world axis (X → Y → Z). Fulfils the user story "pause the rotation and snap to
+> axis-aligned views" ([UserStory.md](UserStory.md)); a UI-layer (L4) change that keeps the
+> backend untouched per [ADR-0001](decisions/0001-backend-cli-ui-separation.md).
 
 #### Feature 9: Paper Points Rendering
 
@@ -130,6 +136,13 @@ Feature 9)
 > Note (a11y #78): a keyboard-navigable ARIA listbox over the search results mirrors the
 > click path via a shared `openDetail` (Arrow/Home/End/Enter; Escape closes the panel and
 > restores focus), making papers reachable without a pointer (`ui/src/results.ts`).
+>
+> Note (#106): neighbour links carry a topic/time weighting toggle — topic weighs only the
+> x/y plane so same-topic papers link across the (time-stretched) z=date axis, time uses full
+> 3D; the choice is persisted and the current selection re-draws live on toggle. Fulfils the
+> user story "neighbour links weighted by topic regardless of year"
+> ([UserStory.md](UserStory.md)); a UI-layer (L4) change per
+> [ADR-0001](decisions/0001-backend-cli-ui-separation.md).
 
 #### Feature 11: Full-Text Search
 

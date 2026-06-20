@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { computeRenderSize } from "../src/renderer";
+import { axisViewpoint, computeRenderSize } from "../src/renderer";
 
 describe("computeRenderSize", () => {
   it("derives the camera aspect from a non-square viewport", () => {
@@ -22,5 +22,37 @@ describe("computeRenderSize", () => {
     const size = computeRenderSize(800.7, 600.9, 1);
     expect(size.width).toBe(800);
     expect(size.height).toBe(600);
+  });
+});
+
+describe("axisViewpoint", () => {
+  const center = [10, 20, 30] as const;
+  const radius = 4;
+  const fov = 60;
+  // The same fit distance frameSphere uses, mirrored so the sphere fills the view.
+  const dist = (radius * 1.4) / Math.sin((fov * Math.PI) / 360);
+
+  it("offsets the camera along +z for the z axis, world-y up (topic plane face-on)", () => {
+    const { position, up } = axisViewpoint("z", center, radius, fov);
+    expect(position).toEqual([center[0], center[1], center[2] + dist]);
+    expect(up).toEqual([0, 1, 0]);
+  });
+
+  it("offsets along +x for the x axis, world-y up", () => {
+    const { position, up } = axisViewpoint("x", center, radius, fov);
+    expect(position).toEqual([center[0] + dist, center[1], center[2]]);
+    expect(up).toEqual([0, 1, 0]);
+  });
+
+  it("offsets along +y for the y axis with a top-down (-z) up-vector", () => {
+    const { position, up } = axisViewpoint("y", center, radius, fov);
+    expect(position).toEqual([center[0], center[1] + dist, center[2]]);
+    expect(up).toEqual([0, 0, -1]);
+  });
+
+  it("places the camera farther than the sphere radius so the cloud fits", () => {
+    const offset = axisViewpoint("z", center, radius, fov).position[2] - center[2];
+    expect(offset).toBeGreaterThan(radius);
+    expect(offset).toBeCloseTo(dist);
   });
 });
