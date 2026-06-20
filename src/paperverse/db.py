@@ -34,6 +34,8 @@ CREATE TABLE papers (
     version INTEGER NOT NULL,
     authors TEXT NOT NULL DEFAULT '',
     abstract TEXT NOT NULL DEFAULT '',
+    summary TEXT NOT NULL DEFAULT '',
+    key_findings TEXT NOT NULL DEFAULT '[]',
     doi TEXT,
     x REAL NOT NULL,
     y REAL NOT NULL,
@@ -49,8 +51,9 @@ CREATE VIRTUAL TABLE papers_fts USING fts5(
 
 _INSERT = (
     "INSERT INTO papers "
-    "(idx, uid, source, title, categories, published, version, authors, abstract, doi, x, y, z) "
-    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+    "(idx, uid, source, title, categories, published, version, authors, abstract, "
+    "summary, key_findings, doi, x, y, z) "
+    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 )
 
 _POPULATE_FTS = (
@@ -146,6 +149,8 @@ def build_db(papers: Sequence[Paper], positions: dict[str, Position], db_path: P
             paper.version,
             paper.authors,
             paper.abstract,
+            paper.summary,
+            json.dumps(paper.key_findings),
             paper.doi,
             *_position_of(paper, positions),
         )

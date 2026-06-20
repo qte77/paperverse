@@ -5,7 +5,7 @@ from __future__ import annotations
 import datetime  # noqa: TC003  # pydantic resolves the annotation at runtime
 from enum import StrEnum
 
-from pydantic import BaseModel, ConfigDict, computed_field
+from pydantic import BaseModel, ConfigDict, Field, computed_field
 
 
 class Source(StrEnum):
@@ -36,6 +36,9 @@ class Paper(BaseModel):
     abstract: str = ""
     doi: str | None = None
     citations: int | None = None
+    # Curated paper-eval enrichment (real feed only; empty for the demo CSV corpus).
+    summary: str = ""
+    key_findings: list[str] = Field(default_factory=list)
 
     @computed_field
     @property
