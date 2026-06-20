@@ -104,6 +104,10 @@ validate:  ## CI gate: lint + check_types + lint_md + audit + test_cov
 # /paperverse/; preview overrides to / so http.server resolves assets at root.
 PORT ?= 8143
 UI_BASE ?= /paperverse/
+# Both datasets are bundled (demo corpus + curated real feed); the UI's dataset
+# toggle picks one at load. Overridable for local builds.
+DATA_DIR_DEMO ?= data
+DATA_DIR_REAL ?= data/real
 
 setup_js:  ## Install ui/ npm devDependencies (npm ci)
 	npm --prefix ui ci
@@ -114,8 +118,9 @@ typecheck_js:  ## tsc --noEmit in ui/
 test_js:  ## vitest run in ui/
 	npm --prefix ui test
 
-build_ui: setup_js  ## Generate data + build ui/ to ui/dist (UI_BASE, default /paperverse/)
-	uv run paperverse --data-dir data --output ui/public/data
+build_ui: setup_js  ## Generate demo+real data + build ui/ to ui/dist (UI_BASE, default /paperverse/)
+	uv run paperverse --data-dir $(DATA_DIR_DEMO) --output ui/public/data/demo
+	uv run paperverse --data-dir $(DATA_DIR_REAL) --output ui/public/data/real
 	cp ui/node_modules/sql.js-fts5/dist/sql-wasm.wasm ui/public/sql-wasm.wasm
 	npm --prefix ui run build -- --base=$(UI_BASE)
 
