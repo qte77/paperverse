@@ -102,11 +102,17 @@ def layout(papers: Sequence[Paper], seed: int = 42) -> dict[str, Position]:
     vectors = encode_features(papers)
     z = date_axis(papers)
     n_neighbors = min(15, len(papers) - 1)
-    # init="random" (seeded) instead of the default spectral init, whose
-    # eigensolver start vector is not controlled by random_state -> required
-    # for reproducible builds (same data + seed -> identical layout).
+    # metric="cosine": correct for high-dim sparse TF-IDF (Euclidean concentrates there).
+    # init="random" (seeded) over the default spectral init, whose eigensolver start vector
+    # is not controlled by random_state; n_jobs=1 keeps numba serial (umap 0.5.x runs
+    # parallel by default) so the seed is honoured -> same data + seed = identical layout.
     reducer = umap.UMAP(
-        n_components=2, n_neighbors=n_neighbors, random_state=seed, init="random"
+        n_components=2,
+        n_neighbors=n_neighbors,
+        metric="cosine",
+        n_jobs=1,
+        random_state=seed,
+        init="random",
     )
     coords = np.asarray(reducer.fit_transform(vectors), dtype=np.float64).tolist()
     return {

@@ -39,6 +39,8 @@ jobs:
           enable-cache: true
 
       - name: Generate papers.db + positions.bin (demo + real datasets)
+        env:
+          NUMBA_NUM_THREADS: "1" # serial numba -> reproducible UMAP layout (matches n_jobs=1)
         run: |
           uv sync
           uv run paperverse --data-dir data/demo --output ui/public/data/demo
