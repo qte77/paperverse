@@ -70,6 +70,10 @@ jobs:
           git add data/real
           git commit --no-gpg-sign -m "chore: sync curated real feed from ai-agents-research (#92)"
           git push origin "${branch}"
-          gh pr create --base main --head "${branch}" \
+          pr_url=$(gh pr create --base main --head "${branch}" \
             --title "chore: sync curated real feed" \
-            --body "Automated weekly sync of the curated AI-agent paper feed from qte77/ai-agents-research (#92). Merge to refresh the deployed Real dataset."
+            --body "Automated weekly sync of the curated AI-agent paper feed from qte77/ai-agents-research (#92). Merge to refresh the deployed Real dataset.")
+          # Auto-merge on green: GitHub re-signs the squash (satisfies the required_signatures
+          # ruleset) and the pull_request rule needs 0 reviews, so the PR merges itself once
+          # CodeFactor + CodeQL pass — no --admin, no manual step. gh-pages redeploys on data/**.
+          gh pr merge --auto --squash --delete-branch "${pr_url}"
