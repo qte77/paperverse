@@ -79,6 +79,18 @@ jobs:
           echo "new_version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
           echo "bumped=true" >> "$GITHUB_OUTPUT"
 
+      - name: Sync uv.lock to the new version
+        if: steps.bump.outputs.bumped == 'true'
+        run: |
+          set -euo pipefail
+          # bump-my-version patches the version files but not uv.lock, whose own
+          # paperverse entry would otherwise lag the bumped pyproject version.
+          uv lock
+          if ! git diff --quiet uv.lock; then
+            git add uv.lock
+            git commit -m "chore: sync uv.lock"
+          fi
+
       - name: Collect changelog fragments
         if: steps.bump.outputs.bumped == 'true'
         env:

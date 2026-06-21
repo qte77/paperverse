@@ -79,14 +79,17 @@ assembled by [scriv](https://scriv.readthedocs.io) from per-PR fragments.
 - **Every non-trivial PR adds a changelog fragment.** `make changelog_new` creates one under
   `changelog.d/`; fill in the category (`Added` / `Changed` / `Fixed` / …) and a bullet ending
   with the issue/PR ref. `make changelog_preview` shows the assembled entry.
-- **Cutting a release** (maintainer, all from the Actions tab):
-  1. Run **bump-my-version** (`patch` / `minor` / `major`). It bumps `pyproject.toml`, the README
-     badge, and `src/paperverse/__init__.py`, collects the fragments into `CHANGELOG.md`, and
-     opens a `chore(release): bump …` PR.
-  2. Merge that PR (`--admin`, on green). **tag-release** then fires on `main` and tags the
-     merge commit `vX.Y.Z` (always reachable from `main` — no tag drift).
-  3. Optionally run **publish-release** to create a GitHub Release with notes from the
-     `CHANGELOG.md` block. The default flow is tag-only.
+- **Cutting a release** (maintainer):
+  1. Run **bump-my-version** (`patch` / `minor` / `major`) from the Actions tab. It bumps
+     `pyproject.toml` + the README badge + `src/paperverse/__init__.py`, **syncs `uv.lock`**,
+     collects the fragments into `CHANGELOG.md`, and opens a `chore(release): bump …` PR.
+  2. **Run the PR's checks.** It's bot-authored, so its Actions checks idle at `action_required`
+     until a real-user event — push any commit to the bump branch, or close + reopen the PR.
+     (The `runs/<id>/approve` API is fork-only, so it won't help here.)
+  3. Merge on green: `gh pr merge <n> --squash --admin --delete-branch`. **tag-release** then
+     fires on `main` and tags the merge commit `vX.Y.Z` (always reachable from `main` — no tag drift).
+  4. Optionally run **publish-release** for a GitHub Release with notes from the `CHANGELOG.md`
+     block. The default flow is tag-only.
 
 ## Decisions
 
