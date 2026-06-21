@@ -79,10 +79,12 @@ Run `make help` for all recipes.
 
 ## Why
 
-Paperscape.org maps arXiv as a flat 2D tiled grid — arXiv only, a dated stack, no 3D.
-Researchers working across domains (e.g. ML + neuroscience) can't see cross-source
-relationships between arXiv, bioRxiv, and medRxiv. paperverse unifies all three in one
-navigable 3D space so cross-domain and temporal patterns become visible. More in
+[Paperscape.org](https://paperscape.org) pioneered mapping the literature, but it shows
+**arXiv only**, as a flat **2D** tiled grid on a dated stack — no 3D, no other sources. So
+researchers working across domains (e.g. ML + neuroscience) can't see relationships that span
+arXiv, bioRxiv, and medRxiv. **paperverse is different**: it unifies all three sources in a
+single navigable **3D** cloud (topic on x/y, publication date on z) served from a static
+site, making cross-domain and temporal patterns visible. More in
 [docs/UserStory.md](docs/UserStory.md) and [docs/PRD.md](docs/PRD.md).
 
 ## Refs
