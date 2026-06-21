@@ -4,7 +4,7 @@
 > connections across fields, right in the browser.
 
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](docs/roadmap.md)
+[![Version](https://img.shields.io/badge/version-0.1.6-blue.svg)](docs/roadmap.md)
 [![CodeQL](https://github.com/qte77/paperverse/actions/workflows/codeql.yaml/badge.svg)](https://github.com/qte77/paperverse/actions/workflows/codeql.yaml)
 [![CodeFactor](https://www.codefactor.io/repository/github/qte77/paperverse/badge)](https://www.codefactor.io/repository/github/qte77/paperverse)
 [![Validate](https://github.com/qte77/paperverse/actions/workflows/validate.yml/badge.svg)](https://github.com/qte77/paperverse/actions/workflows/validate.yml)
