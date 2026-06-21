@@ -73,6 +73,38 @@ reportUnknownMemberType = false
 # Format created/updated snapshots with ruff (avoids the optional black dep).
 format-command = "ruff format --stdin-filename {filename} -"
 
+# Atomic version bumping. [project].version is the single source of truth;
+# bumpversion bumps + commits + syncs the README badge and __version__. Tag
+# creation is deferred to tag-release.yaml so the tag lands on main's merge
+# commit. CHANGELOG.md is owned by scriv (below), collected in bump-my-version.yaml.
+[tool.bumpversion]
+current_version = "0.1.6"
+parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)"
+serialize = ["{major}.{minor}.{patch}"]
+commit = true
+tag = true
+allow_dirty = false
+ignore_missing_version = false
+sign_tags = false
+tag_name = "v{new_version}"
+tag_message = "v{new_version}"
+message = "chore(release): bump {current_version} -> {new_version}"
+
+[[tool.bumpversion.files]]
+filename = "pyproject.toml"
+search = 'version = "{current_version}"'
+replace = 'version = "{new_version}"'
+
+[[tool.bumpversion.files]]
+filename = "src/paperverse/__init__.py"
+search = '__version__ = "{current_version}"'
+replace = '__version__ = "{new_version}"'
+
+[[tool.bumpversion.files]]
+filename = "README.md"
+search = "version-{current_version}-blue"
+replace = "version-{new_version}-blue"
+
 [tool.scriv]
 format = "md"
 fragment_directory = "changelog.d"
