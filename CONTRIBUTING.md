@@ -71,6 +71,23 @@ Commit by topic — one logical change per commit. Commit with `--no-gpg-sign`.
 - In this dev container, prefix `git`/`gh` with `env -u GH_TOKEN -u GITHUB_TOKEN`
   when a stale token shadows your `gh auth` credentials.
 
+## Releasing
+
+SemVer; the version lives only in `pyproject.toml` `[project].version`. `CHANGELOG.md` is
+assembled by [scriv](https://scriv.readthedocs.io) from per-PR fragments.
+
+- **Every non-trivial PR adds a changelog fragment.** `make changelog_new` creates one under
+  `changelog.d/`; fill in the category (`Added` / `Changed` / `Fixed` / …) and a bullet ending
+  with the issue/PR ref. `make changelog_preview` shows the assembled entry.
+- **Cutting a release** (maintainer, all from the Actions tab):
+  1. Run **bump-my-version** (`patch` / `minor` / `major`). It bumps `pyproject.toml`, the README
+     badge, and `src/paperverse/__init__.py`, collects the fragments into `CHANGELOG.md`, and
+     opens a `chore(release): bump …` PR.
+  2. Merge that PR (`--admin`, on green). **tag-release** then fires on `main` and tags the
+     merge commit `vX.Y.Z` (always reachable from `main` — no tag drift).
+  3. Optionally run **publish-release** to create a GitHub Release with notes from the
+     `CHANGELOG.md` block. The default flow is tag-only.
+
 ## Decisions
 
 Record architectural decisions as ADRs under

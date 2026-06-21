@@ -7,6 +7,7 @@
 	lint autofix check_types lint_md lint_links audit \
 	test test_cov retest validate \
 	typecheck_js test_js build_ui preview \
+	changelog_new changelog_preview changelog_release \
 	clean help
 .DEFAULT_GOAL := help
 
@@ -128,6 +129,20 @@ preview: UI_BASE := /
 preview: build_ui  ## Node-free preview: build ui/ + serve ui/dist on http://localhost:$(PORT) (PORT default 8143)
 	echo "Previewing ui/dist on http://localhost:$(PORT)/ (Ctrl-C to stop)"
 	uv run python -m http.server $(PORT) --directory ui/dist
+
+
+# MARK: CHANGELOG
+
+
+changelog_new:  ## create + stage a new changelog fragment under changelog.d/
+	uv run scriv create --add
+
+changelog_preview:  ## preview the assembled release entry without consuming fragments
+	uv run scriv print
+
+changelog_release:  ## collect fragments into CHANGELOG.md (VERSION=X.Y.Z required); run by the bump workflow
+	test -n "$(VERSION)" || (echo "VERSION required, e.g. make changelog_release VERSION=0.1.7"; exit 2)
+	uv run scriv collect --version $(VERSION)
 
 
 # MARK: CLEAN
