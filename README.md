@@ -2,8 +2,14 @@
 
 > Explore arXiv, bioRxiv, and medRxiv papers as one navigable 3D cloud — in your browser.
 
+[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](docs/roadmap.md)
+[![CodeQL](https://github.com/qte77/paperverse/actions/workflows/codeql.yaml/badge.svg)](https://github.com/qte77/paperverse/actions/workflows/codeql.yaml)
+[![CodeFactor](https://www.codefactor.io/repository/github/qte77/paperverse/badge)](https://www.codefactor.io/repository/github/qte77/paperverse)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![Validate](https://github.com/qte77/paperverse/actions/workflows/validate.yml/badge.svg)](https://github.com/qte77/paperverse/actions/workflows/validate.yml)
-[![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
+[![Checked with pyright](https://microsoft.github.io/pyright/img/pyright_badge.svg)](https://microsoft.github.io/pyright/)
+[![Lint MD and Links](https://github.com/qte77/paperverse/actions/workflows/lint-md-links.yml/badge.svg)](https://github.com/qte77/paperverse/actions/workflows/lint-md-links.yml)
 
 **[Open the live demo →](https://qte77.github.io/paperverse/)**
 
@@ -12,6 +18,16 @@ and medRxiv papers. A Python pipeline ingests weekly canonical CSVs, lays the
 papers out in 3D with UMAP, and exports a SQLite + FTS5 database, a Float32
 positions binary, and a small `meta.json` sidecar; a Three.js + sql.js frontend
 renders the cloud and searches it entirely in the browser.
+
+<details>
+<summary>Screenshots</summary>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/cloud-dark.png" />
+  <img alt="The paperverse 3D paper cloud — points coloured by source (arXiv, bioRxiv, medRxiv); depth encodes publication date" src="docs/img/cloud-light.png" />
+</picture>
+
+</details>
 
 ## Architecture
 
