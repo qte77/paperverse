@@ -10,7 +10,15 @@
 [![Validate](https://github.com/qte77/paperverse/actions/workflows/validate.yml/badge.svg)](https://github.com/qte77/paperverse/actions/workflows/validate.yml)
 [![Lint MD and Links](https://github.com/qte77/paperverse/actions/workflows/lint-md-links.yml/badge.svg)](https://github.com/qte77/paperverse/actions/workflows/lint-md-links.yml)
 
-**[Open the live demo →](https://qte77.github.io/paperverse/)**
+## What
+
+A 3D academic-paper cloud over arXiv, bioRxiv, and medRxiv. A Python pipeline ingests
+weekly canonical CSVs, lays papers out in 3D with UMAP (topic on x/y, publication date on
+z), and exports a SQLite + FTS5 database, a Float32 positions binary, and a small
+`meta.json` sidecar; a Three.js + sql.js frontend renders and searches the cloud entirely
+in the browser. What you get: a 3D point cloud with hover/click detail, full-text search, a
+theme picker, depth cues, neighbour links with a topic/time toggle, pause + axis-snap views,
+and a source legend.
 
 <details>
 <summary>Screenshot — 3D paper cloud</summary>
@@ -21,16 +29,6 @@
 </picture>
 
 </details>
-
-## What
-
-A 3D academic-paper cloud over arXiv, bioRxiv, and medRxiv. A Python pipeline ingests
-weekly canonical CSVs, lays papers out in 3D with UMAP (topic on x/y, publication date on
-z), and exports a SQLite + FTS5 database, a Float32 positions binary, and a small
-`meta.json` sidecar; a Three.js + sql.js frontend renders and searches the cloud entirely
-in the browser. What you get: a 3D point cloud with hover/click detail, full-text search, a
-theme picker, depth cues, neighbour links with a topic/time toggle, pause + axis-snap views,
-and a source legend.
 
 ## How
 
