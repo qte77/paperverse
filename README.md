@@ -18,7 +18,7 @@ positions binary, and a small `meta.json` sidecar; a Three.js + sql.js frontend
 renders the cloud and searches it entirely in the browser.
 
 <details>
-<summary>Screenshots</summary>
+<summary>Screenshot — 3D paper cloud (light / dark)</summary>
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/img/cloud-dark.png" />
