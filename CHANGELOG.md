@@ -16,6 +16,16 @@ Types of changes:
 
 <!-- scriv-insert-here -->
 
+## [0.1.7] - 2026-06-21
+
+### Added
+
+- `make changelog_new` / `changelog_preview` / `changelog_release` targets and a CONTRIBUTING "Releasing" section documenting the per-PR changelog fragment convention and the bump → tag → release flow.
+
+### Changed
+
+- README brought onto the qte77 README contract: **What** is now capability bullets (build internals live in `docs/architecture.md`), the CLI flags + input CSV format moved to a new `docs/usage.md`, **Refs** is links-only, and the screenshots moved to `assets/images/`.
+
 ## [0.1.6] - 2026-06-21
 
 ### Added
