@@ -1,6 +1,7 @@
 # paperverse
 
-> Explore arXiv, bioRxiv, and medRxiv papers as one navigable 3D cloud — in your browser.
+> A navigable 3D cloud of arXiv, bioRxiv, and medRxiv papers — for researchers tracing
+> connections across fields, right in the browser.
 
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](docs/roadmap.md)
@@ -11,14 +12,8 @@
 
 **[Open the live demo →](https://qte77.github.io/paperverse/)**
 
-A 3D academic-paper cloud — a static GitHub Pages visualization of arXiv, bioRxiv,
-and medRxiv papers. A Python pipeline ingests weekly canonical CSVs, lays the
-papers out in 3D with UMAP, and exports a SQLite + FTS5 database, a Float32
-positions binary, and a small `meta.json` sidecar; a Three.js + sql.js frontend
-renders the cloud and searches it entirely in the browser.
-
 <details>
-<summary>Screenshot — 3D paper cloud (light / dark)</summary>
+<summary>Screenshot — 3D paper cloud</summary>
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/img/cloud-dark.png" />
@@ -27,35 +22,30 @@ renders the cloud and searches it entirely in the browser.
 
 </details>
 
-## Architecture
+## What
 
-Four layers with one-way imports (`L4 → L1`); see
-[ADR-0001](docs/decisions/0001-backend-cli-ui-separation.md) and
-[docs/architecture.md](docs/architecture.md) for the full picture.
+A 3D academic-paper cloud over arXiv, bioRxiv, and medRxiv. A Python pipeline ingests
+weekly canonical CSVs, lays papers out in 3D with UMAP (topic on x/y, publication date on
+z), and exports a SQLite + FTS5 database, a Float32 positions binary, and a small
+`meta.json` sidecar; a Three.js + sql.js frontend renders and searches the cloud entirely
+in the browser. What you get: a 3D point cloud with hover/click detail, full-text search, a
+theme picker, depth cues, neighbour links with a topic/time toggle, pause + axis-snap views,
+and a source legend.
 
-- **L1 — backend** (`src/paperverse/`): the `Paper` model, CSV ingest, UMAP
-  layout, and the SQLite + positions export. Ships in the wheel.
-- **L2 — CLI** (`paperverse` command): the end-to-end pipeline.
-- **L4 — UI** (`ui/`): a static Three.js + sql.js site, built with Vite. Not in
-  the wheel.
+## How
 
-Why SQLite + FTS5 in the browser (over DuckDB-WASM / Parquet) and the export data
-contract: [ADR-0002](docs/decisions/0002-in-browser-store-and-data-contract.md).
+**Explore** — open the [live demo](https://qte77.github.io/paperverse/) (zero setup), or
+build and serve the UI locally:
 
-## Install
+```bash
+make preview   # build the UI and serve it at http://localhost:8143
+```
 
-Requires Python 3.12+ and [uv](https://docs.astral.sh/uv/).
+**Run the pipeline** — requires Python 3.12+ and [uv](https://docs.astral.sh/uv/):
 
 ```bash
 uv sync
-```
-
-## Usage
-
-Lay out and export a corpus to `papers.db`, `positions.bin`, and `meta.json`:
-
-```bash
-uv run paperverse --data-dir data --output dist/data
+uv run paperverse --data-dir data --output dist/data   # -> papers.db, positions.bin, meta.json
 ```
 
 `--data-dir` holds one subdirectory per source, each with canonical CSVs
@@ -76,30 +66,40 @@ data/
 | `--seed` | `42` | UMAP seed for reproducible layouts |
 
 > paperverse is an internal pipeline tool, not a published library — there is no
-> `pip install paperverse` or public API. Use the `paperverse` CLI (above) to run the
-> pipeline, or the hosted UI to explore.
+> `pip install paperverse` or public API. Use the `paperverse` CLI above, or the hosted UI.
 
-## Development
+**Develop** — the full local loop:
 
 ```bash
 make setup      # uv sync + lychee + markdownlint-cli2
 make validate   # ruff + pyright (strict) + markdownlint + pip-audit + pytest (cov >= 90%)
 make test       # fast pytest (red-green-refactor loop)
 make test_js    # ui/ vitest
-make preview    # build the UI and serve it at http://localhost:8143
 ```
 
-Run `make help` for all recipes. See [CONTRIBUTING.md](CONTRIBUTING.md) for the
-principles, testing, and branch/PR workflow, and the [roadmap](docs/roadmap.md) for
-what's next.
+Run `make help` for all recipes.
 
-## Status
+## Why
 
-v0.1 is shipped and **live at <https://qte77.github.io/paperverse/>** — the full
-pipeline (ingest → layout → export → CLI) and the interactive UI (3D point cloud,
-hover/click, full-text search, theme picker, depth cues, neighbour links with a
-topic/time toggle, pause + axis-snap views, source legend) deployed to GitHub Pages. What shipped and what's next:
-[roadmap.md](docs/roadmap.md); how it's built: [architecture.md](docs/architecture.md).
+Paperscape.org maps arXiv as a flat 2D tiled grid — arXiv only, a dated stack, no 3D.
+Researchers working across domains (e.g. ML + neuroscience) can't see cross-source
+relationships between arXiv, bioRxiv, and medRxiv. paperverse unifies all three in one
+navigable 3D space so cross-domain and temporal patterns become visible. More in
+[docs/UserStory.md](docs/UserStory.md) and [docs/PRD.md](docs/PRD.md).
+
+## Refs
+
+Four layers with one-way imports (`L4 → L1`): **L1** backend (`src/paperverse/`) — the
+`Paper` model, CSV ingest, UMAP layout, and the SQLite + positions export (ships in the
+wheel); **L2** the `paperverse` CLI; **L4** a static Three.js + sql.js UI (`ui/`,
+Vite-built, not in the wheel).
+
+- [architecture.md](docs/architecture.md) — how it's built
+- [ADR-0001](docs/decisions/0001-backend-cli-ui-separation.md) — the four-layer separation
+- [ADR-0002](docs/decisions/0002-in-browser-store-and-data-contract.md) — SQLite + FTS5 in
+  the browser (over DuckDB-WASM / Parquet) and the export data contract
+- [roadmap.md](docs/roadmap.md) — what shipped and what's next
+- [CONTRIBUTING.md](CONTRIBUTING.md) — principles, testing, and the branch/PR workflow
 
 ## License
 
