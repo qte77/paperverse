@@ -14,13 +14,14 @@ export const DATA_ARC = [
   "--data-caution",
   "--data-negative",
   "--data-alt",
+  "--data-alt-other",
 ] as const;
 
 type DataVar = (typeof DATA_ARC)[number];
 
 export const SOURCE_VAR: Record<Source, DataVar> = {
   arxiv: "--data-caution",
-  biorxiv: "--data-alt",
+  biorxiv: "--data-alt-other",
   medrxiv: "--data-negative",
 };
 
@@ -46,5 +47,9 @@ export function hexToRgb01(hex: string): [number, number, number] {
       ? digits[0] + digits[0] + digits[1] + digits[1] + digits[2] + digits[2]
       : digits;
   const value = Number.parseInt(full, 16);
-  return [((value >> 16) & 0xff) / 255, ((value >> 8) & 0xff) / 255, (value & 0xff) / 255];
+  return [
+    ((value >> 16) & 0xff) / 255,
+    ((value >> 8) & 0xff) / 255,
+    (value & 0xff) / 255,
+  ];
 }

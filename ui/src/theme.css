@@ -40,6 +40,7 @@
   --data-caution: #787010;
   --data-negative: #983828;
   --data-alt: #587818;
+  --data-alt-other: #8a5a30;
 }
 
 [data-theme="dark"] {
@@ -54,6 +55,7 @@
   --data-caution: #c8b868;
   --data-negative: #c08060;
   --data-alt: #a8b870;
+  --data-alt-other: #c09058;
 }
 
 /* System preference (no [data-theme]): track the OS so the page paints the right
