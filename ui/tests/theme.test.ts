@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   nextPreference,
+  preferenceFromSources,
   resolveTheme,
   themeAnnouncement,
   themeForPreference,
@@ -53,5 +54,22 @@ describe("themeAnnouncement", () => {
     expect(themeAnnouncement("system")).toBe("Theme: System");
     expect(themeAnnouncement("light")).toBe("Theme: Light");
     expect(themeAnnouncement("dark")).toBe("Theme: Dark");
+  });
+});
+
+describe("preferenceFromSources", () => {
+  it("lets the ?theme= URL param win over a conflicting stored value", () => {
+    expect(preferenceFromSources("dark", "light")).toBe("dark");
+    expect(preferenceFromSources("system", "dark")).toBe("system");
+  });
+
+  it("falls back to the stored value when the URL param is absent or invalid", () => {
+    expect(preferenceFromSources(null, "light")).toBe("light");
+    expect(preferenceFromSources("bogus", "dark")).toBe("dark");
+  });
+
+  it("defaults to 'system' when both sources are absent or invalid", () => {
+    expect(preferenceFromSources(null, null)).toBe("system");
+    expect(preferenceFromSources("x", "y")).toBe("system");
   });
 });
