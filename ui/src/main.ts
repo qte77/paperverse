@@ -196,7 +196,7 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
       // look down each world axis. The scene's prefers-reduced-motion gate stays the
       // top-priority override of auto-rotate.
       const pauseControl = document.querySelector<HTMLButtonElement>("#pause-toggle");
-      const rotationStatus = document.querySelector<HTMLElement>("#rotation-status");
+      const rotationStatus = document.querySelector<HTMLElement>("#toolbar-status");
       // Reduced-motion-honest: when rotation is already off, the button reads "Rotate"
       // (start) rather than "Pause"; the label always tracks the live autoRotate state.
       const reflectPause = (): void => {
@@ -219,7 +219,7 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
       });
 
       const viewControl = document.querySelector<HTMLButtonElement>("#view-cycle");
-      const viewStatus = document.querySelector<HTMLElement>("#view-status");
+      const viewStatus = document.querySelector<HTMLElement>("#toolbar-status");
       if (viewControl) {
         const axes = ["x", "y", "z"] as const;
         const axisName = { x: "X", y: "Y", z: "Z" } as const;
@@ -364,7 +364,7 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
     // Theme toggle: a button that cycles system -> light -> dark on click,
     // applying + persisting the choice and recolouring the cloud.
     const themeControl = document.querySelector<HTMLButtonElement>("#theme-toggle");
-    const themeStatus = document.querySelector<HTMLElement>("#theme-status");
+    const themeStatus = document.querySelector<HTMLElement>("#toolbar-status");
     if (themeControl) {
       let pref = readThemePreference();
       // Keep the visible label AND the accessible name (aria-label + tooltip) in
@@ -401,7 +401,7 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
     // same-topic papers link across the time axis (#106); persisted + re-draws the
     // current selection live. a11y: dynamic aria-label + sr-only announce (mirrors theme).
     const linksControl = document.querySelector<HTMLButtonElement>("#links-toggle");
-    const linksStatus = document.querySelector<HTMLElement>("#links-status");
+    const linksStatus = document.querySelector<HTMLElement>("#toolbar-status");
     if (linksControl) {
       const linkLabel: Record<LinkMode, string> = { topic: "Topic", time: "Time" };
       const reflectLinksControl = (): void => {
@@ -499,7 +499,7 @@ applyThemePreference(readThemePreference());
 function wireDatasetToggle(): void {
   const control = document.querySelector<HTMLButtonElement>("#dataset-toggle");
   if (!control) return;
-  const datasetStatus = document.querySelector<HTMLElement>("#dataset-status");
+  const datasetStatus = document.querySelector<HTMLElement>("#toolbar-status");
   const label: Record<Dataset, string> = { demo: "Demo", real: "Real" };
   const other: Dataset = DATASET === "demo" ? "real" : "demo";
   const aria = `Dataset: ${label[DATASET]} (activate to show ${label[other]} papers)`;
