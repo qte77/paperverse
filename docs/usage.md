@@ -36,5 +36,15 @@ DATA_DIR=data OUTPUT=dist/data uv run paperverse
 The local dev loop has its own knobs (`PORT`, `VERBOSE`) on the `Makefile` recipes —
 run `make help` for those.
 
+## UI URL parameters
+
+The hosted UI reads one query parameter, so a colour theme can be shared by link:
+
+| Parameter | Values | Effect |
+| --- | --- | --- |
+| `theme` | `system` \| `light` \| `dark` | Forces the theme for that visit — highest precedence, above the saved preference and the OS setting. Not persisted; the in-app toggle still owns the stored choice. |
+
+Example: `https://qte77.github.io/paperverse/?theme=dark`
+
 How the pipeline turns these CSVs into the export artifacts is in
 [architecture.md](architecture.md).

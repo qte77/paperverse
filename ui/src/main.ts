@@ -27,6 +27,7 @@ import { attachSearch } from "./search";
 import {
   nextPreference,
   type Preference,
+  preferenceFromSources,
   themeAnnouncement,
   THEME_TOGGLE_LABEL,
   themeForPreference,
@@ -73,9 +74,12 @@ const NEIGHBOR_COUNT = 5;
 const THEME_KEY = "qte77-theme";
 const themeQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
+// Theme precedence per the qte77 ui-kit contract: a `?theme=` URL param wins (so a
+// theme is shareable by link), then the stored choice, else "system". The URL param is
+// a transient override — it is not persisted; the toggle still owns the saved preference.
 function readThemePreference(): Preference {
-  const stored = localStorage.getItem(THEME_KEY);
-  return stored === "light" || stored === "dark" ? stored : "system";
+  const urlParam = new URLSearchParams(window.location.search).get("theme");
+  return preferenceFromSources(urlParam, localStorage.getItem(THEME_KEY));
 }
 
 function applyThemePreference(pref: Preference): void {

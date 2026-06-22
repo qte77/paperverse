@@ -21,6 +21,20 @@ export function resolveTheme(
 /** A user theme preference: follow the OS, or force a scheme. */
 export type Preference = "system" | "light" | "dark";
 
+/** Narrow an arbitrary string to a valid `Preference`, or `null` if it isn't one. */
+function asPreference(value: string | null): Preference | null {
+  return value === "system" || value === "light" || value === "dark" ? value : null;
+}
+
+/**
+ * Resolve the user's theme preference from its ordered sources, per the qte77 ui-kit
+ * contract: a `?theme=` URL param wins, then the stored choice, else `system` (which
+ * follows `prefers-color-scheme`). Invalid values at either source are ignored.
+ */
+export function preferenceFromSources(urlParam: string | null, stored: string | null): Preference {
+  return asPreference(urlParam) ?? asPreference(stored) ?? "system";
+}
+
 /** Resolve a user preference to the active theme (`system` follows the OS). */
 export function themeForPreference(pref: Preference, systemPrefersDark: boolean): Theme {
   return resolveTheme(systemPrefersDark, pref === "system" ? null : pref);

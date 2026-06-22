@@ -6,14 +6,19 @@
     <title>Paperverse</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <script>
-      // Apply a saved Light/Dark choice before the stylesheet loads, so a
-      // returning visitor never sees a flash of the wrong theme. "system" stores
-      // nothing and is handled by the prefers-color-scheme media query in
-      // theme.css; main.ts later re-applies the saved choice (leaving "system"
-      // attribute-less so the OS scheme keeps governing).
+      // Apply the resolved theme before the stylesheet loads, so a visitor never sees a
+      // flash of the wrong theme. Precedence (qte77 ui-kit): a ?theme= URL param wins,
+      // then a saved Light/Dark choice; "system" stores nothing and is handled by the
+      // prefers-color-scheme media query in theme.css. main.ts later re-applies via the
+      // same precedence (leaving "system" attribute-less so the OS scheme keeps governing).
       (function () {
         try {
-          var t = localStorage.getItem("qte77-theme");
+          // Validate before use: only an exact light/dark/system value is honoured.
+          var u = new URLSearchParams(location.search).get("theme");
+          var t =
+            u === "light" || u === "dark" || u === "system"
+              ? u
+              : localStorage.getItem("qte77-theme");
           if (t === "light" || t === "dark") {
             document.documentElement.dataset.theme = t;
           }
