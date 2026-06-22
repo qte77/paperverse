@@ -56,16 +56,8 @@ Full flags and the input CSV format: [docs/usage.md](docs/usage.md).
 > paperverse is an internal pipeline tool, not a published library — there is no
 > `pip install paperverse` or public API. Use the `paperverse` CLI above, or the hosted UI.
 
-**Develop** — the full local loop:
-
-```bash
-make setup      # uv sync + lychee + markdownlint-cli2
-make validate   # ruff + pyright (strict) + markdownlint + pip-audit + pytest (cov >= 90%)
-make test       # fast pytest (red-green-refactor loop)
-make test_js    # ui/ vitest
-```
-
-Run `make help` for all recipes.
+**Develop** — setup, the full test loop, and the branch/PR workflow are in
+[CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Why
 
