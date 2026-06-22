@@ -24,13 +24,16 @@ rather than restating them.
 - **Validate before done** — run `make validate` (and `make test_js` for `ui/`) and
   report the result; never claim completion on a red gate.
 
+## Commands
+
+Every dev task is a `Makefile` recipe — run `make help` for the full grouped list
+(setup, quality/test gates, UI, changelog). `make setup` gets a fresh checkout
+ready. Other docs point here rather than restating the recipes.
+
 ## Testing
 
-```bash
-make test       # fast pytest (red-green-refactor loop)
-make validate   # full gate: ruff + pyright (strict) + markdownlint + pip-audit + pytest (cov >= 90%)
-make test_js    # ui/ vitest (make typecheck_js for tsc)
-```
+`make validate` is the full gate and `make test_js` covers `ui/` — `make help`
+lists the rest. The rules:
 
 - Write tests **first** (Red → Green → Refactor).
 - **Only clear, value-adding tests.** Cover real behaviour and **edge cases** —
@@ -46,14 +49,10 @@ make test_js    # ui/ vitest (make typecheck_js for tsc)
 
 ## Running the UI locally
 
-```bash
-make preview            # build ui/ + serve the production bundle on :8143 (node-free: uv + http.server)
-make preview PORT=8001  # override the port
-npm --prefix ui run dev # hot-reload dev server (source, not the production bundle)
-```
-
-`preview` regenerates the data, builds `ui/` with a root base path, and serves
-`ui/dist` the way GitHub Pages does — assets resolve at the server root.
+`make preview` builds `ui/` with a root base path and serves `ui/dist` the way
+GitHub Pages does — assets resolve at the server root, matching the deployed site.
+For hot-reload against source (not the production bundle), use
+`npm --prefix ui run dev`.
 
 ## Commits
 
