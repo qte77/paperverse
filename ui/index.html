@@ -139,6 +139,12 @@
         border-radius: 6px;
         cursor: pointer;
       }
+      /* The links toggle only re-weights a selected paper's neighbour links, so
+         it's disabled (and dimmed) until a paper is selected (#127). */
+      #links-toggle:disabled {
+        opacity: 0.4;
+        cursor: default;
+      }
       /* GitHub repo/issues links styled as toolbar buttons. */
       .toolbar-link {
         display: inline-flex;
@@ -285,7 +291,7 @@
       <button id="theme-toggle" type="button" aria-label="Theme" title="Theme">◐ System</button>
       <button id="reset" type="button" title="Reset view" aria-label="Reset view">Reset</button>
       <button id="dataset-toggle" type="button" aria-label="Dataset" title="Dataset">Demo</button>
-      <button id="links-toggle" type="button" aria-label="Neighbour links" title="Neighbour links">Links: Topic</button>
+      <button id="links-toggle" type="button" disabled aria-label="Select a paper to weight its neighbour links by topic or time" title="Select a paper to weight its neighbour links by topic or time">Links: Topic</button>
       <button id="pause-toggle" type="button" aria-label="Pause rotation" title="Pause rotation">Pause</button>
       <button id="view-cycle" type="button" aria-label="View axis" title="View axis">View: X</button>
       <div id="legend" role="img" aria-label="Paper source colour key: arXiv, bioRxiv, medRxiv">
