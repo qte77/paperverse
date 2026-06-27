@@ -26,6 +26,9 @@ if TYPE_CHECKING:
 LAUNCH_ARGS = ["--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"]
 THEMES = ("light", "dark")
 VIEWPORT = {"width": 1280, "height": 900}
+# Crop to the toolbar + cloud band: the oblique fly-to leaves the lower viewport
+# empty, so a top clip gives a tighter ~2:1 hero without shrinking the cloud.
+CLIP = {"x": 0, "y": 0, "width": 1280, "height": 640}
 # Resolve next to the repo (scripts/..), NOT the CWD: `uv run --directory` runs this
 # from the polyfetch-scrape env, so a relative default would write to the wrong tree.
 DEFAULT_OUT = Path(__file__).resolve().parent.parent / "assets" / "images"
@@ -45,8 +48,13 @@ def capture(page: Page, base_url: str, theme: str, search: str, out_dir: Path) -
     page.wait_for_timeout(1500)  # let the camera fly-to settle
     if page.get_attribute("#detail", "hidden") is not None:
         raise RuntimeError(f"{theme}: no paper selected — the capture would be wrong")
+    # Hide the detail flyout WITHOUT deselecting: the normal close path clears the
+    # neighbour links, but here we want them to stay drawn so the cloud and its
+    # connections show unobstructed by the side panel.
+    page.evaluate("() => { const d = document.querySelector('#detail'); if (d) d.hidden = true; }")
+    page.wait_for_timeout(300)
     out = out_dir / f"cloud-{theme}.png"
-    page.screenshot(path=str(out))
+    page.screenshot(path=str(out), clip=CLIP)
     return out
 
 
