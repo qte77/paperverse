@@ -37,9 +37,9 @@
   --primary: #7a6010;
   --primary-on: #ece8d8;
   --data-positive: #4a6818;
-  --data-caution: #787010;
+  --data-caution: #a07410;
   --data-negative: #983828;
-  --data-alt: #587818;
+  --data-alt: #3e7414;
 }
 
 [data-theme="dark"] {
@@ -51,9 +51,9 @@
   --primary: #c8a858;
   --primary-on: #1c1a14;
   --data-positive: #8aa860;
-  --data-caution: #c8b868;
+  --data-caution: #e0b040;
   --data-negative: #c08060;
-  --data-alt: #a8b870;
+  --data-alt: #90c060;
 }
 
 /* System preference (no [data-theme]): track the OS so the page paints the right

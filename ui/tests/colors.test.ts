@@ -20,9 +20,9 @@ describe("sourceColorVar", () => {
 
 describe("hexToRgb01", () => {
   it("converts #rrggbb to 0..1 floats", () => {
-    const [r, g, b] = hexToRgb01("#787010"); // EyeRest --data-caution
-    expect(r).toBeCloseTo(120 / 255);
-    expect(g).toBeCloseTo(112 / 255);
+    const [r, g, b] = hexToRgb01("#a07410"); // EyeRest --data-caution (light)
+    expect(r).toBeCloseTo(160 / 255);
+    expect(g).toBeCloseTo(116 / 255);
     expect(b).toBeCloseTo(16 / 255);
   });
 
