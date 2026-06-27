@@ -16,6 +16,51 @@ Types of changes:
 
 <!-- scriv-insert-here -->
 
+## [0.2.0] - 2026-06-27
+
+### Added
+
+- Toolbar links to the project's GitHub **repo** and **issues** (octicon + label), matching the qte77 estate UI pattern.
+
+- `?theme=` URL parameter (`system`/`light`/`dark`) so a colour theme is shareable by link — highest precedence above the saved preference and the OS setting, honoured by the inline anti-FOUC guard too (no flash). Conforms to the qte77 ui-kit theme precedence contract.
+
+- A toolbar **`?` info button** with a short popover explaining, in plain terms,
+  how the cloud is built — topic similarity (x/y), date depth (z), in-browser
+  SQLite/FTS5 search, and the neighbour-link toggle — linking to the architecture
+  docs for detail (#128).
+
+- A reproducible `make screenshots` target (with `scripts/capture-readme.py`) and a
+  `?cam=oblique` URL param to recapture the README screenshots headlessly (#126).
+
+### Changed
+
+- Consolidated the five per-control `sr-only` `aria-live` toolbar status regions into a single shared `#toolbar-status` polite live region (theme/dataset/links/rotation/view announce through it). No behaviour change for sighted users; controls fire one at a time so a single polite region announces correctly.
+
+- Docs follow the qte77 README doc-structure canon: dev-loop recipes are no longer duplicated across `README.md`/`CONTRIBUTING.md` — the `Makefile` (`make help`) is the single source and the docs reference it. `docs/usage.md` also gains an **Environment variables** section (the pydantic-settings env fallback for the CLI flags). (#124)
+
+- Toolbar **Repo** and **Issues** links now use the GitHub Invertocat (octocat) mark on both, matching the `agenthud-agui-a2ui` estate UI; also hardened the links with `rel="noopener noreferrer"`.
+
+- The neighbour-link weighting toggle (Topic ↔ Time) is now legible: it is
+  disabled until a paper is selected, its label/announcement make clear it
+  weights the *links* (not the layout), and switching mode briefly flashes the
+  links that change so the effect is visible (#127).
+
+- README screenshots recaptured at an oblique 3D angle with a paper selected, so the
+  depth (z = publication date) and neighbour-link features are now visible (#126).
+
+### Fixed
+
+- Toolbar GitHub **Repo**/**Issues** Octocat is no longer tinted to the theme text colour — per GitHub's brand guidelines the mark must not be recoloured, so it now renders only in GitHub-permitted black (`#181717`) / white, tracking the active theme.
+
+- arXiv and bioRxiv points are now clearly distinguishable in both light and dark:
+  arXiv shifts to amber-gold (`--data-caution`) and bioRxiv to a deeper green
+  (`--data-alt`), keeping the zero-blue EyeRest palette intact (#130).
+
+- README screenshots now show the cloud and a clicked paper's detail card **side by
+  side** instead of the card overlaying the cloud. The capture composes two panels —
+  the oblique cloud with its neighbour links, and the selected paper's card — so both
+  are fully visible and unobstructed in each theme (follow-up to #126).
+
 ## [0.1.7] - 2026-06-21
 
 ### Added
