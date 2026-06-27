@@ -1,23 +1,29 @@
 #!/usr/bin/env python3
-"""Capture the README screenshots: an oblique 3D angle with a paper selected.
+"""Capture the README screenshots: the cloud + a clicked paper, side by side.
 
 Drives the local preview (see `make screenshots`) with the shared polyfetch-scrape
-Patchright/SwiftShader env. For each theme it loads `?theme=<t>&cam=oblique` (the
-oblique view reveals the z=date depth and pauses the idle rotation for a stable
-frame), selects a paper via search so its neighbour links render, then writes
-`assets/images/cloud-<theme>.png`.
+Patchright/SwiftShader env, plus Pillow for the side-by-side compose. For each theme
+it loads `?theme=<t>&cam=oblique` (the oblique view reveals the z=date depth and
+pauses the idle rotation for a stable frame), selects a paper via search so its
+neighbour links render, then composes two panels that do NOT overlap:
 
-Usage (via the shared env):
-  uv run --directory ../polyfetch-scrape python scripts/capture-readme.py \
-      --url http://localhost:8143 --search agent
+  [ oblique cloud + neighbour links ]  [ selected paper's detail card ]
+
+…and writes `assets/images/cloud-<theme>.png`.
+
+Usage (via the shared env; Pillow added for the compose):
+  uv run --directory ../polyfetch-scrape --with pillow \
+      python scripts/capture-readme.py --url http://localhost:8143 --search agent
 """
 from __future__ import annotations
 
 import argparse
+import io
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 from patchright.sync_api import sync_playwright
+from PIL import Image
 
 if TYPE_CHECKING:
     from patchright.sync_api import Page
@@ -26,19 +32,27 @@ if TYPE_CHECKING:
 LAUNCH_ARGS = ["--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"]
 THEMES = ("light", "dark")
 VIEWPORT = {"width": 1280, "height": 900}
-# Crop to the toolbar + cloud band: the oblique fly-to leaves the lower viewport
-# empty, so a top clip gives a tighter ~2:1 hero without shrinking the cloud.
-CLIP = {"x": 0, "y": 0, "width": 1280, "height": 640}
+# Cloud panel: crop the rendered viewport to the toolbar + cloud band (the oblique
+# fly-to leaves the lower viewport empty).
+CLOUD_CLIP = {"x": 0, "y": 0, "width": 1280, "height": 640}
+GAP = 40  # px between the two panels
+# Page-background fill behind the panels, per theme (EyeRest --bg).
+BG = {"light": (236, 232, 216), "dark": (28, 26, 20)}
 # Resolve next to the repo (scripts/..), NOT the CWD: `uv run --directory` runs this
 # from the polyfetch-scrape env, so a relative default would write to the wrong tree.
 DEFAULT_OUT = Path(__file__).resolve().parent.parent / "assets" / "images"
 
 
+def _png(data: bytes) -> Image.Image:
+    return Image.open(io.BytesIO(data)).convert("RGB")
+
+
 def capture(page: Page, base_url: str, theme: str, search: str, out_dir: Path) -> Path:
-    """Load the oblique view in `theme`, select a paper, and screenshot the cloud."""
+    """Compose the oblique cloud and the selected paper's card side by side."""
     page.goto(f"{base_url}/?theme={theme}&cam=oblique", wait_until="networkidle")
-    # Search enables only once the DB (and selection wiring) is ready.
     page.wait_for_selector("#search:not([disabled])", timeout=30000)
+    if page.query_selector("#info-btn") is None:  # also warms the page
+        raise RuntimeError(f"{theme}: served build is missing #info-btn — stale preview?")
     page.fill("#search", search)
     page.wait_for_selector("#results li", timeout=30000)
     page.click("#results li:first-child")  # selects -> draws neighbour links + detail
@@ -46,15 +60,25 @@ def capture(page: Page, base_url: str, theme: str, search: str, out_dir: Path) -
     page.fill("#search", "")  # drop the results overlay; the paper stays selected
     page.wait_for_selector("#results", state="hidden", timeout=5000)
     page.wait_for_timeout(1500)  # let the camera fly-to settle
-    if page.get_attribute("#detail", "hidden") is not None:
-        raise RuntimeError(f"{theme}: no paper selected — the capture would be wrong")
-    # Hide the detail flyout WITHOUT deselecting: the normal close path clears the
-    # neighbour links, but here we want them to stay drawn so the cloud and its
-    # connections show unobstructed by the side panel.
+
+    # Panel 2: the detail card, cropped to its content (the panel itself is full-height).
+    flyout = _png(page.locator("#detail").screenshot())
+    abstract = page.locator("#detail-abstract").bounding_box()
+    content_h = int(abstract["y"] + abstract["height"] + 24) if abstract else flyout.height
+    flyout = flyout.crop((0, 0, flyout.width, min(content_h, flyout.height)))
+
+    # Panel 1: the cloud. Hide the flyout WITHOUT deselecting (the normal close path
+    # clears the links) so the connections stay drawn and nothing overlaps the cloud.
     page.evaluate("() => { const d = document.querySelector('#detail'); if (d) d.hidden = true; }")
     page.wait_for_timeout(300)
+    cloud = _png(page.screenshot(clip=CLOUD_CLIP))
+
+    height = max(cloud.height, flyout.height)
+    canvas = Image.new("RGB", (cloud.width + GAP + flyout.width, height), BG[theme])
+    canvas.paste(cloud, (0, (height - cloud.height) // 2))
+    canvas.paste(flyout, (cloud.width + GAP, (height - flyout.height) // 2))
     out = out_dir / f"cloud-{theme}.png"
-    page.screenshot(path=str(out), clip=CLIP)
+    canvas.save(out)
     return out
 
 
@@ -71,9 +95,9 @@ def main() -> int:
         browser = pw.chromium.launch(headless=True, args=LAUNCH_ARGS)
         try:
             for theme in THEMES:
-                page = browser.new_page(viewport=VIEWPORT)
-                out = capture(page, args.url.rstrip("/"), theme, args.search, args.out_dir)
-                page.close()
+                pg = browser.new_page(viewport=VIEWPORT)
+                out = capture(pg, args.url.rstrip("/"), theme, args.search, args.out_dir)
+                pg.close()
                 print(f"  wrote {out}")
         finally:
             browser.close()

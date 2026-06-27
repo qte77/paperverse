@@ -141,7 +141,7 @@ screenshots: build_ui  ## Recapture README screenshots (oblique 3D + selected pa
 	srv=$$!
 	trap 'kill $$srv 2>/dev/null' EXIT
 	until curl -sf http://localhost:$(PORT)/ > /dev/null 2>&1; do sleep 0.2; done
-	uv run --directory $(POLYFETCH_DIR) python $(CURDIR)/scripts/capture-readme.py \
+	uv run --directory $(POLYFETCH_DIR) --with pillow python $(CURDIR)/scripts/capture-readme.py \
 		--url http://localhost:$(PORT) --search "$(CAPTURE_SEARCH)"
 
 
