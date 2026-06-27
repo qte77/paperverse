@@ -5,6 +5,7 @@ import { attachInteraction, type InteractionElements } from "./interaction";
 import {
   buildColorBuffer,
   buildPointsCloud,
+  changedNeighbors,
   createDateAxis,
   createNeighborLines,
   dimColors,
@@ -156,6 +157,12 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
     handle.add(points);
     const neighborLines = createNeighborLines(NEIGHBOR_COUNT);
     handle.add(neighborLines);
+    // A brighter overlay set, drawn over just the links that CHANGE when the
+    // topic/time weighting flips, then faded out — so the toggle visibly does
+    // something (#127). Themed to the hover/emphasis colour in applyThemeColors.
+    const emphasisLines = createNeighborLines(NEIGHBOR_COUNT, 0.9);
+    handle.add(emphasisLines);
+    let emphasisTimer: ReturnType<typeof setTimeout> | null = null;
     setStatus(null);
     // The axis encoding + real year span (from meta.json) is the legend chip's
     // tooltip — keeps the toolbar key compact; hover/AT get the full description.
@@ -264,6 +271,7 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
       handle.setFogColor(bgRgb);
       setCloudFog(points, bgRgb, fogNear, fogFar);
       setLineColor(neighborLines, readColour("--text"));
+      setLineColor(emphasisLines, hoverRgb);
       if (dateAxis) {
         setAxisColor(dateAxis, readColour("--text"));
       }
@@ -291,14 +299,24 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
     // lets the links toggle re-draw the current selection live.
     let linkMode = readLinkMode();
     let lastSelectedIdx: number | null = null;
+    // Reassigned once the links toggle is wired (below); a no-op until then so
+    // showNeighbors — the single selection chokepoint — can gate the toggle on
+    // selection without a forward reference.
+    let reflectLinksControl: () => void = () => {};
     const showNeighbors = (idx: number | null): void => {
       lastSelectedIdx = idx;
       if (idx === null) {
         neighborLines.visible = false;
-        return;
+        emphasisLines.visible = false;
+        if (emphasisTimer !== null) {
+          clearTimeout(emphasisTimer);
+          emphasisTimer = null;
+        }
+      } else {
+        const neighbors = nearestNeighbors(positions, idx, NEIGHBOR_COUNT, linkMode === "time");
+        updateNeighborLines(neighborLines, positions, idx, neighbors);
       }
-      const neighbors = nearestNeighbors(positions, idx, NEIGHBOR_COUNT, linkMode === "time");
-      updateNeighborLines(neighborLines, positions, idx, neighbors);
+      reflectLinksControl();
     };
     // Detail panel: one open/close controller shared by the canvas click
     // (interaction.ts), the keyboard results list (results.ts), the close button,
@@ -408,24 +426,45 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
     const linksStatus = document.querySelector<HTMLElement>("#toolbar-status");
     if (linksControl) {
       const linkLabel: Record<LinkMode, string> = { topic: "Topic", time: "Time" };
-      const reflectLinksControl = (): void => {
+      // The toggle only re-weights a SELECTED paper's neighbour links — it never
+      // moves points — so it reads as inert until a paper is picked (#127). Gate
+      // it on the selection and spell out that it weights the links, not the layout.
+      reflectLinksControl = (): void => {
+        const selected = lastSelectedIdx !== null;
         const other: LinkMode = linkMode === "topic" ? "time" : "topic";
+        linksControl.disabled = !selected;
         linksControl.textContent = `Links: ${linkLabel[linkMode]}`;
-        const aria = `Neighbour links: ${linkLabel[linkMode]} (activate to weigh by ${linkLabel[other]})`;
+        const aria = selected
+          ? `Neighbour links weighted by ${linkLabel[linkMode]} — activate to weigh by ${linkLabel[other]}; this changes the links, not the layout`
+          : "Select a paper to weight its neighbour links by topic or time";
         linksControl.setAttribute("aria-label", aria);
         linksControl.title = aria;
       };
       reflectLinksControl();
       linksControl.addEventListener("click", () => {
+        // The button is disabled without a selection; guard anyway so the rest can
+        // treat the index as concrete.
+        if (lastSelectedIdx === null) return;
+        const idx = lastSelectedIdx;
+        // Capture the neighbours BEFORE the flip so we can flash just the links
+        // that change under the new weighting.
+        const prev = nearestNeighbors(positions, idx, NEIGHBOR_COUNT, linkMode === "time");
         linkMode = linkMode === "topic" ? "time" : "topic";
         localStorage.setItem(LINKS_KEY, linkMode);
-        reflectLinksControl();
         if (linksStatus) {
-          linksStatus.textContent = `Neighbour links: ${linkLabel[linkMode]}`;
+          linksStatus.textContent = `Neighbour links weighted by ${linkLabel[linkMode]}`;
         }
-        // Re-draw the currently selected paper's links under the new weighting.
-        if (lastSelectedIdx !== null) {
-          showNeighbors(lastSelectedIdx);
+        showNeighbors(idx); // redraw base links under the new weighting + refresh label
+        const changed = changedNeighbors(
+          prev,
+          nearestNeighbors(positions, idx, NEIGHBOR_COUNT, linkMode === "time"),
+        );
+        if (changed.length > 0) {
+          updateNeighborLines(emphasisLines, positions, idx, changed);
+          if (emphasisTimer !== null) clearTimeout(emphasisTimer);
+          emphasisTimer = setTimeout(() => {
+            emphasisLines.visible = false;
+          }, 800);
         }
       });
     }

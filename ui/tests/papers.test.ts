@@ -4,6 +4,7 @@ import type { Source } from "../src/colors";
 import {
   applyHighlight,
   buildColorBuffer,
+  changedNeighbors,
   dimColors,
   nearestNeighbors,
   paintPoints,
@@ -156,5 +157,20 @@ describe("nearestNeighbors link weighting (includeZ)", () => {
     // d2 (z ignored): point 1 = 25; point 2 = 4 -> point 2 (topic-near) now wins,
     // i.e. same-topic papers link across the time axis.
     expect(nearestNeighbors(cloud, 0, 1, false)).toEqual([2]);
+  });
+});
+
+describe("changedNeighbors", () => {
+  it("returns the indices in next that are absent from prev, in next's order", () => {
+    // prev {2,1,3}; next adds 4 and 5 (order follows next, not sorted).
+    expect(changedNeighbors([2, 1, 3], [1, 4, 3, 5])).toEqual([4, 5]);
+  });
+
+  it("returns all of next when prev is empty (first links drawn after selecting)", () => {
+    expect(changedNeighbors([], [1, 2])).toEqual([1, 2]);
+  });
+
+  it("returns empty when next adds nothing new (a subset of prev) — no flash", () => {
+    expect(changedNeighbors([1, 2, 3], [2, 1])).toEqual([]);
   });
 });

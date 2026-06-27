@@ -124,6 +124,14 @@ export function nearestNeighbors(
   return ranked.slice(0, k).map((e) => e.idx);
 }
 
+/** Indices in `next` not present in `prev` — the neighbours newly linked when the
+ * link-weighting mode flips (topic ↔ time). Order follows `next`. Used to flash
+ * just the links that changed, so the toggle is visibly doing something. */
+export function changedNeighbors(prev: number[], next: number[]): number[] {
+  const prevSet = new Set(prev);
+  return next.filter((i) => !prevSet.has(i));
+}
+
 /** Resolve each source's EyeRest data-arc CSS variable to an RGB triple. */
 export function resolveSourceRgb(el: Element): Record<Source, [number, number, number]> {
   const styles = getComputedStyle(el);
@@ -226,14 +234,14 @@ export function setCloudFog(
 
 /** A reusable line object linking a selected point to its neighbours. Holds a
  * pre-allocated buffer for up to `maxNeighbors` segments; hidden until updated. */
-export function createNeighborLines(maxNeighbors: number): THREE.LineSegments {
+export function createNeighborLines(maxNeighbors: number, opacity = 0.35): THREE.LineSegments {
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute(
     "position",
     new THREE.BufferAttribute(new Float32Array(maxNeighbors * 2 * 3), 3),
   );
   geometry.setDrawRange(0, 0);
-  const material = new THREE.LineBasicMaterial({ transparent: true, opacity: 0.35 });
+  const material = new THREE.LineBasicMaterial({ transparent: true, opacity });
   const lines = new THREE.LineSegments(geometry, material);
   lines.frustumCulled = false;
   lines.visible = false;
