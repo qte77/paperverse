@@ -6,7 +6,7 @@
 	setup setup_uv setup_dev setup_lychee setup_md setup_js \
 	lint autofix check_types lint_md lint_links audit \
 	test test_cov retest validate \
-	typecheck_js test_js build_ui preview \
+	typecheck_js test_js build_ui preview screenshots \
 	changelog_new changelog_preview changelog_release \
 	clean help
 .DEFAULT_GOAL := help
@@ -109,6 +109,10 @@ UI_BASE ?= /paperverse/
 # toggle picks one at load. Overridable for local builds.
 DATA_DIR_DEMO ?= data/demo
 DATA_DIR_REAL ?= data/real
+# README screenshot capture: the sibling polyfetch-scrape Patchright env + the
+# search query used to select a paper (overridable).
+POLYFETCH_DIR ?= $(abspath ../polyfetch-scrape)
+CAPTURE_SEARCH ?= agent
 
 setup_js:  ## Install ui/ npm devDependencies (npm ci)
 	npm --prefix ui ci
@@ -129,6 +133,16 @@ preview: UI_BASE := /
 preview: build_ui  ## Node-free preview: build ui/ + serve ui/dist on http://localhost:$(PORT) (PORT default 8143)
 	echo "Previewing ui/dist on http://localhost:$(PORT)/ (Ctrl-C to stop)"
 	uv run python -m http.server $(PORT) --directory ui/dist
+
+screenshots: UI_BASE := /
+screenshots: build_ui  ## Recapture README screenshots (oblique 3D + selected paper); needs ../polyfetch-scrape
+	set -e
+	uv run python -m http.server $(PORT) --directory ui/dist &
+	srv=$$!
+	trap 'kill $$srv 2>/dev/null' EXIT
+	until curl -sf http://localhost:$(PORT)/ > /dev/null 2>&1; do sleep 0.2; done
+	uv run --directory $(POLYFETCH_DIR) python $(CURDIR)/scripts/capture-readme.py \
+		--url http://localhost:$(PORT) --search "$(CAPTURE_SEARCH)"
 
 
 # MARK: CHANGELOG
