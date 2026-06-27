@@ -17,7 +17,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
-import { axisViewpoint, computeRenderSize } from "./renderer";
+import { axisViewpoint, computeRenderSize, obliqueViewpoint } from "./renderer";
 
 /** A running scene; call `dispose` to stop the loop and release resources. */
 export interface SceneHandle {
@@ -38,6 +38,8 @@ export interface SceneHandle {
     center: readonly [number, number, number],
     radius: number,
   ): void;
+  /** Snap the camera to a readable oblique angle that reveals the z=date depth. */
+  viewOblique(center: readonly [number, number, number], radius: number): void;
   /** Set the fog colour (RGB 0–1) so distant points fade toward the page bg. */
   setFogColor(rgb: readonly [number, number, number]): void;
   dispose(): void;
@@ -137,6 +139,16 @@ export async function createScene(canvas: HTMLCanvasElement): Promise<SceneHandl
       // looking straight down the chosen world axis. near/far stay valid because the
       // distance magnitude is unchanged from the initial framing.
       const { position, up } = axisViewpoint(axis, center, radius, camera.fov);
+      controls.target.set(center[0], center[1], center[2]);
+      camera.up.set(up[0], up[1], up[2]);
+      camera.position.set(position[0], position[1], position[2]);
+      camera.updateProjectionMatrix();
+      controls.update();
+    },
+    viewOblique(center: readonly [number, number, number], radius: number): void {
+      // Same fit distance as frameSphere/viewAxis, but an oblique three-quarter
+      // angle so the z=date depth reads (head-on hides it).
+      const { position, up } = obliqueViewpoint(center, radius, camera.fov);
       controls.target.set(center[0], center[1], center[2]);
       camera.up.set(up[0], up[1], up[2]);
       camera.position.set(position[0], position[1], position[2]);
