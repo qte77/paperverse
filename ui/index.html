@@ -66,6 +66,32 @@
         color: var(--text);
         border-radius: 4px;
       }
+      /* Info popover: a brief, user-facing explainer of how the cloud is built
+         (#128). Native HTML popover — top-layer, click-outside + Esc dismiss for
+         free; the UA centres it. Card styling mirrors the toolbar/detail tokens. */
+      #algo-info {
+        max-width: min(30rem, 92vw);
+        padding: 1rem 1.25rem;
+        font: 0.9rem/1.5 var(--font-sans);
+        background: var(--surface);
+        color: var(--text);
+        border: 1px solid var(--text);
+        border-radius: 8px;
+      }
+      #algo-info h2 {
+        margin: 0 0 0.5rem;
+        font-size: 1rem;
+      }
+      #algo-info ul {
+        margin: 0;
+        padding-left: 1.1rem;
+      }
+      #algo-info li {
+        margin: 0.3rem 0;
+      }
+      #algo-info p {
+        margin: 0.6rem 0 0;
+      }
       #detail {
         position: fixed;
         top: 0;
@@ -130,6 +156,7 @@
       #links-toggle,
       #pause-toggle,
       #view-cycle,
+      #info-btn,
       .toolbar-link {
         padding: 0.4rem 0.5rem;
         font: 0.9rem var(--font-sans);
@@ -294,6 +321,7 @@
       <button id="links-toggle" type="button" disabled aria-label="Select a paper to weight its neighbour links by topic or time" title="Select a paper to weight its neighbour links by topic or time">Links: Topic</button>
       <button id="pause-toggle" type="button" aria-label="Pause rotation" title="Pause rotation">Pause</button>
       <button id="view-cycle" type="button" aria-label="View axis" title="View axis">View: X</button>
+      <button id="info-btn" type="button" popovertarget="algo-info" aria-label="How the cloud is built" title="How the cloud is built">?</button>
       <div id="legend" role="img" aria-label="Paper source colour key: arXiv, bioRxiv, medRxiv">
         <span class="src"><span class="swatch arxiv"></span>arXiv</span>
         <span class="src"><span class="swatch biorxiv"></span>bioRxiv</span>
@@ -307,6 +335,23 @@
         <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.65 7.65 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z" /></svg>
         Issues
       </a>
+    </div>
+    <div id="algo-info" popover>
+      <h2>How the cloud is built</h2>
+      <ul>
+        <li><strong>Left–right &amp; up–down</strong> place papers by <strong>topic
+          similarity</strong> — a UMAP layout over the words (TF-IDF) of each title,
+          abstract and category.</li>
+        <li><strong>Depth</strong> encodes <strong>publication date</strong>,
+          time-stretched so the years stay legible.</li>
+        <li><strong>Search</strong> runs entirely in your browser, over a small
+          SQLite database with an FTS5 full-text index.</li>
+        <li><strong>Neighbour links</strong> join a selected paper to its nearest
+          others; the Links toggle weights them by topic or by time.</li>
+      </ul>
+      <p>More detail in the
+        <a href="https://github.com/qte77/paperverse/blob/main/docs/architecture.md"
+          target="_blank" rel="noopener noreferrer">architecture docs</a>.</p>
     </div>
     <ul id="results" role="listbox" aria-label="Search results" hidden></ul>
     <div id="status" role="status" aria-live="polite">Loading…</div>
