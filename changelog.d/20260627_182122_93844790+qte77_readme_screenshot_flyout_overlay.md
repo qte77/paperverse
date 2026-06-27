@@ -1,6 +1,6 @@
 ### Fixed
 
-- README screenshots no longer have the paper-detail flyout covering the cloud: the
-  capture now hides the side panel (keeping the selected paper's neighbour links)
-  and crops to a tighter 2:1 frame, so the cloud and its connections show clearly
-  in both themes (follow-up to #126).
+- README screenshots now show the cloud and a clicked paper's detail card **side by
+  side** instead of the card overlaying the cloud. The capture composes two panels —
+  the oblique cloud with its neighbour links, and the selected paper's card — so both
+  are fully visible and unobstructed in each theme (follow-up to #126).
