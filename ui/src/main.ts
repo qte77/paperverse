@@ -257,6 +257,15 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
           reflectView();
         });
       }
+
+      // Capture/verification hook: ?cam=oblique snaps to a fixed oblique angle that
+      // reveals the z=date depth and stops the idle rotation for a stable frame
+      // (used by `make screenshots`). Mirrors the ?theme= URL-param pattern.
+      if (new URLSearchParams(window.location.search).get("cam") === "oblique") {
+        handle.viewOblique(center, radius);
+        handle.controls.autoRotate = false;
+        reflectPause();
+      }
     }
 
     const readColour = (name: string): [number, number, number] =>

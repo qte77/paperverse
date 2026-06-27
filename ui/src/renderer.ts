@@ -77,3 +77,31 @@ export function axisViewpoint(
     up: up[axis],
   };
 }
+
+/**
+ * Where to put the camera for a readable *oblique* view of a bounding sphere —
+ * looking down none of the world axes, so the z=date depth AND the x/y topic
+ * spread are both visible at once (the head-on framing hides the depth).
+ *
+ * Spherical offset at the same fit distance as `axisViewpoint`: `polar` is the
+ * angle from world-y (0 = straight down +y, top-down), `azimuth` swings around y.
+ * Defaults (45° azimuth, 60° polar) give a balanced three-quarter view. World-y
+ * stays up. Pure (no `three`) so it unit-tests without a GPU. */
+export function obliqueViewpoint(
+  center: readonly [number, number, number],
+  radius: number,
+  fov: number,
+  azimuth = Math.PI / 4,
+  polar = Math.PI / 3,
+): AxisViewpoint {
+  const safeRadius = Math.max(radius, 0.01);
+  const dist = (safeRadius * 1.4) / Math.sin((fov * Math.PI) / 360);
+  return {
+    position: [
+      center[0] + dist * Math.sin(polar) * Math.sin(azimuth),
+      center[1] + dist * Math.cos(polar),
+      center[2] + dist * Math.sin(polar) * Math.cos(azimuth),
+    ],
+    up: [0, 1, 0],
+  };
+}
