@@ -12,13 +12,13 @@
   },
   "devDependencies": {
     "@types/sql.js": "^1.4.11",
-    "@types/three": "^0.185.1",
+    "@types/three": "^0.186.0",
     "typescript": "^7.0.2",
-    "vite": "^8.1.4",
-    "vitest": "^4.1.10"
+    "vite": "^8.3.1",
+    "vitest": "^5.0.2"
   },
   "dependencies": {
     "sql.js-fts5": "^1.4.0",
-    "three": "^0.185.1"
+    "three": "^0.186.1"
   }
 }
