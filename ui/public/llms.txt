@@ -1,0 +1,14 @@
+# paperverse
+
+> A static, in-browser 3D map of research papers: abstracts are embedded with TF-IDF,
+> laid out with UMAP, and searched with SQLite FTS5 — no server. Pick a paper to see its
+> nearest neighbours; switch between the Demo and Real (curated AI-agent arXiv feed) datasets.
+
+## App
+
+- [paperverse](https://qte77.github.io/paperverse/): the live 3D paper cloud
+
+## Project
+
+- [Source repository](https://github.com/qte77/paperverse): code, README and docs
+- [Issues](https://github.com/qte77/paperverse/issues): bug reports and feature requests
