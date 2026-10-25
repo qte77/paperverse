@@ -59,7 +59,10 @@ jobs:
           RUN_ID: ${{ github.run_id }}
         run: |
           set -euo pipefail
-          if git diff --quiet -- data/real; then
+          # Stage first: new weeks arrive as untracked files, which a plain
+          # `git diff` ignores — so the check must run against the index.
+          git add data/real
+          if git diff --cached --quiet -- data/real; then
             echo "No curated-feed changes; nothing to sync."
             exit 0
           fi
@@ -67,7 +70,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git switch -c "${branch}"
-          git add data/real
           git commit --no-gpg-sign -m "chore: sync curated real feed from ai-agents-research (#92)"
           git push origin "${branch}"
           pr_url=$(gh pr create --base main --head "${branch}" \
