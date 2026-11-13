@@ -63,12 +63,12 @@ Commit by topic — one logical change per commit. Commit with `--no-gpg-sign`.
 
 - Branch off `main`; never commit directly to `main`.
 - Open a PR; keep its commits topic-scoped.
-- **Merge only when every CI check is green**, via
-  `gh pr merge --squash --admin --delete-branch`.
+- **Merge only when every CI check is green**: squash-merge and delete the branch. `main` requires
+  signed commits, so merging unsigned CLI commits is the owner's call.
 - Never `paths-ignore` a required check — CodeQL and CodeFactor run on every PR, so
-  a skipped required check blocks the merge even with `--admin`.
-- In this dev container, prefix `git`/`gh` with `env -u GH_TOKEN -u GITHUB_TOKEN`
-  when a stale token shadows your `gh auth` credentials.
+  a skipped required check blocks the merge, and no bypass gets past it.
+- If a stale `GH_TOKEN`/`GITHUB_TOKEN` in your environment shadows your `gh auth` credentials, fix
+  the environment (remove the stale variable) rather than working around it per command.
 
 ## Releasing
 
@@ -85,7 +85,7 @@ assembled by [scriv](https://scriv.readthedocs.io) from per-PR fragments.
   2. **Run the PR's checks.** It's bot-authored, so its Actions checks idle at `action_required`
      until a real-user event — push any commit to the bump branch, or close + reopen the PR.
      (The `runs/<id>/approve` API is fork-only, so it won't help here.)
-  3. Merge on green: `gh pr merge <n> --squash --admin --delete-branch`. **tag-release** then
+  3. Merge on green: squash-merge and delete the branch. **tag-release** then
      fires on `main` and tags the merge commit `vX.Y.Z` (always reachable from `main` — no tag drift).
   4. Optionally run **publish-release** for a GitHub Release with notes from the `CHANGELOG.md`
      block. The default flow is tag-only.
