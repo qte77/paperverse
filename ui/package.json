@@ -11,11 +11,11 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@types/sql.js": "^1.4.11",
+    "@types/sql.js": "^1.16.0",
     "@types/three": "^0.187.0",
     "typescript": "^7.0.2",
     "vite": "^8.3.8",
-    "vitest": "^5.1.0"
+    "vitest": "^5.1.1"
   },
   "dependencies": {
     "sql.js-fts5": "^1.4.0",
