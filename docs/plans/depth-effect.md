@@ -5,8 +5,8 @@
 > Shipped: gentle idle auto-rotation (prefers-reduced-motion gated, #77), distance fog
 > toward `--bg`, perspective size
 > attenuation, neighbour-link lines, round soft-edged sprites, dated axis legend
-> (real year span), older → newer time-axis arrow (#82). Open: explicit z-axis tick
-> labels (deferred until the multi-year feed #107).
+> (real year span), older → newer time-axis arrow (#82). Open: see
+> [plan 0001](2026-11-25-0001-backlog-and-kit-colours.md#remaining-work), row P3.
 
 ## Context
 

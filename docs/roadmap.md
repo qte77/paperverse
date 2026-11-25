@@ -70,7 +70,8 @@ time-axis arrowhead is smaller so it no longer balloons with the balanced z time
 
 ## Next
 
-Nothing queued — the deferred items under **Later** are the candidates.
+Open work, in order, with gates and done-whens:
+[plan 0001](plans/2026-11-25-0001-backlog-and-kit-colours.md#remaining-work).
 
 ## Later — visual & performance
 
