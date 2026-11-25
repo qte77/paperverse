@@ -23,4 +23,9 @@ updates:
     groups:
       npm-deps:
         patterns: ["*"]
+    ignore:
+      # @types/sql.js must match the sql.js-fts5 runtime (a sql.js 1.4.0 fork); 1.16+ types
+      # describe APIs the fork lacks. Lift this when the runtime moves past 1.4.
+      - dependency-name: "@types/sql.js"
+        update-types: ["version-update:semver-minor", "version-update:semver-major"]
 ...
