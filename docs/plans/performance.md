@@ -3,8 +3,8 @@
 > Tracking: [#43](https://github.com/qte77/paperverse/issues/43) · Status: partial
 >
 > Shipped: rAF-coalesced pointermove picking; `papers.db` + sql.js WASM load off the
-> first-paint path (cloud renders from `positions.bin` + `meta.json`). Open: bundle
-> code-split, culling / LOD, spatial-index or GPU picking, sql.js Web Worker.
+> first-paint path (cloud renders from `positions.bin` + `meta.json`). Open: see
+> [plan 0001](2026-11-25-0001-backlog-and-kit-colours.md#remaining-work), row P1.
 
 ## Context
 
