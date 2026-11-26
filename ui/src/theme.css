@@ -1,7 +1,9 @@
-/* EyeRest design tokens (default variant), vendored from the canonical brand
-   source qte77/qte77/brand/DESIGN.md. App code references these CSS variables by
-   pointer — never a raw hex, never a blue accent. The zero-blue `--data-*` arc
-   encodes paper source; `[data-theme]` (set in main.ts) flips light/dark. */
+/* EyeRest design tokens come from the vendored brand-kit copy, imported below:
+   an unedited copy of qte77/qte77/brand/ui-kit/eyerest.css (see the kit-check
+   workflow). App code references these CSS variables by pointer, never a raw hex.
+   `[data-theme]` (set in main.ts) flips light/dark; no attribute follows the OS. */
+
+@import "./vendor/eyerest.css";
 
 /* Self-hosted Inter (brand sans), vendored from qte77/qte77/brand/fonts. Vite
    hashes these into the build; `font-display: swap` paints system-ui first so
@@ -26,51 +28,6 @@
     url("./assets/fonts/Inter-Bold.ttf") format("truetype");
 }
 
-:root,
-[data-theme="light"] {
+:root {
   --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --bg: #ece8d8;
-  --surface: #e2dec8;
-  --border: #c8c4b0;
-  --text: #2c2818;
-  --text-muted: #686040;
-  --primary: #7a6010;
-  --primary-on: #ece8d8;
-  --data-positive: #4a6818;
-  --data-caution: #a07410;
-  --data-negative: #983828;
-  --data-alt: #3e7414;
-}
-
-[data-theme="dark"] {
-  --bg: #1c1a14;
-  --surface: #242018;
-  --border: #383428;
-  --text: #d8d0b8;
-  --text-muted: #a89878;
-  --primary: #c8a858;
-  --primary-on: #1c1a14;
-  --data-positive: #8aa860;
-  --data-caution: #e0b040;
-  --data-negative: #c08060;
-  --data-alt: #90c060;
-}
-
-/* System preference (no [data-theme]): track the OS so the page paints the right
-   scheme on first load, before main.ts resolves the saved preference. Scoped to
-   :not([data-theme]) so an explicit Light/Dark choice always wins. */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme]) {
-    --bg: #1c1a14;
-    --surface: #242018;
-    --border: #383428;
-    --text: #d8d0b8;
-    --text-muted: #a89878;
-    --primary: #c8a858;
-    --primary-on: #1c1a14;
-    --data-positive: #8aa860;
-    --data-caution: #c8b868;
-    --data-negative: #c08060;
-    --data-alt: #a8b870;
-  }
 }
