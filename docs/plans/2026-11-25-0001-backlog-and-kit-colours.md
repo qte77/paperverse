@@ -100,13 +100,13 @@ No two lanes touch the same file.
 | Area | Where |
 | --- | --- |
 | Entry, theme stylesheet link | `ui/index.html:30` (`<link rel="stylesheet" href="/src/theme.css">`) |
-| Static db import (lane B changes it) | `ui/src/main.ts:2` |
+| Type-only db import (the runtime loads in the background load) | `ui/src/main.ts:2` |
 | `data-theme` set or removed on `<html>` (System removes it) | `ui/src/main.ts:90-92` |
 | First paint: `positions.bin` + `meta.json` only | `ui/src/main.ts:129-134` |
 | Search disabled until the db is ready | `ui/src/main.ts:392` |
-| Background load: fetch `papers.db`, `openPapersDb`, attach hover/click, results, search; enable search at :533; on error, `console.warn` only | `ui/src/main.ts:481-535` |
+| Background load: `import("./db")` + fetch `papers.db` in parallel (:488-491), `openPapersDb`, attach hover/click, results, search; enable search at :537; on error, `console.warn` only | `ui/src/main.ts:481-542` |
 | sql.js runtime import + init | `ui/src/db.ts:7` (`import initSqlJs from "sql.js-fts5"`), `:39` |
-| Type-only db importers (unaffected by lane B) | `ui/src/interaction.ts:9`, `ui/src/results.ts:8`, `ui/src/search.ts:7` |
+| Other type-only db importers | `ui/src/interaction.ts:9`, `ui/src/results.ts:8`, `ui/src/search.ts:7` |
 | `three` importers (needed for first paint, don't split) | `ui/src/scene.ts:17-18`, `ui/src/papers.ts:8`, `ui/src/interaction.ts:7` |
 | Point cloud (`THREE.Points` + `ShaderMaterial`) | `ui/src/scene.ts`, `ui/src/papers.ts` |
 | Source to token map, zero-blue `DataVar` type | `ui/src/colors.ts:10-25` |
