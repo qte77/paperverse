@@ -5,10 +5,12 @@
 
 ## Status and handoff (read first)
 
-**Paused 2026-11-25 after this plan update. No lanes have started.** Resume at step 1 below.
+**Resumed 2026-11-26.** Lanes A (D1) and B (P1a) shipped. Lane C (V2) is prepared on a local
+branch and waits for qte77/qte77#242. Next: step 3 below.
 
 - **Shipped in this arc:** #171 (robots.txt + llms.txt, #160), #186 (actions bump), #189
-  (`@types/sql.js` pinned to the 1.4 runtime), #190 (this plan), #191 (vitest 5.1.1).
+  (`@types/sql.js` pinned to the 1.4 runtime), #190 (this plan), #191 (vitest 5.1.1),
+  #192 (reusable-workflow pins, D1), #194 (sql.js in its own chunk, P1a).
 - **Next, in order:**
   1. Spawn lanes A, B and C from the [parallel lanes](#parallel-lanes) table in one message.
      Each one is a subagent with its own git worktree (Agent tool, `isolation: "worktree"`).
@@ -98,13 +100,13 @@ No two lanes touch the same file.
 | Area | Where |
 | --- | --- |
 | Entry, theme stylesheet link | `ui/index.html:30` (`<link rel="stylesheet" href="/src/theme.css">`) |
-| Static db import (lane B changes it) | `ui/src/main.ts:2` |
+| Type-only db import (the runtime loads in the background load) | `ui/src/main.ts:2` |
 | `data-theme` set or removed on `<html>` (System removes it) | `ui/src/main.ts:90-92` |
 | First paint: `positions.bin` + `meta.json` only | `ui/src/main.ts:129-134` |
 | Search disabled until the db is ready | `ui/src/main.ts:392` |
-| Background load: fetch `papers.db`, `openPapersDb`, attach hover/click, results, search; enable search at :533; on error, `console.warn` only | `ui/src/main.ts:481-535` |
+| Background load: `import("./db")` + fetch `papers.db` in parallel (:488-491), `openPapersDb`, attach hover/click, results, search; enable search at :537; on error, `console.warn` only | `ui/src/main.ts:481-542` |
 | sql.js runtime import + init | `ui/src/db.ts:7` (`import initSqlJs from "sql.js-fts5"`), `:39` |
-| Type-only db importers (unaffected by lane B) | `ui/src/interaction.ts:9`, `ui/src/results.ts:8`, `ui/src/search.ts:7` |
+| Other type-only db importers | `ui/src/interaction.ts:9`, `ui/src/results.ts:8`, `ui/src/search.ts:7` |
 | `three` importers (needed for first paint, don't split) | `ui/src/scene.ts:17-18`, `ui/src/papers.ts:8`, `ui/src/interaction.ts:7` |
 | Point cloud (`THREE.Points` + `ShaderMaterial`) | `ui/src/scene.ts`, `ui/src/papers.ts` |
 | Source to token map, zero-blue `DataVar` type | `ui/src/colors.ts:10-25` |
@@ -129,8 +131,8 @@ No two lanes touch the same file.
 | ID | Item | Gate | Done when |
 | --- | --- | --- | --- |
 | ~~R1~~ | ~~#185 npm bump~~ (shipped: #189 types pin, #191 vitest; #185 superseded) | | |
-| D1 | #192 reusable-workflow pins: fix the four stale trailing comments, then merge (reviewed safe) | agent (lane A) | merged green, comments name `qte77/.github#77` |
-| P1a | #43 part 1: load `db` + `sql.js-fts5` through a dynamic import (own chunk) | agent (lane B) | merged; entry chunk smaller; first paint unchanged or faster; smoke e2e clean locally and live |
+| ~~D1~~ | ~~#192 reusable-workflow pins + trailing comments~~ (shipped: #192) | | |
+| ~~P1a~~ | ~~#43 part 1: `db` + `sql.js-fts5` through a dynamic import~~ (shipped: #194) | | |
 | V2 | Kit colours: unedited copy of the kit's `eyerest.css` in `ui/src/vendor/`, `theme.css` reduced to fonts + import, weekly diff check; close #183 | owner (qte77/qte77#242 merged) | copy committed from the kit's `main`; diff check quiet on the real copy and warns on an edit; Light/Dark/System screenshots checked; #183 closed |
 | S1 | #187 sync PRs: choose a fix (approve runs per PR, an App token or PAT for the sync, or CodeQL default setup) | owner | a sync PR gets every required check and merges |
 | S2 | #187 add the `triage/kb-papers/` source from ai-agents-research | agent, after S1 | `arxiv-kb.jsonl` lands in `data/real/arxiv/`; `make validate` passes |
