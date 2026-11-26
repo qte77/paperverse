@@ -6,7 +6,7 @@
 > first-paint path (cloud renders from `positions.bin` + `meta.json`); the sql.js
 > runtime is a separate lazily imported chunk, fetched in parallel with `papers.db`
 > after first paint. Open: see
-> [plan 0001](2026-11-25-0001-backlog-and-kit-colours.md#remaining-work), row P1.
+> [plan 0001](2026-11-25-0001-backlog-and-kit-colours.md#remaining-work), row P1b.
 
 ## Context
 
