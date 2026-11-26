@@ -1,5 +1,5 @@
 import { hexToRgb01, type Source } from "./colors";
-import { openPapersDb, type PaperMeta } from "./db";
+import type { PaperMeta } from "./db";
 import { formatDateRange } from "./legend";
 import { attachInteraction, type InteractionElements } from "./interaction";
 import {
@@ -484,7 +484,11 @@ async function mount(canvas: HTMLCanvasElement): Promise<void> {
     // rather than overwrite the working canvas with an error banner.
     void (async (): Promise<void> => {
       try {
-        const dbResponse = await fetch(`${DATA_DIR}/papers.db`);
+        // sql.js lives in its own chunk: fetch it in parallel with the db bytes.
+        const [{ openPapersDb }, dbResponse] = await Promise.all([
+          import("./db"),
+          fetch(`${DATA_DIR}/papers.db`),
+        ]);
         const db = await openPapersDb(
           new Uint8Array(await dbResponse.arrayBuffer()),
           SQL_WASM_URL,
