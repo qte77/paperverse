@@ -42,6 +42,7 @@ start now. Lane D's live test waits for one owner step.
     and Pull requests set to read/write.
   - Go or no-go on P1b.
   - Approve the F1 design note before any F1 code is written.
+  - Allow the V3 browser check (its first run was stopped at a permission prompt).
 - **Commands:**
   - Full gate: `CI=true make validate`.
   - UI tests: `make test_js`.
@@ -72,7 +73,7 @@ How the open rows run in parallel. What is open lives only in the
 | Lane | Row | Branch (own worktree) | Touches only | Ends at |
 | --- | --- | --- | --- | --- |
 | D | S1 | `fix/sync-pat` | `.github/workflows/sync-real-feed.yml`, one `changelog.d/` fragment | PR open, actionlint + gates green |
-| E | P2 | `feat/adaptive-point-size` | `ui/src/papers.ts`, `ui/src/main.ts` (:177-190 only), `ui/tests/papers.test.ts` (new or extended), one `changelog.d/` fragment | PR open, gates + smoke e2e green |
+| E | P2 | `feat/adaptive-point-size` | `ui/src/papers.ts`, `ui/src/main.ts` (the `./papers` import :12-24 and :177-190), `ui/tests/papers.test.ts` (new or extended), one `changelog.d/` fragment | PR open, gates + smoke e2e green |
 | F | F1 | `docs/semantic-near` | `docs/plans/semantic-near.md` (new design note) | PR open, docs-only; no code until the owner approves |
 
 **Limits for every lane:**
@@ -96,7 +97,7 @@ How the open rows run in parallel. What is open lives only in the
   6. Run actionlint. No `${{ }}` of untrusted data may appear inside `run:`.
 - **E (P2):**
   1. RED first: add a pure, unit-tested size function, e.g.
-     `computePointSize(radius, count)`. It replaces the fixed `radius * 0.08` at
+     `computePointSize(radius, count)`, with `count` from `meta.count` (`CloudMeta`, `main.ts:64-65`). It replaces the fixed `radius * 0.08` at
      `main.ts:190`, so that dense clouds get smaller points and sparse ones larger. Clamp it,
      and keep `pickThreshold` (`main.ts:189`) in step with it.
   2. Keep the shader floor `max(4.0, …)` at `papers.ts:163`.
@@ -139,7 +140,7 @@ How the open rows run in parallel. What is open lives only in the
 | Other type-only db importers | `ui/src/interaction.ts:9`, `ui/src/results.ts:8`, `ui/src/search.ts:7` |
 | `three` importers (needed for first paint, don't split) | `ui/src/scene.ts:17-18`, `ui/src/papers.ts:8`, `ui/src/interaction.ts:7` |
 | Point cloud (`THREE.Points` + `ShaderMaterial`) | `ui/src/scene.ts`, `ui/src/papers.ts` |
-| Point size (lane E) | `ui/src/papers.ts:16` (`POINT_SIZE`), vertex shader :147-163 (`gl_PointSize = max(4.0, pointSize * (300.0 / -mv.z)) * pixelRatio`), uniform :197, `setPointSize` :210-213; caller `ui/src/main.ts:177,189-190` (`pickThreshold`, `setPointSize(points, radius * 0.08)`); picking default `ui/src/interaction.ts:39` |
+| Point size (lane E) | `ui/src/papers.ts:16` (`POINT_SIZE`), size comment :145-153, vertex shader `_VERT` :154-167 (`gl_PointSize = max(4.0, pointSize * (300.0 / -mv.z)) * pixelRatio` at :163), uniform :197, `setPointSize` :210-213; caller `ui/src/main.ts:177,189-190` (`pickThreshold`, `setPointSize(points, radius * 0.08)`); picking default `ui/src/interaction.ts:39` |
 | Source to token map, zero-blue `DataVar` type | `ui/src/colors.ts:10-25` |
 | Type shim for `sql.js-fts5` | `ui/src/sql-js-fts5.d.ts` |
 | Theme file parts | `ui/src/theme.css`: header :1-4, `@import "./vendor/eyerest.css"` :6, Inter `@font-face` :12-29, `--font-sans` :32. Colour tokens live only in the vendored copy `ui/src/vendor/eyerest.css` (never hand-edit) |
