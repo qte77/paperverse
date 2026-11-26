@@ -5,12 +5,12 @@
 
 ## Status and handoff (read first)
 
-**Resumed 2026-11-26.** Lanes A (D1) and B (P1a) shipped. Lane C (V2) is prepared on a local
-branch and waits for qte77/qte77#242. Next: step 3 below.
+**Updated 2026-11-26.** Lanes A (D1), B (P1a) and C (V2) shipped; steps 1-3 below are done.
+Next: P2 (agent), then the owner-gated rows S1 and P1b.
 
 - **Shipped in this arc:** #171 (robots.txt + llms.txt, #160), #186 (actions bump), #189
   (`@types/sql.js` pinned to the 1.4 runtime), #190 (this plan), #191 (vitest 5.1.1),
-  #192 (reusable-workflow pins, D1), #194 (sql.js in its own chunk, P1a).
+  #192 (reusable-workflow pins, D1), #194 (sql.js in its own chunk, P1a), #195 (kit `eyerest.css` copy, V2).
 - **Next, in order:**
   1. Spawn lanes A, B and C from the [parallel lanes](#parallel-lanes) table in one message.
      Each one is a subagent with its own git worktree (Agent tool, `isolation: "worktree"`).
@@ -24,8 +24,7 @@ branch and waits for qte77/qte77#242. Next: step 3 below.
      lanes never conflict on it.
 - **Review tiers:** workflow-pin bumps by bots get the deterministic pin check. Lock files and
   code get one fresh reviewer. Workflows, tokens and permissions get the strongest reviewer.
-- **Owner gates:** #187 fix choice (S1), go/no-go on the rest of the load-speed work (P1b), and
-  the final kit colours (qte77/qte77#242).
+- **Owner gates:** #187 fix choice (S1) and go/no-go on the rest of the load-speed work (P1b).
 - **Commands:**
   - Full gate: `CI=true make validate`.
   - UI tests: `make test_js`.
@@ -111,7 +110,8 @@ No two lanes touch the same file.
 | Point cloud (`THREE.Points` + `ShaderMaterial`) | `ui/src/scene.ts`, `ui/src/papers.ts` |
 | Source to token map, zero-blue `DataVar` type | `ui/src/colors.ts:10-25` |
 | Type shim for `sql.js-fts5` | `ui/src/sql-js-fts5.d.ts` |
-| Theme file parts (lane C) | `ui/src/theme.css`: header :1-4, Inter `@font-face` :10-27, `--font-sans` :31, token blocks :29-76 (light, `[data-theme="dark"]`, System dark) |
+| Theme file parts | `ui/src/theme.css`: header :1-4, `@import "./vendor/eyerest.css"` :6, Inter `@font-face` :12-29, `--font-sans` :32. Colour tokens live only in the vendored copy `ui/src/vendor/eyerest.css` (never hand-edit) |
+| Kit drift check (weekly + manual, warns on a difference) | `.github/workflows/kit-check.yml` |
 | Build config (no `manualChunks`, no dynamic imports yet) | `ui/vite.config.ts` |
 | `papers.db` schema | `src/paperverse/db.py:27-48` |
 | CI: UI job (typecheck + test, no build) | `.github/workflows/ui.yml:28-30` |
@@ -122,8 +122,8 @@ No two lanes touch the same file.
 | Store and data contract, lazy-load intent | `docs/decisions/0002-in-browser-store-and-data-contract.md:38` (WASM ~1.16 MB), `:60-63` (`meta.json` sources), `:72-74` (httpvfs needs `fileLength`), `:78-82` (background load) |
 | Performance notes | `docs/plans/performance.md:5-6,17-20` |
 | Brand kit file | `qte77/qte77` `brand/ui-kit/eyerest.css`: header line `kit version: X (brand/ui-kit/package.json)`; blocks `:root`, `@media (prefers-color-scheme: dark) :root:not([data-theme="light"])`, `:root[data-theme="dark"]`, `data-variant` blocks, a `body` rule; adds `--link`, `--shadow-card` |
-| Kit consumer contract | `qte77/qte77` `brand/ui-kit/BASELINE.md:38` (on #242) |
-| Kit version | `qte77/qte77` `brand/ui-kit/package.json` (0.4.0 on main, 0.5.0 on #242). Its npm `files` leave out `eyerest.css`, so copy it from the repo. |
+| Kit consumer contract | `qte77/qte77` `brand/ui-kit/BASELINE.md:38` |
+| Kit version | `qte77/qte77` `brand/ui-kit/package.json` (0.5.0, kit main `9cbdfa6`, copied in V2). Its npm `files` leave out `eyerest.css`, so copy it from the repo. |
 | Design notes per effort | [visual-polish](visual-polish.md) (#42), [performance](performance.md) (#43), [depth-effect](depth-effect.md) (#44) |
 
 ## Remaining work
@@ -133,7 +133,7 @@ No two lanes touch the same file.
 | ~~R1~~ | ~~#185 npm bump~~ (shipped: #189 types pin, #191 vitest; #185 superseded) | | |
 | ~~D1~~ | ~~#192 reusable-workflow pins + trailing comments~~ (shipped: #192) | | |
 | ~~P1a~~ | ~~#43 part 1: `db` + `sql.js-fts5` through a dynamic import~~ (shipped: #194) | | |
-| V2 | Kit colours: unedited copy of the kit's `eyerest.css` in `ui/src/vendor/`, `theme.css` reduced to fonts + import, weekly diff check; close #183 | owner (qte77/qte77#242 merged) | copy committed from the kit's `main`; diff check quiet on the real copy and warns on an edit; Light/Dark/System screenshots checked; #183 closed |
+| ~~V2~~ | ~~Kit colours: unedited kit `eyerest.css` copy, `theme.css` reduced to fonts + import, weekly diff check~~ (shipped: #195; #183 closed) | | |
 | S1 | #187 sync PRs: choose a fix (approve runs per PR, an App token or PAT for the sync, or CodeQL default setup) | owner | a sync PR gets every required check and merges |
 | S2 | #187 add the `triage/kb-papers/` source from ai-agents-research | agent, after S1 | `arxiv-kb.jsonl` lands in `data/real/arxiv/`; `make validate` passes |
 | S3 | #187 one catch-up sync of all weekly files; then close or supersede #188 | agent, after S1 | `main` holds every weekly file; the live page shows the real set |
