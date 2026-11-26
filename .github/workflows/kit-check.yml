@@ -1,0 +1,57 @@
+---
+name: Kit Check
+
+# Weekly drift check: compares the vendored brand-kit copy (ui/src/vendor/eyerest.css)
+# with the kit's main branch. A difference warns (hand edit or newer kit); it never fails.
+on:
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  kit-check:
+    name: eyerest.css drift
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Compare vendored copy with the kit
+        env:
+          KIT_URL: https://raw.githubusercontent.com/qte77/qte77/main/brand/ui-kit/eyerest.css
+          LOCAL: ui/src/vendor/eyerest.css
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 -o "$RUNNER_TEMP/kit.css" "$KIT_URL"
+          if [ ! -s "$RUNNER_TEMP/kit.css" ]; then
+            echo "::error::Fetched kit file is empty: $KIT_URL"
+            exit 1
+          fi
+          if [ ! -f "$LOCAL" ]; then
+            echo "::error::Vendored copy missing: $LOCAL"
+            exit 1
+          fi
+          rc=0
+          diff -u "$LOCAL" "$RUNNER_TEMP/kit.css" > "$RUNNER_TEMP/kit.diff" || rc=$?
+          case "$rc" in
+            0)
+              echo "Vendored eyerest.css matches the kit's main." | tee -a "$GITHUB_STEP_SUMMARY"
+              ;;
+            1)
+              echo "::warning::$LOCAL differs from the kit's main (hand edit or newer kit); recopy it from qte77/qte77."
+              {
+                echo "eyerest.css drift: the vendored copy differs from the kit's main."
+                echo
+                echo '```diff'
+                head -n 200 "$RUNNER_TEMP/kit.diff"
+                echo '```'
+              } >> "$GITHUB_STEP_SUMMARY"
+              ;;
+            *)
+              echo "::error::diff exited with unexpected code $rc"
+              exit "$rc"
+              ;;
+          esac
