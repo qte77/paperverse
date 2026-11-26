@@ -129,7 +129,7 @@ No two lanes touch the same file.
 | ID | Item | Gate | Done when |
 | --- | --- | --- | --- |
 | ~~R1~~ | ~~#185 npm bump~~ (shipped: #189 types pin, #191 vitest; #185 superseded) | | |
-| D1 | #192 reusable-workflow pins: fix the four stale trailing comments, then merge (reviewed safe) | agent (lane A) | merged green, comments name `qte77/.github#77` |
+| ~~D1~~ | ~~#192 reusable-workflow pins + trailing comments~~ (shipped: #192) | | |
 | P1a | #43 part 1: load `db` + `sql.js-fts5` through a dynamic import (own chunk) | agent (lane B) | merged; entry chunk smaller; first paint unchanged or faster; smoke e2e clean locally and live |
 | V2 | Kit colours: unedited copy of the kit's `eyerest.css` in `ui/src/vendor/`, `theme.css` reduced to fonts + import, weekly diff check; close #183 | owner (qte77/qte77#242 merged) | copy committed from the kit's `main`; diff check quiet on the real copy and warns on an edit; Light/Dark/System screenshots checked; #183 closed |
 | S1 | #187 sync PRs: choose a fix (approve runs per PR, an App token or PAT for the sync, or CodeQL default setup) | owner | a sync PR gets every required check and merges |
